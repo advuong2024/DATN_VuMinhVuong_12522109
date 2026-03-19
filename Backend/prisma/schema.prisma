@@ -1,15 +1,191 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum VaiTro {
+  ADMIN
+  BAC_SI
+  LE_TAN
+  THU_NGAN
+}
+
+enum TrangThaiTaiKhoan {
+  HOAT_DONG
+  KHOA
+}
+
+enum TrangThaiLichHen {
+  DA_DAT
+  CHO_KHAM
+  DA_KHAM
+  DA_HUY
+}
+
+enum TrangThaiThanhToan {
+  CHUA_THANH_TOAN
+  DA_THANH_TOAN
+}
+
+//////////////////////////////////////////////////////
+// CORE TABLES
+//////////////////////////////////////////////////////
+
+model NhanVien {
+  id            Int      @id @default(autoincrement())
+  ten           String
+  ngaySinh      DateTime?
+  gioiTinh      String?
+  soDienThoai   String?
+  diaChi        String?
+  chucVu        String
+  chuyenKhoa    String?
+  ngayTao       DateTime @default(now())
+
+  taiKhoan      TaiKhoan?
+  lichHen       LichHen[]
+  phieuKham     PhieuKham[]
+}
+
+model TaiKhoan {
+  id            Int      @id @default(autoincrement())
+  tenDangNhap   String   @unique
+  matKhau       String
+  vaiTro        VaiTro
+  trangThai     TrangThaiTaiKhoan @default(HOAT_DONG)
+  ngayTao       DateTime @default(now())
+
+  nhanVienId    Int?     @unique
+  nhanVien      NhanVien? @relation(fields: [nhanVienId], references: [id])
+}
+
+model BenhNhan {
+  id            Int      @id @default(autoincrement())
+  ten           String
+  ngaySinh      DateTime?
+  gioiTinh      String?
+  soDienThoai   String?
+  diaChi        String?
+  tienSuBenh    String?
+  ngayTao       DateTime @default(now())
+
+  lichHen       LichHen[]
+  phieuKham     PhieuKham[]
+}
+
+//////////////////////////////////////////////////////
+// APPOINTMENT
+//////////////////////////////////////////////////////
+
+model LichHen {
+  id            Int      @id @default(autoincrement())
+  ngayHen       DateTime
+  gioHen        String?
+  lyDoKham      String?
+  trangThai     TrangThaiLichHen @default(DA_DAT)
+
+  benhNhanId    Int
+  benhNhan      BenhNhan @relation(fields: [benhNhanId], references: [id])
+
+  bacSiId       Int
+  bacSi         NhanVien @relation(fields: [bacSiId], references: [id])
+
+  ngayTao       DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// EXAMINATION
+//////////////////////////////////////////////////////
+
+model PhieuKham {
+  id            Int      @id @default(autoincrement())
+  ngayKham      DateTime @default(now())
+  trieuChung    String?
+  chanDoan      String?
+  ghiChu        String?
+
+  benhNhanId    Int
+  benhNhan      BenhNhan @relation(fields: [benhNhanId], references: [id])
+
+  bacSiId       Int
+  bacSi         NhanVien @relation(fields: [bacSiId], references: [id])
+
+  donThuoc      DonThuoc?
+  thanhToan     ThanhToan?
+}
+
+//////////////////////////////////////////////////////
+// PRESCRIPTION
+//////////////////////////////////////////////////////
+
+model DonThuoc {
+  id            Int      @id @default(autoincrement())
+  ngayKeDon     DateTime @default(now())
+  ghiChu        String?
+
+  phieuKhamId   Int @unique
+  phieuKham     PhieuKham @relation(fields: [phieuKhamId], references: [id])
+
+  chiTiet       ChiTietDonThuoc[]
+}
+
+model ChiTietDonThuoc {
+  id            Int      @id @default(autoincrement())
+  soLuong       Int
+  lieuDung      String?
+
+  donThuocId    Int
+  donThuoc      DonThuoc @relation(fields: [donThuocId], references: [id])
+
+  thuocId       Int
+  thuoc         Thuoc @relation(fields: [thuocId], references: [id])
+}
+
+//////////////////////////////////////////////////////
+// MEDICINE
+//////////////////////////////////////////////////////
+
+model DanhMucThuoc {
+  id            Int      @id @default(autoincrement())
+  tenDanhMuc    String
+  moTa          String?
+
+  thuoc         Thuoc[]
+}
+
+model Thuoc {
+  id            Int      @id @default(autoincrement())
+  tenThuoc      String
+  gia           Float
+  soLuong       Int
+  donViTinh     String?
+  hanSuDung     DateTime?
+
+  danhMucId     Int
+  danhMuc       DanhMucThuoc @relation(fields: [danhMucId], references: [id])
+
+  chiTietDonThuoc ChiTietDonThuoc[]
+}
+
+//////////////////////////////////////////////////////
+// PAYMENT
+//////////////////////////////////////////////////////
+
+model ThanhToan {
+  id            Int      @id @default(autoincrement())
+  tongTien      Float
+  phuongThuc    String?
+  trangThai     TrangThaiThanhToan @default(CHUA_THANH_TOAN)
+  ngayThanhToan DateTime?
+
+  phieuKhamId   Int @unique
+  phieuKham     PhieuKham @relation(fields: [phieuKhamId], references: [id])
 }
