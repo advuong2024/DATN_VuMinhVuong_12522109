@@ -35,157 +35,181 @@ enum TrangThaiThanhToan {
   DA_THANH_TOAN
 }
 
+enum GioiTinh {
+  NAM
+  NU
+  KHAC
+}
+
+enum PhuongThucThanhToan {
+  TIEN_MAT
+  CHUYEN_KHOAN
+}
+
 //////////////////////////////////////////////////////
 // CORE TABLES
 //////////////////////////////////////////////////////
 
-model NhanVien {
-  id            Int      @id @default(autoincrement())
-  ten           String
-  ngaySinh      DateTime?
-  gioiTinh      String?
-  soDienThoai   String?
-  diaChi        String?
-  chucVu        String
-  chuyenKhoa    String?
-  ngayTao       DateTime @default(now())
+model nhan_vien {
+  id_nhan_vien   Int      @id @default(autoincrement())
+  ten_nhan_vien  String
+  ngay_sinh      DateTime?
+  gioi_tinh      GioiTinh?
+  so_dien_thoai  String?  @unique
+  dia_chi        String?
+  chuc_vu        String
+  chuyen_khoa    String?
+  ngay_tao       DateTime @default(now())
+  ngay_cap_nhat  DateTime @updatedAt
 
-  taiKhoan      TaiKhoan?
-  lichHen       LichHen[]
-  phieuKham     PhieuKham[]
+  tai_khoan      tai_khoan?
+  lich_hen       lich_hen[]
+  phieu_kham     phieu_kham[]
 }
 
-model TaiKhoan {
-  id            Int      @id @default(autoincrement())
-  tenDangNhap   String   @unique
-  matKhau       String
-  vaiTro        VaiTro
-  trangThai     TrangThaiTaiKhoan @default(HOAT_DONG)
-  ngayTao       DateTime @default(now())
+model tai_khoan {
+  id_tai_khoan   Int      @id @default(autoincrement())
+  ten_dang_nhap  String   @unique
+  mat_khau       String
+  vai_tro        VaiTro
+  trang_thai     TrangThaiTaiKhoan @default(HOAT_DONG)
+  ngay_tao       DateTime @default(now())
+  ngay_cap_nhat  DateTime @updatedAt
 
-  nhanVienId    Int?     @unique
-  nhanVien      NhanVien? @relation(fields: [nhanVienId], references: [id])
+  id_nhan_vien   Int?     @unique
+  nhan_vien      nhan_vien? @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
 }
 
-model BenhNhan {
-  id            Int      @id @default(autoincrement())
-  ten           String
-  ngaySinh      DateTime?
-  gioiTinh      String?
-  soDienThoai   String?
-  diaChi        String?
-  tienSuBenh    String?
-  ngayTao       DateTime @default(now())
+model benh_nhan {
+  id_benh_nhan  Int      @id @default(autoincrement())
+  ten_benh_nhan String
+  ngay_sinh     DateTime?
+  gioi_tinh     GioiTinh?
+  so_dien_thoai String?  @unique
+  dia_chi       String?
+  tien_su_benh  String?
+  ngay_tao      DateTime @default(now())
+  ngay_cap_nhat DateTime @updatedAt
 
-  lichHen       LichHen[]
-  phieuKham     PhieuKham[]
+  lich_hen      lich_hen[]
+  phieu_kham    phieu_kham[]
 }
 
 //////////////////////////////////////////////////////
 // APPOINTMENT
 //////////////////////////////////////////////////////
 
-model LichHen {
-  id            Int      @id @default(autoincrement())
-  ngayHen       DateTime
-  gioHen        String?
-  lyDoKham      String?
-  trangThai     TrangThaiLichHen @default(DA_DAT)
+model lich_hen {
+  id_lich_hen   Int      @id @default(autoincrement())
+  thoi_gian_hen DateTime
+  ly_do_kham    String?
+  trang_thai    TrangThaiLichHen @default(DA_DAT)
 
-  benhNhanId    Int
-  benhNhan      BenhNhan @relation(fields: [benhNhanId], references: [id])
+  id_benh_nhan  Int
+  benh_nhan     benh_nhan @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
 
-  bacSiId       Int
-  bacSi         NhanVien @relation(fields: [bacSiId], references: [id])
+  id_nhan_vien  Int
+  nhan_vien     nhan_vien @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
 
-  ngayTao       DateTime @default(now())
+  ngay_tao      DateTime @default(now())
+
+  @@index([id_benh_nhan])
+  @@index([id_nhan_vien])
+  @@unique([id_nhan_vien, thoi_gian_hen]) // chống trùng lịch
 }
 
 //////////////////////////////////////////////////////
 // EXAMINATION
 //////////////////////////////////////////////////////
 
-model PhieuKham {
-  id            Int      @id @default(autoincrement())
-  ngayKham      DateTime @default(now())
-  trieuChung    String?
-  chanDoan      String?
-  ghiChu        String?
+model phieu_kham {
+  id_phieu_kham  Int      @id @default(autoincrement())
+  ngay_kham      DateTime @default(now())
+  trieu_chung    String?
+  chan_doan      String?
+  ghi_chu        String?
 
-  benhNhanId    Int
-  benhNhan      BenhNhan @relation(fields: [benhNhanId], references: [id])
+  id_benh_nhan   Int
+  benh_nhan      benh_nhan @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
 
-  bacSiId       Int
-  bacSi         NhanVien @relation(fields: [bacSiId], references: [id])
+  id_nhan_vien   Int
+  nhan_vien      nhan_vien @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
 
-  donThuoc      DonThuoc?
-  thanhToan     ThanhToan?
+  don_thuoc      don_thuoc?
+  thanh_toan     thanh_toan?
+
+  @@index([id_benh_nhan])
+  @@index([id_nhan_vien])
 }
 
 //////////////////////////////////////////////////////
 // PRESCRIPTION
 //////////////////////////////////////////////////////
 
-model DonThuoc {
-  id            Int      @id @default(autoincrement())
-  ngayKeDon     DateTime @default(now())
-  ghiChu        String?
+model don_thuoc {
+  id_don_thuoc   Int      @id @default(autoincrement())
+  ngay_ke_don    DateTime @default(now())
+  ghi_chu        String?
 
-  phieuKhamId   Int @unique
-  phieuKham     PhieuKham @relation(fields: [phieuKhamId], references: [id])
+  id_phieu_kham  Int @unique
+  phieu_kham     phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
 
-  chiTiet       ChiTietDonThuoc[]
+  chi_tiet       chi_tiet_don_thuoc[]
 }
 
-model ChiTietDonThuoc {
-  id            Int      @id @default(autoincrement())
-  soLuong       Int
-  lieuDung      String?
+model chi_tiet_don_thuoc {
+  id_chi_tiet    Int      @id @default(autoincrement())
+  so_luong       Int
+  lieu_dung      String?
+  gia_tai_thoi_diem Decimal @db.Decimal(10,2)
 
-  donThuocId    Int
-  donThuoc      DonThuoc @relation(fields: [donThuocId], references: [id])
+  id_don_thuoc   Int
+  don_thuoc      don_thuoc @relation(fields: [id_don_thuoc], references: [id_don_thuoc])
 
-  thuocId       Int
-  thuoc         Thuoc @relation(fields: [thuocId], references: [id])
+  id_thuoc       Int
+  thuoc          thuoc @relation(fields: [id_thuoc], references: [id_thuoc])
+
+  @@index([id_don_thuoc])
+  @@index([id_thuoc])
 }
 
 //////////////////////////////////////////////////////
 // MEDICINE
 //////////////////////////////////////////////////////
 
-model DanhMucThuoc {
-  id            Int      @id @default(autoincrement())
-  tenDanhMuc    String
-  moTa          String?
+model danh_muc_thuoc {
+  id_danh_muc   Int      @id @default(autoincrement())
+  ten_danh_muc  String
+  mo_ta         String?
 
-  thuoc         Thuoc[]
+  thuoc         thuoc[]
 }
 
-model Thuoc {
-  id            Int      @id @default(autoincrement())
-  tenThuoc      String
-  gia           Float
-  soLuong       Int
-  donViTinh     String?
-  hanSuDung     DateTime?
+model thuoc {
+  id_thuoc       Int      @id @default(autoincrement())
+  ten_thuoc      String
+  gia_thuoc      Decimal  @db.Decimal(10,2)
+  so_luong       Int
+  don_vi_tinh    String?
+  han_su_dung    DateTime?
 
-  danhMucId     Int
-  danhMuc       DanhMucThuoc @relation(fields: [danhMucId], references: [id])
+  id_danh_muc     Int
+  danh_muc_thuoc  danh_muc_thuoc @relation(fields: [id_danh_muc], references: [id_danh_muc])
 
-  chiTietDonThuoc ChiTietDonThuoc[]
+  chi_tiet_don_thuoc chi_tiet_don_thuoc[]
 }
 
 //////////////////////////////////////////////////////
 // PAYMENT
 //////////////////////////////////////////////////////
 
-model ThanhToan {
-  id            Int      @id @default(autoincrement())
-  tongTien      Float
-  phuongThuc    String?
-  trangThai     TrangThaiThanhToan @default(CHUA_THANH_TOAN)
-  ngayThanhToan DateTime?
+model thanh_toan {
+  id_thanh_toan   Int      @id @default(autoincrement())
+  tong_tien       Decimal  @db.Decimal(10,2)
+  phuong_thuc     PhuongThucThanhToan?
+  trang_thai      TrangThaiThanhToan @default(CHUA_THANH_TOAN)
+  ngay_thanh_toan DateTime?
 
-  phieuKhamId   Int @unique
-  phieuKham     PhieuKham @relation(fields: [phieuKhamId], references: [id])
+  id_phieu_kham   Int @unique
+  phieu_kham      phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
 }
