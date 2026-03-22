@@ -6,12 +6,16 @@
         orderBy: {
             id_nhan_vien: 'desc',
         },
+        where: { is_deleted: false },
     });
  };
 
  const getById = (id_nhan_vien) => {
-    return prisma.nhan_vien.findUnique({
-        where: { id_nhan_vien },
+    return prisma.nhan_vien.findFirst({
+        where: { 
+            id_nhan_vien,
+            is_deleted: false
+        },
     });
  };
 

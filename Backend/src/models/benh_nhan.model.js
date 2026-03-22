@@ -6,12 +6,16 @@ const getAll = () => {
         orderBy: {
             id_benh_nhan: 'desc',
         },
+        where: { is_deleted: false },
     });
 };
 
 const getById = (id_benh_nhan) => {
-    return prisma.benh_nhan.findUnique({
-        where: { id_benh_nhan },
+    return prisma.benh_nhan.findFirst({
+        where: { 
+            id_benh_nhan,
+            is_deleted: false
+        },
     });
 };
 

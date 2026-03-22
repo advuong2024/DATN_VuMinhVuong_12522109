@@ -61,6 +61,7 @@ model nhan_vien {
   chuyen_khoa    String?
   ngay_tao       DateTime @default(now())
   ngay_cap_nhat  DateTime @updatedAt
+  is_deleted     Boolean  @default(false)
 
   tai_khoan      tai_khoan?
   lich_hen       lich_hen[]
@@ -75,6 +76,7 @@ model tai_khoan {
   trang_thai     TrangThaiTaiKhoan @default(HOAT_DONG)
   ngay_tao       DateTime @default(now())
   ngay_cap_nhat  DateTime @updatedAt
+  is_deleted     Boolean  @default(false)
 
   id_nhan_vien   Int?     @unique
   nhan_vien      nhan_vien? @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
@@ -90,6 +92,7 @@ model benh_nhan {
   tien_su_benh  String?
   ngay_tao      DateTime @default(now())
   ngay_cap_nhat DateTime @updatedAt
+  is_deleted    Boolean  @default(false)
 
   lich_hen      lich_hen[]
   phieu_kham    phieu_kham[]
@@ -104,6 +107,7 @@ model lich_hen {
   thoi_gian_hen DateTime
   ly_do_kham    String?
   trang_thai    TrangThaiLichHen @default(DA_DAT)
+  is_deleted    Boolean  @default(false)
 
   id_benh_nhan  Int
   benh_nhan     benh_nhan @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
@@ -113,9 +117,7 @@ model lich_hen {
 
   ngay_tao      DateTime @default(now())
 
-  @@index([id_benh_nhan])
-  @@index([id_nhan_vien])
-  @@unique([id_nhan_vien, thoi_gian_hen]) // chống trùng lịch
+  @@unique([id_nhan_vien, thoi_gian_hen])
 }
 
 //////////////////////////////////////////////////////
@@ -128,6 +130,7 @@ model phieu_kham {
   trieu_chung    String?
   chan_doan      String?
   ghi_chu        String?
+  is_deleted     Boolean  @default(false)
 
   id_benh_nhan   Int
   benh_nhan      benh_nhan @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
@@ -137,9 +140,6 @@ model phieu_kham {
 
   don_thuoc      don_thuoc?
   thanh_toan     thanh_toan?
-
-  @@index([id_benh_nhan])
-  @@index([id_nhan_vien])
 }
 
 //////////////////////////////////////////////////////
@@ -150,6 +150,7 @@ model don_thuoc {
   id_don_thuoc   Int      @id @default(autoincrement())
   ngay_ke_don    DateTime @default(now())
   ghi_chu        String?
+  is_deleted     Boolean  @default(false)
 
   id_phieu_kham  Int @unique
   phieu_kham     phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
@@ -168,9 +169,6 @@ model chi_tiet_don_thuoc {
 
   id_thuoc       Int
   thuoc          thuoc @relation(fields: [id_thuoc], references: [id_thuoc])
-
-  @@index([id_don_thuoc])
-  @@index([id_thuoc])
 }
 
 //////////////////////////////////////////////////////
@@ -192,6 +190,7 @@ model thuoc {
   so_luong       Int
   don_vi_tinh    String?
   han_su_dung    DateTime?
+  is_deleted     Boolean  @default(false)
 
   id_danh_muc     Int
   danh_muc_thuoc  danh_muc_thuoc @relation(fields: [id_danh_muc], references: [id_danh_muc])
@@ -209,6 +208,7 @@ model thanh_toan {
   phuong_thuc     PhuongThucThanhToan?
   trang_thai      TrangThaiThanhToan @default(CHUA_THANH_TOAN)
   ngay_thanh_toan DateTime?
+  is_deleted      Boolean  @default(false)
 
   id_phieu_kham   Int @unique
   phieu_kham      phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])

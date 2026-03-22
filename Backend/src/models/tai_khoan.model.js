@@ -3,6 +3,12 @@ const prisma = new PrismaClient();
 
 const getAll = () => {
     return prisma.tai_khoan.findMany({
+        where: {
+            is_deleted: false,
+            trang_thai: {
+                not: "KHOA"
+            }
+        },
         orderBy: {
             id_tai_khoan: 'desc',
         },
@@ -10,8 +16,11 @@ const getAll = () => {
 };
 
 const getById = (id_tai_khoan) => {
-    return prisma.tai_khoan.findUnique({
-        where: { id_tai_khoan },
+    return prisma.tai_khoan.findFirst({
+        where: { 
+            id_tai_khoan,
+            is_deleted: false
+        },
     });
 };
 
@@ -28,11 +37,20 @@ const update = (id_tai_khoan, data) => {
     });
 };
 
-const remove = (id_tai_khoan) => {
+const cancel = (id_tai_khoan) => {
     return prisma.tai_khoan.update({
         where: { id_tai_khoan },
         data: {
             trang_thai: "KHOA",
+        },
+    });
+};
+
+const remove = (id_tai_khoan) => {
+    return prisma.tai_khoan.update({
+        where: { id_tai_khoan },
+        data: {
+            is_deleted: true,
         }
     });
 };
@@ -42,5 +60,6 @@ module.exports = {
     getById,
     insert,
     update,
+    cancel,
     remove,
 };

@@ -3,6 +3,12 @@ const prisma = new PrismaClient();
 
 const getAll = () => {
     return prisma.lich_hen.findMany({
+        where: {
+            is_deleted: false,
+            trang_thai: {
+                not: "DA_HUY"
+            }
+        },
         orderBy: {
             id_lich_hen: 'desc',
         },
@@ -10,8 +16,11 @@ const getAll = () => {
 };
 
 const getById = (id_lich_hen) => {
-    return prisma.lich_hen.findUnique({
-        where: { id_lich_hen },
+    return prisma.lich_hen.findFirst({
+        where: { 
+            id_lich_hen,
+            is_deleted: false
+        },
     });
 };
 
@@ -28,11 +37,20 @@ const update = (id_lich_hen, data) => {
     });
 };
 
-const remove = (id_lich_hen) => {
+const cancel = (id_lich_hen) => {
     return prisma.lich_hen.update({
         where: { id_lich_hen },
         data: {
             trang_thai: "DA_HUY",
+        },
+    });
+};
+
+const remove = (id_lich_hen) => {
+    return prisma.lich_hen.update({
+        where: { id_lich_hen },
+        data: {
+            is_deleted: true,
         },
     });
 };
@@ -42,5 +60,6 @@ module.exports = {
     getById,
     insert,
     update,
+    cancel,
     remove,
 };

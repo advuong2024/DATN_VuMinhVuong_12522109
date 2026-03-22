@@ -6,12 +6,16 @@ const getALL = () => {
         orderBy: {
             id_thuoc: 'desc',
         },
+        where: { is_deleted: false },
     });
 };
 
 const getById = (id_thuoc) => {
-    return prisma.thuoc.findUnique({
-        where: { id_thuoc },
+    return prisma.thuoc.findFirst({
+        where: { 
+            id_thuoc,
+            is_deleted: false
+        },
     });
 };
  
@@ -29,7 +33,7 @@ const update = (id_thuoc, data) => {
 };
 
 const remove = (id_thuoc) => {
-    return prisma.thuoc.delete({
+    return prisma.thuoc.update({
         where: { id_thuoc },
         data: {
             is_deleted: true,
