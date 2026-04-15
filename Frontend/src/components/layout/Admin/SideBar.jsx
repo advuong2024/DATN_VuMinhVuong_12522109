@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { Layout, Menu, theme } from "antd";
 import {
-  FiFileText,
-  FiSend,
-  FiList,
-  FiTruck,
-  FiCreditCard,
-  FiFolder,
-  FiDatabase,
-  FiSettings,
-  FiTool,
-  FiHelpCircle,
+  FiHome,
+  FiCalendar,
+  FiUser,
 } from "react-icons/fi";
+import { PiInvoice } from "react-icons/pi";
+import { FaUserDoctor } from "react-icons/fa6";
+import { RiAccountCircleLine, RiServiceLine } from "react-icons/ri";
+import { GiMedicines } from "react-icons/gi";
+import { BsClipboardCheck } from "react-icons/bs";
+import { MdOutlineCategory } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import { icons } from "antd/es/image/PreviewGroup";
 
@@ -19,10 +18,55 @@ const { Sider } = Layout;
 
 const menuItems = [
   {
-    key: "/",
+    key: "/admin",
     label: "Dashboard",
-    icon: <FiFileText size={22}/>,
-  }
+    icon: <FiHome size={16}/>,
+  },
+  {
+    key: "",
+    label: "Accounts",
+    icon: <RiAccountCircleLine size={16}/>,
+  },
+  {
+    key: "/admin/booking",
+    label: "Booking",
+    icon: <FiCalendar size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Encounter",
+    icon: <BsClipboardCheck size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Patients",
+    icon: <FiUser size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Doctors",
+    icon: <FaUserDoctor size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Services",
+    icon: <RiServiceLine size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Medicines",
+    icon: <GiMedicines size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Category",
+    icon: <MdOutlineCategory size={16}/>,
+  },
+  {
+    key: "/admin",
+    label: "Bills",
+    icon: <PiInvoice size={16}/>,
+  },
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {
@@ -56,6 +100,7 @@ export default function Sidebar({ collapsed, onToggle }) {
       }}
     >
       <Menu
+        theme="dark"
         mode="inline"
         inlineCollapsed={collapsed}
         selectedKeys={[location.pathname]}
@@ -63,7 +108,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         items={menuItems}
         style={{
           background: "transparent",
-          fontSize: 23,
+          fontSize: 18,
           padding: "10px",
         }}
         itemRender={(item, dom) => (
@@ -82,13 +127,13 @@ export default function Sidebar({ collapsed, onToggle }) {
         style={{
           position: "absolute",
           top: "50%",
-          right: -45,
+          right: -35,
           transform: "translate(-50%, -50%)",
-          width: 45,
-          height: 45,
+          width: 35,
+          height: 35,
           borderRadius: "50%",
-          background: "#1890ff",
-          color: "#fff",
+          background: "#bebfc0",
+          color: "#000000",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",

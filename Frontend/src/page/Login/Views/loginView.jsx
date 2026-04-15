@@ -103,7 +103,7 @@ const LoginForm = () => {
               fontWeight: 600,
             }}
             onClick={() => {
-              localStorage.setItem("user", JSON.stringify({ username, role: "ADMIN" }));
+              localStorage.setItem("user", JSON.stringify({ role: "admin" }));
               navigate("/admin");
             }}
           >

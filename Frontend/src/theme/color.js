@@ -1,5 +1,5 @@
 const UI_COLORS = {
-  primary: "#003366",  
+  primary: "#034ea5",
   sidebar: "#001529",      
   vnaBlue: "#00AEEF",  
   hover: "#004A80",     

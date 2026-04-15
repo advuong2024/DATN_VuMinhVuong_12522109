@@ -1,69 +1,64 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Spin } from "antd";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import MainLayout from "@/components/layout/MainLayout";
+import UserLayout from "@/components/layout/User/UseLayout";
+import MainLayout from "@/components/layout/Admin/MainLayout";
 
 import LoginForm from "@/page/Login/Views/loginView";
+import BookingPage from "@/page/User/Booking/View/BookingPage";
+import BookPage from "@/page/Admin/Booking/View/BookPage";
 
 import {
   loginUrl,
-  layoutUrl,
   error403Url,
   error404Url,
-} from "./urls";
+  BookingUrl,
+} from "@/routes/urls";
 
-const Home = () => <h2>Home ✅</h2>;
-const Error403 = () => <h1>403 Forbidden</h1>;
-const NotFound = () => <h1>404 Not Found</h1>;
+import { ProtectedAdminRoute, ProtectedUserRoute } from "@/routes/ProtectedRouter";
 
-
-const ProtectedRoute = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <Spin
-        size="large"
-        style={{ display: "block", margin: "100px auto" }}
-      />
-    );
-  }
-
-  const user = localStorage.getItem("user");
-
-  if (!user) return <Navigate to={loginUrl} replace />;
-
-  return children;
-};
-
+const Home = () => <h2>Home </h2>;
+const Error403 = () => <h2>403 Forbidden</h2>;
+const Error404 = () => <h2>404 Not Found</h2>;
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <ProtectedUserRoute>
+        <UserLayout />
+      </ProtectedUserRoute>
+    ),
+    children: [
+      { index: true, element: <BookingPage /> },
+    ],
+  },
+
+  {
+    path: "/admin",
+    element: (
+      <ProtectedAdminRoute>
+        <MainLayout />
+      </ProtectedAdminRoute>
+    ),
+    children: [
+      { index: true, element: <h2>Admin Dashboard</h2> },
+      { path: BookingUrl, element: <BookPage /> },
+    ],
+  },
+
   {
     path: loginUrl,
     element: <LoginForm />,
   },
 
   {
-    path: layoutUrl,
-    element: (
-      <ProtectedRoute>
-        <MainLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Home /> },
-    ],
+    path: "/test",
+    element: <MainLayout />,
   },
 
   { path: error403Url, element: <Error403 /> },
-  { path: error404Url, element: <NotFound /> },
-  { path: "*", element: <NotFound /> },
+  { path: error404Url, element: <Error404 /> },
+  { path: "*", element: <Error404 /> },
 ]);
 
 export default function AppRouter() {
