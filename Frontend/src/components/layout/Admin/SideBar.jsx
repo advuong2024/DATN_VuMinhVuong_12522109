@@ -23,7 +23,7 @@ const menuItems = [
     icon: <FiHome size={16}/>,
   },
   {
-    key: "",
+    key: "/admin/account",
     label: "Accounts",
     icon: <RiAccountCircleLine size={16}/>,
   },
@@ -33,37 +33,37 @@ const menuItems = [
     icon: <FiCalendar size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/encounter",
     label: "Encounter",
     icon: <BsClipboardCheck size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/customer",
     label: "Patients",
     icon: <FiUser size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/doctor",
     label: "Doctors",
     icon: <FaUserDoctor size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/service",
     label: "Services",
     icon: <RiServiceLine size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/medicine",
     label: "Medicines",
     icon: <GiMedicines size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/category",
     label: "Category",
     icon: <MdOutlineCategory size={16}/>,
   },
   {
-    key: "/admin",
+    key: "/admin/bill",
     label: "Bills",
     icon: <PiInvoice size={16}/>,
   },
@@ -80,6 +80,12 @@ export default function Sidebar({ collapsed, onToggle }) {
     const latest = keys.find((k) => !openKeys.includes(k));
     setOpenKeys(latest ? [latest] : []);
   };
+
+  const selectedKey =
+  [...menuItems]
+    .sort((a, b) => b.key.length - a.key.length)
+    .find(item => location.pathname.startsWith(item.key))
+  ?.key;
 
   return (
     <Sider
@@ -103,7 +109,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         theme="dark"
         mode="inline"
         inlineCollapsed={collapsed}
-        selectedKeys={[location.pathname]}
+        selectedKeys={[selectedKey]}
         onClick={(e) => navigate(e.key)}
         items={menuItems}
         style={{
@@ -132,7 +138,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           width: 35,
           height: 35,
           borderRadius: "50%",
-          background: "#bebfc0",
+          background: "#93c2f1d5",
           color: "#000000",
           display: "flex",
           justifyContent: "center",

@@ -6,12 +6,21 @@ import MainLayout from "@/components/layout/Admin/MainLayout";
 import LoginForm from "@/page/Login/Views/loginView";
 import BookingPage from "@/page/User/Booking/View/BookingPage";
 import BookPage from "@/page/Admin/Booking/View/BookPage";
+import AccountPage from "@/page/Admin/Account/View/AccountPage";
+import CustomerPage from "@/page/Admin/Customer/View/CustomerPage";
+import DoctorPage from "@/page/Admin/Doctor/View/DoctorPage";
+import ServicePage from "@/page/Admin/Services/View/ServicePage";
+import EncounterPage from "@/page/Admin/Encounter/View/EncounterPage";
+import EncounterDetail from "@/page/Admin/Encounter/View/EncounterDetail/EncounterDetail";
+import MedicinePage from "@/page/Admin/Medicines/View/MedicinePage";
+import CategoryPage from "@/page/Admin/Category/View/CategoryPage";
+// import BillPage from "@/page/Admin/Bill/View/BillPage";
 
 import {
   loginUrl,
   error403Url,
   error404Url,
-  BookingUrl,
+  BookingUrl, doctorUrl, customerUrl, encounterUrl, serviceUrl, accountUrl, MedicineUrl, categoryUrl, billUrl
 } from "@/routes/urls";
 
 import { ProtectedAdminRoute, ProtectedUserRoute } from "@/routes/ProtectedRouter";
@@ -43,6 +52,15 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <h2>Admin Dashboard</h2> },
       { path: BookingUrl, element: <BookPage /> },
+      { path: accountUrl, element: <AccountPage /> },
+      { path: serviceUrl, element: <ServicePage /> },
+      { path: encounterUrl, element: <EncounterPage /> },
+      { path: `${encounterUrl}/:id`, element: <EncounterDetail /> },
+      { path: customerUrl, element: <CustomerPage /> },
+      { path: doctorUrl, element: <DoctorPage /> },
+      { path: MedicineUrl, element: <MedicinePage /> },
+      { path: categoryUrl, element: <CategoryPage /> },
+      // { path: billUrl, element: <BillPage /> },
     ],
   },
 

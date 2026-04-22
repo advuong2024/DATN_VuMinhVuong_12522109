@@ -128,13 +128,25 @@ export default function BookingPage() {
               <Row gutter={24}>
                 <Col span={12}>
                   <Form.Item
-                    label="Dịch vụ"
+                    label="Chuyên khoa"
                     name="service"
-                    rules={[{ required: true, message: "Vui lòng chọn dịch vụ" }]}
+                    rules={[{ required: true, message: "Vui lòng chọn chuyên khoa" }]}
                   >
                     <Select
                       size="large"
-                      placeholder="Chọn dịch vụ"
+                      placeholder="Chọn chuyên khoa"
+                      options={services}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Bác sĩ"
+                    name="doctor"
+                    rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
+                  >
+                    <Select
+                      size="large"
+                      placeholder="Chọn bác sĩ"
                       options={services}
                     />
                   </Form.Item>

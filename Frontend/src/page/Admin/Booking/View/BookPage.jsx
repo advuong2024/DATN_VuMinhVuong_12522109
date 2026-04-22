@@ -6,6 +6,8 @@ import {
   Input,
   Row,
   Col,
+  Modal, 
+  Descriptions,
 } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
@@ -31,18 +33,20 @@ const mockData = [
     key: "1",
     name: "Nguyễn Văn Anh",
     phone: "0123456789",
-    service: "Khám tổng quát",
+    specialty: "Khám tổng quát",
     date: "2026-04-15",
     time: "09:00",
+    doctor: "Nguyễn Văn Anh",
     status: "CHO",
   },
   {
     key: "2",
     name: "Nguyễn Văn Anh",
     phone: "0123456789",
-    service: "Khám tổng quát và xét nghiệm máu, nước tiểu",
+    specialty: "Khám tổng quát và xét nghiệm máu, nước tiểu",
     date: "2026-04-15",
     time: "09:00",
+    doctor: "Nguyễn Văn Anh",
     status: "XAC_NHAN",
   },
 ];
@@ -51,22 +55,25 @@ export default function BookingManagement() {
   const [data, setData] = useState(mockData);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [openView, setOpenView] = useState(false);
+  const [viewRecord, setViewRecord] = useState(null);
 
   const columns = [
     { title: "Customer Name", dataIndex: "name", align: "left", width: 180 },
-    { title: "Phone Number", dataIndex: "phone", align: "left", width: 180 },
-    { title: "Service", dataIndex: "service", align: "left", width: 200, ellipsis: true},
-    { title: "Date",  dataIndex: "date", align: "center", render: (date) => dayjs(date).format("DD/MM/YYYY"), width: 120 },
-    { title: "Time", dataIndex: "time", align: "center", width: 100 },
+    { title: "Phone Number", dataIndex: "phone", align: "left", width: 170 },
+    { title: "Specialty", dataIndex: "specialty", align: "left", width: 190, ellipsis: true},
+    { title: "Date",  dataIndex: "date", align: "center", render: (date) => dayjs(date).format("DD/MM/YYYY"), width: 100 },
+    { title: "Time", dataIndex: "time", align: "center", width: 90 },
+    { title: "Doctor name", dataIndex: "doctor", align: "left", width: 180 },
     {
       title: "Status",
       dataIndex: "status",
       align: "center",
-      width: 150,
+      width: 140,
       render: (status, record) => (
         <Select
           value={status}
-          style={{ width: 130 }}
+          style={{ width: 120 }}
           onChange={(value) => handleChangeStatus(value, record)}
           options={STATUS_OPTIONS.map((opt) => ({
             value: opt.value,
@@ -91,7 +98,7 @@ export default function BookingManagement() {
           <EyeOutlined style={{ fontSize: 18, cursor: "pointer", color: "#1677ff" }} onClick={() => handleShow(record)} />
         </Space>
       ),
-      width: 120,
+      width: 90,
     },
   ];
 
@@ -103,6 +110,11 @@ export default function BookingManagement() {
     );
 
     setData(newData);
+  };
+
+  const handleShow = (record) => {
+    setViewRecord(record);
+    setOpenView(true);
   };
 
   return (
@@ -160,6 +172,49 @@ export default function BookingManagement() {
         </Row>
 
         <DataTable columns={columns} data={data} loading={false} />
+
+        <Modal
+          open={openView}
+          onCancel={() => setOpenView(false)}
+          footer={null}
+          title={<div style={{ textAlign: "center" }}>BOOKING DETAILS</div>}
+        >
+          {viewRecord && (
+            <Descriptions column={1} bordered>
+              <Descriptions.Item label="Customer Name">
+                {viewRecord.name}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Phone Number">
+                {viewRecord.phone}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Specialty">
+                {viewRecord.specialty}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Date">
+                {dayjs(viewRecord.date).format("DD/MM/YYYY")}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Time">
+                {viewRecord.time}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Doctor Name">
+                {viewRecord.name}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Status">
+                {
+                  STATUS_OPTIONS.find(
+                    (x) => x.value === viewRecord.status
+                  )?.label
+                }
+              </Descriptions.Item>
+            </Descriptions>
+          )}
+        </Modal>
     </div>
   );
 }

@@ -1,0 +1,15 @@
+export const UNIT_OPTIONS = [
+  { label: "Viên", value: "VIEN" },
+  { label: "Vỉ", value: "VI" },
+  { label: "Hộp", value: "HOP" },
+  { label: "Chai", value: "CHAI" },
+  { label: "Lọ", value: "LO" },
+  { label: "Ống", value: "ONG" },
+  { label: "Gói", value: "GOI" },
+  { label: "Tuýp", value: "TUYP" },
+  { label: "Miếng", value: "MIENG" },
+  { label: "Kg", value: "KG" },
+  { label: "Gram", value: "GRAM" },
+  { label: "Ml", value: "ML" },
+  { label: "Lít", value: "LIT" },
+];

@@ -1,4 +1,4 @@
-const LichHen = require("../models/lich_hen.model");
+const LichHen = require("../models/dat_lich.model");
 
 function normalize(body = {}) {
   const data = { ...body };

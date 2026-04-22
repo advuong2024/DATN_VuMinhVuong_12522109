@@ -1,18 +1,18 @@
-const DanhMuc = require("../models/danh_muc.model");
+const ChiTietDV = require("../models/chi_tiet_dich_vu.model");
 
 function normalize(body = {}) {
   const data = { ...body };
 
-  ["ten_danh_muc", "mo_ta"].forEach((k) => {
-    if (typeof data[k] === "string") data[k] = data[k].trim();
-  });
+  if (typeof data.ghi_chu === "string") {
+    data.ghi_chu = data.ghi_chu.trim();
+  }
 
   return data;
 }
 
 exports.getAll = async (_req, res) => {
   try {
-    const rows = await DanhMuc.getAll();
+    const rows = await ChiTietDV.getAll();
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -22,12 +22,14 @@ exports.getAll = async (_req, res) => {
 exports.getById = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id))
+    if (!Number.isInteger(id)) {
       return res.status(400).json({ error: "id không hợp lệ" });
+    }
 
-    const row = await DanhMuc.getById(id);
-    if (!row)
+    const row = await ChiTietDV.getById(id);
+    if (!row) {
       return res.status(404).json({ error: "Không tìm thấy" });
+    }
 
     res.json(row);
   } catch (err) {
@@ -38,7 +40,14 @@ exports.getById = async (req, res) => {
 exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);
-    const created = await DanhMuc.insert(payload);
+
+    if (!payload.id_dich_vu || !payload.don_gia) {
+      return res.status(400).json({
+        error: "Thiếu id_dich_vu hoặc don_gia",
+      });
+    }
+
+    const created = await ChiTietDV.insert(payload);
     res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -48,12 +57,13 @@ exports.insert = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id))
+    if (!Number.isInteger(id)) {
       return res.status(400).json({ error: "id không hợp lệ" });
+    }
 
     const payload = normalize(req.body);
 
-    await DanhMuc.update(id, payload);
+    await ChiTietDV.update(id, payload);
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -63,10 +73,12 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id))
+    if (!Number.isInteger(id)) {
       return res.status(400).json({ error: "id không hợp lệ" });
+    }
 
-    await DanhMuc.remove(id);
+    await ChiTietDV.remove(id);
+
     res.json({ message: "Xóa thành công" });
   } catch (err) {
     res.status(500).json({ error: err.message });
