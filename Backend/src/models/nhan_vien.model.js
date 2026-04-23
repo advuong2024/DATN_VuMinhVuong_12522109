@@ -2,11 +2,25 @@
  const prisma = new PrismaClient();
 
  const getAll = () => {
+  return prisma.nhan_vien.findMany({
+    where: { is_deleted: false },
+    orderBy: { id_nhan_vien: "desc" },
+    include: {
+      chuyen_khoa: true
+    }
+  });
+ };
+
+ const get_bacsi_Chuyenkhoa = (id_chuyen_khoa) => {
     return prisma.nhan_vien.findMany({
-        orderBy: {
-            id_nhan_vien: 'desc',
+        where: {
+            id_chuyen_khoa,
+            is_deleted: false
         },
-        where: { is_deleted: false },
+        select: {
+            id_nhan_vien: true,
+            ten_nhan_vien: true
+        }
     });
  };
 
@@ -47,4 +61,5 @@ module.exports = {
     insert,
     update,
     remove,
+    get_bacsi_Chuyenkhoa,
 };

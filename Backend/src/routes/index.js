@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+router.use("/auth", require("./auth.router"))
 router.use("/benh-nhan", require("./benh_nhan.route"));
 router.use("/nhan-vien", require("./nhan_vien.route"));
 router.use("/tai-khoan", require("./tai_khoan.route"));

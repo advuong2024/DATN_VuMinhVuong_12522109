@@ -97,3 +97,19 @@ exports.delete = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getBacSiByChuyenKhoa = async (req, res) => {
+  try {
+    const id_chuyen_khoa = Number(req.params.id);
+
+    if (!Number.isInteger(id_chuyen_khoa)) {
+      return res.status(400).json({ error: "id chuyên khoa không hợp lệ" });
+    }
+
+    const data = await NhanVien.get_bacsi_Chuyenkhoa(id_chuyen_khoa);
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

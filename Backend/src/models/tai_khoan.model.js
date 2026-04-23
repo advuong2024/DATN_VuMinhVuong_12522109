@@ -55,6 +55,42 @@ const remove = (id_tai_khoan) => {
     });
 };
 
+const findByUsername = (username) => {
+  return prisma.tai_khoan.findUnique({
+    where: { username },
+    include: {
+      nhan_vien: true,
+    },
+  });
+};
+
+const findByIdWithNV = (id_tai_khoan) => {
+  return prisma.tai_khoan.findUnique({
+    where: { id_tai_khoan },
+    include: {
+      nhan_vien: true,
+    },
+  });
+};
+
+const saveRefreshToken = (id_tai_khoan, token) => {
+  return prisma.tai_khoan.update({
+    where: { id_tai_khoan },
+    data: {
+      refresh_token: token,
+    },
+  });
+};
+
+const clearRefreshToken = (id_tai_khoan) => {
+  return prisma.tai_khoan.update({
+    where: { id_tai_khoan },
+    data: {
+      refresh_token: null,
+    },
+  });
+};
+
 module.exports = {
     getAll,
     getById,
@@ -62,4 +98,8 @@ module.exports = {
     update,
     cancel,
     remove,
+    findByUsername,
+    findByIdWithNV,
+    saveRefreshToken,
+    clearRefreshToken,
 };

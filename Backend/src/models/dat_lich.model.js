@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const getAll = () => {
-    return prisma.lich_hen.findMany({
+    return prisma.dat_lich.findMany({
         where: {
             is_deleted: false,
             trang_thai: {
@@ -10,49 +10,79 @@ const getAll = () => {
             }
         },
         orderBy: {
-            id_lich_hen: 'desc',
+            id_dat_lich: 'desc',
         },
     });
 };
 
-const getById = (id_lich_hen) => {
-    return prisma.lich_hen.findFirst({
+const getById = (id_dat_lich) => {
+    return prisma.dat_lich.findFirst({
         where: { 
-            id_lich_hen,
+            id_dat_lich,
             is_deleted: false
         },
     });
 };
 
 const insert = (data) => {
-    return prisma.lich_hen.create({
+  return prisma.dat_lich.create({
+    data: {
+      thoi_gian: data.thoi_gian,
+      ly_do: data.ly_do,
+
+      benh_nhan: {
+        connect: { id_benh_nhan: data.id_benh_nhan },
+      },
+
+      bac_si: {
+        connect: { id_nhan_vien: data.id_bac_si },
+      },
+
+      chuyen_khoa: {
+        connect: { id_chuyen_khoa: data.id_chuyen_khoa },
+      },
+    },
+  });
+};
+
+const update = (id_dat_lich, data) => {
+    return prisma.dat_lich.update({
+        where: { id_dat_lich },
         data,
     });
 };
 
-const update = (id_lich_hen, data) => {
-    return prisma.lich_hen.update({
-        where: { id_lich_hen },
-        data,
-    });
-};
-
-const cancel = (id_lich_hen) => {
-    return prisma.lich_hen.update({
-        where: { id_lich_hen },
+const cancel = (id_dat_lich) => {
+    return prisma.dat_lich.update({
+        where: { id_dat_lich },
         data: {
             trang_thai: "DA_HUY",
         },
     });
 };
 
-const remove = (id_lich_hen) => {
-    return prisma.lich_hen.update({
-        where: { id_lich_hen },
+const remove = (id_dat_lich) => {
+    return prisma.dat_lich.update({
+        where: { id_dat_lich },
         data: {
             is_deleted: true,
         },
     });
+};
+
+const getByDoctorAndDate = (id_bac_si, date) => {
+  const start = new Date(`${date}T00:00:00.000Z`);
+  const end = new Date(`${date}T23:59:59.999Z`);
+
+  return prisma.dat_lich.findMany({
+    where: {
+      id_bac_si: Number(id_bac_si),
+      thoi_gian: {
+        gte: start,
+        lte: end,
+      },
+    },
+  });
 };
 
 module.exports = {
@@ -62,4 +92,5 @@ module.exports = {
     update,
     cancel,
     remove,
+    getByDoctorAndDate,
 };

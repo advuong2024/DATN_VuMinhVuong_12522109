@@ -104,6 +104,8 @@ model tai_khoan {
   vai_tro VaiTro
   trang_thai TrangThaiTaiKhoan @default(HOAT_DONG)
 
+  refresh_token String? @db.Text
+
   id_nhan_vien Int @unique
   nhan_vien nhan_vien @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
 

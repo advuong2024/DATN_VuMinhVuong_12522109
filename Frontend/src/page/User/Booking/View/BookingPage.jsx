@@ -9,20 +9,21 @@ import {
   Col,
   Card,
   Typography,
-  Steps
+  Steps,
+  Modal,
+  message,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { getCK, getDoctorCK, getCustomer, 
+  postBook, postCustomer, updateCustomer, 
+  getBookedSlots, 
+} from "../Api/BookingApi"
 
 const { TextArea } = Input;
 const { Title } = Typography;
 
-const services = [
-  { label: "Khám tổng quát", value: "general" },
-  { label: "Da liễu", value: "skin" },
-  { label: "Răng hàm mặt", value: "dental" },
-];
 
 export default function BookingPage() {
   const [step, setStep] = useState(0);
@@ -34,6 +35,100 @@ export default function BookingPage() {
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [originalData, setOriginalData] = useState(null);
+  const [specialty, setSpecialty] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  useEffect(() => {
+    fetchCK();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate && selectedDoctor) {
+      fetchBookedSlots();
+    }
+  }, [selectedDate, selectedDoctor]);
+
+  const fetchCK = async () => {
+    try {
+      const data = await getCK();
+      setSpecialty(
+        data.map((item) => ({
+          label: item.ten_chuyen_khoa,
+          value: item.id_chuyen_khoa,
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleChangeCK = async (value) => {
+    try {
+      const data = await getDoctorCK(value);
+
+      setDoctors(
+        data.map((item) => ({
+          label: item.ten_nhan_vien,
+          value: item.id_nhan_vien,
+        }))
+      );
+
+      form.setFieldsValue({ doctor: null });
+      setSelectedDoctor(null);
+
+    } catch (err) {
+      console.error("Lỗi load bác sĩ:", err);
+    }
+  };
+
+  const fetchBookedSlots = async () => {
+    try {
+      if (!selectedDoctor || !selectedDate) return;
+
+      const data = await getBookedSlots({
+        id_bac_si: selectedDoctor,
+        date: selectedDate,
+      });
+
+      const times = data.map((item) =>
+        dayjs(item.thoi_gian).format("HH:mm")
+      );
+
+      setBookedSlots(times);
+    } catch (err) {
+      console.error("Lỗi load slot:", err);
+    }
+  };
+
+  const handleFindPatient = async () => {
+    try {
+      const code = form.getFieldValue("patient_code");
+
+      if (!code) return;
+
+      const data = await getCustomer(code);
+
+      form.setFieldsValue({
+        ...data,
+        ngay_sinh: data.ngay_sinh
+          ? dayjs(data.ngay_sinh).format("YYYY-MM-DD")
+          : null,
+      });
+
+      setOriginalData({
+        ...data,
+        ngay_sinh: data.ngay_sinh
+          ? dayjs(data.ngay_sinh).format("YYYY-MM-DD")
+          : null,
+      });
+      setPatientLoaded(true);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Lỗi tìm bệnh nhân:", err);
+    }
+  };
 
   const dates = [0, 1, 2, 3].map((i) => {
     const d = dayjs().add(i, "day");
@@ -76,7 +171,7 @@ export default function BookingPage() {
 
   const nextStep = async () => {
     try {
-        await form.validateFields(["service", "reason", "date"]);
+        await form.validateFields(["specialty", "doctor", "reason", "date", "time"]);
 
         const time = form.getFieldValue("time");
 
@@ -90,8 +185,104 @@ export default function BookingPage() {
     } catch (err) {}
   };
 
-  const onFinish = (values) => {
-    console.log(values);
+  const onFinish = async () => {
+    const values = form.getFieldsValue(true);
+    let isNewPatient = false;
+    try {
+      let patientId = null;
+
+      if (patientType === "new") {
+        const customerRes = await postCustomer({
+          ten_benh_nhan: values.ten_benh_nhan,
+          so_dien_thoai: values.so_dien_thoai,
+          ngay_sinh: values.ngay_sinh,
+          gioi_tinh: values.gioi_tinh,
+          CCCD: values.CCCD,
+          email: values.email,
+          dia_chi: values.dia_chi,
+          tien_su_benh: values.tien_su_benh,
+        });
+
+        patientId = customerRes?.id_benh_nhan || customerRes?.data?.id_benh_nhan;
+        isNewPatient = true;
+      }
+
+      if (patientType === "old") {
+        patientId = values.patient_code;
+      }
+
+      console.log("DATE:", values.date);
+      console.log("TIME:", values.time);
+
+      const thoi_gian = new Date(`${values.date}T${values.time}:00+07:00`);
+      console.log("FINAL:", thoi_gian);
+
+      await postBook({
+        id_benh_nhan: Number(patientId),
+        id_bac_si: Number(values.doctor),
+        id_chuyen_khoa: Number(values.specialty),
+        thoi_gian,
+        ly_do: values.reason,
+      });
+
+      Modal.success({
+        title: "Đặt lịch thành công 🎉",
+        content: (
+          <div>
+            <p>Bạn đã đặt lịch khám thành công.</p>
+
+            {isNewPatient && (
+              <p>
+                👉 <b>Mã bệnh nhân của bạn là: {patientId}</b>
+              </p>
+            )}
+
+            <p>Vui lòng lưu lại để sử dụng cho lần sau.</p>
+          </div>
+        ),
+      });
+
+      // form.resetFields();
+      // setStep(0);
+    } catch (err) {
+      console.error("Lỗi đặt lịch:", err);
+      message.error("Đặt lịch thất bại ❌");
+    }
+  };
+
+  const handleUpdatePatient = async () => {
+    try {
+      const values = form.getFieldsValue(true);
+
+      await updateCustomer(values.id_benh_nhan, {
+        ten_benh_nhan: values.ten_benh_nhan,
+        so_dien_thoai: values.so_dien_thoai,
+        ngay_sinh: values.ngay_sinh,
+        gioi_tinh: values.gioi_tinh,
+        CCCD: values.CCCD,
+        email: values.email,
+        dia_chi: values.dia_chi,
+        tien_su_benh: values.tien_su_benh,
+      });
+
+      setOriginalData(values);
+      setIsEditing(false);
+
+      console.log("Update thành công");
+    } catch (err) {
+      console.error("Lỗi update:", err);
+    }
+  };
+
+  const isBooked = (time) => {
+    return bookedSlots.includes(time);
+  };
+
+  const handleChangeDoctor = (value) => {
+    setSelectedDoctor(value);
+    setBookedSlots([]);
+    form.setFieldsValue({ time: null });
+    setSelectedTime(null);
   };
 
   return (
@@ -122,33 +313,52 @@ export default function BookingPage() {
           style={{ marginBottom: 30 }}
         />
 
-        <Form layout="vertical" form={form} onFinish={onFinish}>
+        <Form layout="vertical" form={form} onFinish={onFinish} preserve>
+          <Form.Item name="date" hidden>
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="time" hidden>
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="id_benh_nhan" hidden>
+            <Input />
+          </Form.Item>
+
           {step === 0 && (
             <>
               <Row gutter={24}>
                 <Col span={12}>
                   <Form.Item
                     label="Chuyên khoa"
-                    name="service"
+                    name="specialty"
                     rules={[{ required: true, message: "Vui lòng chọn chuyên khoa" }]}
                   >
                     <Select
                       size="large"
                       placeholder="Chọn chuyên khoa"
-                      options={services}
+                      options={specialty}
+                      onChange={handleChangeCK}
                     />
                   </Form.Item>
 
-                  <Form.Item
-                    label="Bác sĩ"
-                    name="doctor"
-                    rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
-                  >
-                    <Select
-                      size="large"
-                      placeholder="Chọn bác sĩ"
-                      options={services}
-                    />
+                  <Form.Item shouldUpdate>
+                    {() => (
+                      <Form.Item
+                        label="Bác sĩ"
+                        name="doctor"
+                        rules={[{ required: true, message: "Vui lòng chọn bác sĩ" }]}
+                      >
+                        <Select
+                          size="large"
+                          placeholder="Chọn bác sĩ"
+                          options={doctors}
+                          disabled={!form.getFieldValue("specialty")}
+                          onChange={handleChangeDoctor}
+                        />
+                      </Form.Item>
+                    )}
                   </Form.Item>
                 </Col>
 
@@ -207,7 +417,7 @@ export default function BookingPage() {
                             <div style={{ marginBottom: 10 }}>🌤 Ca sáng</div>
                             <Row gutter={[10, 10]}>
                                 {morning.map((time) => {
-                                const disabled = isPastTime(time);
+                                const disabled = isPastTime(time) || isBooked(time);
 
                                 return (
                                     <Col key={time} flex="0 0 90px">
@@ -222,28 +432,32 @@ export default function BookingPage() {
                                         padding: "10px 18px",
                                         borderRadius: 20,
                                         cursor: disabled
-                                            ? "not-allowed"
+                                          ? "not-allowed"
                                             : "pointer",
                                         border:
-                                            selectedTime === time
+                                          selectedTime === time
                                             ? "2px solid #1677ff"
-                                            : "1px solid #ddd",
+                                              : "1px solid #ddd",
                                         background:
-                                            selectedTime === time
+                                          isBooked(time)
+                                            ? "#ff4d4f"
+                                              : selectedTime === time
                                             ? "#1677ff"
-                                            : disabled
+                                              : disabled
                                             ? "#f5f5f5"
-                                            : "#fff",
+                                              : "#fff",
                                         color:
-                                            selectedTime === time
+                                          isBooked(time)
                                             ? "#fff"
-                                            : disabled
+                                              : selectedTime === time
+                                            ? "#fff"
+                                              : disabled
                                             ? "#999"
-                                            : "#000",
+                                              : "#000",
                                         fontWeight: 500,
-                                        }}
+                                      }}
                                     >
-                                        {time}
+                                      {time}
                                     </div>
                                     </Col>
                                 );
@@ -255,42 +469,46 @@ export default function BookingPage() {
                             </div>
                             <Row gutter={[10, 10]} wrap >
                                 {afternoon.map((time) => {
-                                const disabled = isPastTime(time);
+                                const disabled = isPastTime(time) || isBooked(time);
 
                                 return (
                                 <Col key={time} flex="0 0 90px">
                                     <div
-                                        onClick={() => {
-                                            if (disabled) return;
-                                            setSelectedTime(time);
-                                            setTimeError("");
-                                            form.setFieldsValue({ time });
-                                        }}
-                                        style={{
-                                            padding: "10px 18px",
-                                            borderRadius: 20,
-                                            cursor: disabled
-                                                ? "not-allowed"
-                                                : "pointer",
-                                            border:
-                                                selectedTime === time
-                                                ? "2px solid #1677ff"
-                                                : "1px solid #ddd",
-                                            background:
-                                                selectedTime === time
-                                                ? "#1677ff"
-                                                : disabled
-                                                ? "#f5f5f5"
-                                                : "#fff",
-                                            color:
-                                                selectedTime === time
-                                                ? "#fff"
-                                                : disabled
-                                                ? "#999"
-                                                : "#000",
-                                            fontWeight: 500,
-                                            textAlign: "center",
-                                        }}
+                                      onClick={() => {
+                                        if (disabled) return;
+                                        setSelectedTime(time);
+                                        setTimeError("");
+                                        form.setFieldsValue({ time });
+                                      }}
+                                      style={{
+                                        padding: "10px 18px",
+                                        borderRadius: 20,
+                                        cursor: disabled
+                                          ? "not-allowed"
+                                          : "pointer",
+                                        border:
+                                          selectedTime === time
+                                            ? "2px solid #1677ff"
+                                            : "1px solid #ddd",
+                                        background:
+                                          isBooked(time)
+                                            ? "#ff4d4f"
+                                            : selectedTime === time
+                                            ? "#1677ff"
+                                            : disabled
+                                            ? "#f5f5f5"
+                                            : "#fff",
+                                        color:
+                                          isBooked(time)
+                                            ? "#fff"
+                                            : selectedTime === time
+                                            ? "#fff"
+                                            : disabled
+                                            ? "#999"
+                                            : "#000",
+                                        fontWeight: 500,
+                                        textAlign: "center",
+                                      }}
                                     >
                                         {time}
                                     </div>
@@ -342,7 +560,7 @@ export default function BookingPage() {
                           "so_dien_thoai",
                           "ngay_sinh",
                           "gioi_tinh",
-                          "cccd",
+                          "CCCD",
                           "email",
                           "dia_chi",
                           "tien_su_benh",
@@ -365,7 +583,7 @@ export default function BookingPage() {
                       rules={[
                         { required: true, message: "Nhập mã bệnh nhân" },
                         {
-                          pattern: /^0\d{9}$/,
+                          pattern: /^\d+$/,
                           message: "Chỉ nhập số không chứa chữ cái và ký tự đặc biệt",
                         },
                       ]}
@@ -379,21 +597,7 @@ export default function BookingPage() {
                       <Button
                         type="primary"
                         block
-                        onClick={() => {
-                          const fakeData = {
-                            ten_benh_nhan: "Nguyễn Văn A",
-                            so_dien_thoai: "0123456789",
-                            ngay_sinh: "2000-01-01",
-                            gioi_tinh: "NAM",
-                            cccd: "123456789012",
-                            email: "a@gmail.com",
-                            dia_chi: "Hà Nội",
-                          };
-                          form.setFieldsValue(fakeData);
-                          setOriginalData(fakeData);
-                          setPatientLoaded(true);
-                          setIsEditing(false);
-                        }}
+                        onClick={handleFindPatient}
                       >
                         Tìm
                       </Button>
@@ -412,9 +616,7 @@ export default function BookingPage() {
                   <>
                     <Button
                       type="primary"
-                      onClick={() => {
-                        setIsEditing(false);
-                      }}
+                      onClick={handleUpdatePatient}
                     >
                       Lưu
                     </Button>
@@ -509,7 +711,7 @@ export default function BookingPage() {
                   <Col span={12}>
                     <Form.Item
                       label="CCCD"
-                      name="cccd"
+                      name="CCCD"
                       rules={[
                         { required: true, message: "Vui lòng nhập CCCD" },
                         {
@@ -559,11 +761,9 @@ export default function BookingPage() {
                 Quay lại
               </Button>
 
-              {patientType === "new" && (
-                <Button type="primary" size="large" htmlType="submit">
-                  Xác nhận đặt lịch
-                </Button>
-              )}
+              <Button type="primary" size="large" htmlType="submit">
+                Xác nhận đặt lịch
+              </Button>
             </div>
           </>
         )}

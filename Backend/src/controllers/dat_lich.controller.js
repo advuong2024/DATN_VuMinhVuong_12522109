@@ -46,6 +46,19 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.getBooked = async (req, res) => {
+  try {
+    const { id_bac_si, date } = req.query;
+
+    const data = await LichHen.getByDoctorAndDate(id_bac_si, date);
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
 exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);
@@ -54,6 +67,12 @@ exports.insert = async (req, res) => {
 
     res.status(201).json(created);
   } catch (err) {
+    console.error("🔥 ERROR BOOKING:", err);
+    if (err.code === "P2002") {
+      return res.status(400).json({
+        message: "Khung giờ này đã có người đặt",
+      });
+    }
     res.status(500).json({ error: err.message });
   }
 };

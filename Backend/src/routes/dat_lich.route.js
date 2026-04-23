@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/dat_lich.controller");
 
+router.get("/da-dat", controller.getBooked);
 router.get("/", controller.getAll);
 router.get("/:id", controller.getById);
 router.post("/", controller.insert);
