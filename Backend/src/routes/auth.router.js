@@ -4,9 +4,10 @@ const router = express.Router();
 const authController = require("../controllers/auth.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 
+router.patch("/reset-password/:id", authController.resetPassword);
 router.post("/login", authController.login);
 router.post("/refresh", authController.refresh);
-router.post("/logout", authMiddleware.verifyToken, authController.logout);
+router.post("/logout", authMiddleware, authController.logout);
 
 // test phân quyền
 // router.get(

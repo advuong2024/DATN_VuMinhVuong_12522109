@@ -23,6 +23,7 @@ exports.getAll = async (_req, res) => {
     const rows = await DichVu.getAll();
     res.json(rows);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -39,6 +40,7 @@ exports.getById = async (req, res) => {
 
     res.json(row);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -56,6 +58,7 @@ exports.insert = async (req, res) => {
     const created = await DichVu.insert(payload);
     res.status(201).json(created);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -71,6 +74,7 @@ exports.update = async (req, res) => {
     await DichVu.update(id, payload);
     res.json({ message: "Cập nhật dịch vụ thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -85,6 +89,7 @@ exports.delete = async (req, res) => {
 
     res.json({ message: "Xóa dịch vụ thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };

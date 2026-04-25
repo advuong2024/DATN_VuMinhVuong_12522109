@@ -24,6 +24,18 @@
     });
  };
 
+ const getNhanVienChuaCoTaiKhoan = () => {
+  return prisma.nhan_vien.findMany({
+    where: {
+      tai_khoan: null,
+    },
+    select: {
+      id_nhan_vien: true,
+      ten_nhan_vien: true,
+    },
+  });
+ };
+
  const getById = (id_nhan_vien) => {
     return prisma.nhan_vien.findFirst({
         where: { 
@@ -62,4 +74,5 @@ module.exports = {
     update,
     remove,
     get_bacsi_Chuyenkhoa,
+    getNhanVienChuaCoTaiKhoan,
 };

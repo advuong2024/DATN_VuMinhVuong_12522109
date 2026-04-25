@@ -117,16 +117,6 @@ export default function Sidebar({ collapsed, onToggle }) {
           fontSize: 18,
           padding: "10px",
         }}
-        itemRender={(item, dom) => (
-          <div
-            style={{
-              borderRadius: 8,
-              padding: "4px 8px",
-            }}
-          >
-            {dom}
-          </div>
-        )}
       />
       <div
         onClick={onToggle}

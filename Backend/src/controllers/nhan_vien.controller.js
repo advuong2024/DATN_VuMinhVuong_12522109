@@ -28,6 +28,7 @@ exports.getAll = async (_req, res) => {
     const rows = await NhanVien.getAll();
     res.json(rows);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -48,6 +49,7 @@ exports.getById = async (req, res) => {
 
     res.json(row);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -60,6 +62,7 @@ exports.insert = async (req, res) => {
 
     res.status(201).json(created);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -78,6 +81,7 @@ exports.update = async (req, res) => {
 
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -94,6 +98,7 @@ exports.delete = async (req, res) => {
 
     res.json({ message: "Xóa mềm thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -110,6 +115,17 @@ exports.getBacSiByChuyenKhoa = async (req, res) => {
 
     res.json(data);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getNhanVienChuaCoTK = async (req, res) => {
+  try {
+    const data = await NhanVien.getNhanVienChuaCoTaiKhoan();
+    res.json(data);
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    res.status(500).json({ message: "Error" });
   }
 };

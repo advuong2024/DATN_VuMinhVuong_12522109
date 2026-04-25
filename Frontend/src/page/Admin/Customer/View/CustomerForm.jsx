@@ -10,7 +10,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect } from "react";
-import { GENDER_OPTIONS } from "../Constants/Specialty";
+import { GENDER_OPTIONS } from "../Constants/customer_option";
 
 export default function PatientForm({ initialValues, onSubmit }) {
   const [form] = Form.useForm();

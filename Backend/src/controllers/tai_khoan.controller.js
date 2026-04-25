@@ -17,11 +17,12 @@ function normalize(body = {}) {
   return data;
 }
 
-exports.getAll = async (_req, res) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await TaiKhoan.getAll();
+    const rows = await TaiKhoan.getAll(req.query);
     res.json(rows);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -38,6 +39,7 @@ exports.getById = async (req, res) => {
 
     res.json(row);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -48,6 +50,7 @@ exports.insert = async (req, res) => {
     const created = await TaiKhoan.insert(payload);
     res.status(201).json(created);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -63,20 +66,37 @@ exports.update = async (req, res) => {
     await TaiKhoan.update(id, payload);
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-exports.cancel = async (req, res) => {
+exports.updateStatus = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id))
-      return res.status(400).json({ error: "id không hợp lệ" });
+    const { trang_thai } = req.body;
 
-    await TaiKhoan.cancel(id);
-    res.json({ message: "Đã khóa tài khoản" });
+    const result = await TaiKhoan.updateStatus(id, trang_thai);
+
+    res.json(result);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("🔥 ERROR:", err);
+    res.status(500).json({ message: "Update failed" });
+  }
+};
+
+
+exports.updateRole = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { vai_tro } = req.body;
+
+    const result = await TaiKhoan.updateRole(id, vai_tro);
+
+    res.json(result);
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    res.status(500).json({ message: "Update failed" });
   }
 };
 
@@ -89,6 +109,7 @@ exports.delete = async (req, res) => {
     await TaiKhoan.remove(id);
     res.json({ message: "Xóa thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };

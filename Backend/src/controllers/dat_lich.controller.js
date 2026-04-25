@@ -18,11 +18,12 @@ function normalize(body = {}) {
   return data;
 }
 
-exports.getAll = async (_req, res) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await LichHen.getAll();
+    const rows = await LichHen.getAll(req.query);
     res.json(rows);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -42,6 +43,7 @@ exports.getById = async (req, res) => {
 
     res.json(row);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -90,6 +92,7 @@ exports.update = async (req, res) => {
 
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -105,6 +108,7 @@ exports.cancel = async (req, res) => {
 
     res.json({ message: "Đã hủy lịch hẹn" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -120,6 +124,7 @@ exports.delete = async (req, res) => {
 
     res.json({ message: "Xóa mềm thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };

@@ -1,25 +1,81 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const dayjs = require("dayjs");
 
-const getAll = () => {
-    return prisma.dat_lich.findMany({
-        where: {
-            is_deleted: false,
-            trang_thai: {
-                not: "DA_HUY"
-            }
+const getAll = (params = {}) => {
+  const { search, status, startDate, endDate } = params;
+
+  const where = {};
+  if (search) {
+    where.OR = [
+        {
+            benh_nhan: {
+            ten_benh_nhan: {
+                contains: search,
+            },
+            },
         },
-        orderBy: {
-            id_dat_lich: 'desc',
+        {
+            benh_nhan: {
+            so_dien_thoai: {
+                contains: search,
+            },
+            },
         },
-    });
+    ];
+  }
+
+  if (status) {
+    where.trang_thai = status;
+  }
+
+  if (startDate || endDate) {
+    where.thoi_gian = {};
+
+    if (startDate) {
+        where.thoi_gian.gte = dayjs(startDate).startOf("day").toDate();
+    }
+
+    if (endDate) {
+        where.thoi_gian.lte = dayjs(endDate).endOf("day").toDate();
+    }
+  }
+  return prisma.dat_lich.findMany({
+    where,
+    include: {
+      benh_nhan: {
+        select: {
+          ten_benh_nhan: true,
+          so_dien_thoai: true,
+          id_benh_nhan: true,
+        },
+      },
+
+      bac_si: {
+        select: {
+          ten_nhan_vien: true,
+          id_nhan_vien: true,
+        },
+      },
+
+      chuyen_khoa: {
+        select: {
+          ten_chuyen_khoa: true,
+          id_chuyen_khoa: true,
+        },
+      },
+    },
+
+    orderBy: {
+      id_dat_lich: "desc",
+    },
+  });
 };
 
 const getById = (id_dat_lich) => {
     return prisma.dat_lich.findFirst({
         where: { 
             id_dat_lich,
-            is_deleted: false
         },
     });
 };
@@ -62,12 +118,9 @@ const cancel = (id_dat_lich) => {
 };
 
 const remove = (id_dat_lich) => {
-    return prisma.dat_lich.update({
-        where: { id_dat_lich },
-        data: {
-            is_deleted: true,
-        },
-    });
+  return prisma.dat_lich.delete({
+    where: { id_dat_lich },
+  });
 };
 
 const getByDoctorAndDate = (id_bac_si, date) => {

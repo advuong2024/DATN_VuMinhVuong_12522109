@@ -19,9 +19,10 @@ function normalize(body = {}) {
 
 exports.getAll = async (_req, res) => {
   try {
-    const rows = await DonThuoc.getAll(); // model đã filter is_deleted
+    const rows = await DonThuoc.getAll();
     res.json(rows);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -32,12 +33,13 @@ exports.getById = async (req, res) => {
     if (!Number.isInteger(id))
       return res.status(400).json({ error: "id không hợp lệ" });
 
-    const row = await DonThuoc.getById(id); // model đã filter is_deleted
+    const row = await DonThuoc.getById(id);
     if (!row)
       return res.status(404).json({ error: "Không tìm thấy" });
 
     res.json(row);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -48,6 +50,7 @@ exports.insert = async (req, res) => {
     const created = await DonThuoc.insert(payload);
     res.status(201).json(created);
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -63,6 +66,7 @@ exports.update = async (req, res) => {
     await DonThuoc.update(id, payload);
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -76,6 +80,7 @@ exports.delete = async (req, res) => {
     await DonThuoc.remove(id);
     res.json({ message: "Xóa thành công" });
   } catch (err) {
+    console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };

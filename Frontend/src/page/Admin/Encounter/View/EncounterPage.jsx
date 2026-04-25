@@ -63,11 +63,11 @@ export default function BookingManagement() {
   const navigate = useNavigate();
 
   const columns = [
-    { title: "Customer Name", dataIndex: "name", align: "left", width: 190 },
+    { title: "Customer Name", dataIndex: "name", align: "left", width: 185 },
     { title: "Phone Number", dataIndex: "phone", align: "left", width: 170 },
     { title: "Specialty", dataIndex: "specialty", align: "left", width: 200, ellipsis: true},
     { title: "Time", dataIndex: "time", align: "center", width: 95 },
-    { title: "Doctor name", dataIndex: "doctor", align: "left", width: 190 },
+    { title: "Doctor name", dataIndex: "doctor", align: "left", width: 185 },
     {
       title: "Status",
       dataIndex: "status",

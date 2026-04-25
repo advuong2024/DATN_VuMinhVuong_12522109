@@ -9,71 +9,94 @@ import {
   Modal, 
   Descriptions,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
 import { EyeOutlined } from "@ant-design/icons";
-
-const STATUS_COLORS = {
-  Pending: "#faad14",
-  Confirmed: "#52c41a",
-  Done: "#1890ff",
-  Cancelled: "#ff4d4f",
-}
-
-const STATUS_OPTIONS = [
-  { label: "Pending", value: "CHO", color: "#faad14" },
-  { label: "Confirmed", value: "XAC_NHAN", color: "#52c41a" },
-  { label: "Done", value: "HOAN_THANH", color: "#1890ff" },
-  { label: "Cancelled", value: "HUY", color: "#ff4d4f" },
-]
-
-const mockData = [
-  {
-    key: "1",
-    name: "Nguyễn Văn Anh",
-    phone: "0123456789",
-    specialty: "Khám tổng quát",
-    date: "2026-04-15",
-    time: "09:00",
-    doctor: "Nguyễn Văn Anh",
-    status: "CHO",
-  },
-  {
-    key: "2",
-    name: "Nguyễn Văn Anh",
-    phone: "0123456789",
-    specialty: "Khám tổng quát và xét nghiệm máu, nước tiểu",
-    date: "2026-04-15",
-    time: "09:00",
-    doctor: "Nguyễn Văn Anh",
-    status: "XAC_NHAN",
-  },
-];
+import { getBookings } from "../Api/BookingApi"
+import { STATUS_COLORS, STATUS_OPTIONS } from "../Constants/booking_option";
 
 export default function BookingManagement() {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [openView, setOpenView] = useState(false);
   const [viewRecord, setViewRecord] = useState(null);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState(null);
+  const [filters, setFilters] = useState({
+    search: "",
+    status: null,
+    startDate: null,
+    endDate: null,
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      applyFilter({ search });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const fetchData = async (filters = {}) => {
+    try {
+      setLoading(true);
+
+      const res = await getBookings({
+        ...filters,
+        startDate: filters.startDate
+          ? dayjs(filters.startDate).format("YYYY-MM-DD")
+          : undefined,
+        endDate: filters.endDate
+          ? dayjs(filters.endDate).format("YYYY-MM-DD")
+          : undefined,
+      });
+
+      const formatted = res.data.map((item) => ({
+        key: item.id_dat_lich,
+        name: item.benh_nhan?.ten_benh_nhan,
+        phone: item.benh_nhan?.so_dien_thoai,
+        specialty: item.chuyen_khoa?.ten_chuyen_khoa,
+        date: item.thoi_gian,
+        time: item.thoi_gian
+          ? dayjs(item.thoi_gian).format("HH:mm")
+          : "",
+        doctor: item.bac_si?.ten_nhan_vien,
+        status: item.trang_thai,
+      }));
+
+      setData(formatted);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns = [
     { title: "Customer Name", dataIndex: "name", align: "left", width: 180 },
     { title: "Phone Number", dataIndex: "phone", align: "left", width: 170 },
-    { title: "Specialty", dataIndex: "specialty", align: "left", width: 190, ellipsis: true},
-    { title: "Date",  dataIndex: "date", align: "center", render: (date) => dayjs(date).format("DD/MM/YYYY"), width: 100 },
+    { title: "Specialty", dataIndex: "specialty", align: "left", width: 180, ellipsis: true},
+    { title: "Date",  dataIndex: "date", align: "center", 
+      render: (date) => date ? dayjs(date).format("DD/MM/YYYY") : "-", width: 100 
+    },
     { title: "Time", dataIndex: "time", align: "center", width: 90 },
     { title: "Doctor name", dataIndex: "doctor", align: "left", width: 180 },
     {
       title: "Status",
       dataIndex: "status",
       align: "center",
-      width: 140,
+      width: 150,
       render: (status, record) => (
         <Select
           value={status}
-          style={{ width: 120 }}
+          style={{ width: 130 }}
           onChange={(value) => handleChangeStatus(value, record)}
           options={STATUS_OPTIONS.map((opt) => ({
             value: opt.value,
@@ -112,6 +135,13 @@ export default function BookingManagement() {
     setData(newData);
   };
 
+  const applyFilter = (newFilter) => {
+    const updated = { ...filters, ...newFilter };
+
+    setFilters(updated);
+    fetchData(updated);
+  };
+
   const handleShow = (record) => {
     setViewRecord(record);
     setOpenView(true);
@@ -123,14 +153,25 @@ export default function BookingManagement() {
 
         <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
           <Col span={5}>
-            <Input placeholder="Search by name / phone" />
+            <Input
+              placeholder="Search by name / phone"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                applyFilter({ search: e.target.value });
+              }}
+            />
           </Col>
 
           <Col span={3}>
             <Select
               placeholder="Select Status"
-              style={{ width: "100%" }}
               allowClear
+              value={status}
+              onChange={(value) => {
+                setStatus(value);
+                applyFilter({ status: value });
+              }}
               options={STATUS_OPTIONS}
             />
           </Col>
@@ -141,7 +182,10 @@ export default function BookingManagement() {
               style={{ width: "100%" }}
               format="DD/MM/YYYY"
               value={startDate}
-              onChange={(date) => setStartDate(date)}
+              onChange={(date) => {
+                setStartDate(date);
+                applyFilter({ startDate: date });
+              }}
             />
           </Col>
 
@@ -151,7 +195,10 @@ export default function BookingManagement() {
               style={{ width: "100%" }}
               format="DD/MM/YYYY"
               value={endDate}
-              onChange={(date) => setEndDate(date)}
+              onChange={(date) => {
+                setEndDate(date);
+                applyFilter({ endDate: date });
+              }}
             />
           </Col>
 
@@ -164,7 +211,21 @@ export default function BookingManagement() {
                 backgroundColor: startDate || endDate ? "#af050e" : "#d45258",
                 color: startDate || endDate ? "#fff" : "#fff",
               }}
-              onClick={() => { setStartDate(null); setEndDate(null); }}
+              onClick={() => {
+                const reset = {
+                  search: "",
+                  status: null,
+                  startDate: null,
+                  endDate: null,
+                };
+
+                setSearch("");
+                setStatus(null);
+                setStartDate(null);
+                setEndDate(null);
+
+                fetchData(reset);
+              }}
             >
               CLEAR
             </Button>
@@ -202,7 +263,7 @@ export default function BookingManagement() {
               </Descriptions.Item>
 
               <Descriptions.Item label="Doctor Name">
-                {viewRecord.name}
+                {viewRecord.doctor}
               </Descriptions.Item>
 
               <Descriptions.Item label="Status">

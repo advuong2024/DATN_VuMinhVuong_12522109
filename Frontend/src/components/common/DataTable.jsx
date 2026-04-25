@@ -1,5 +1,7 @@
-import { Table } from "antd";
+import { Table, Empty } from "antd";
 import { useState } from "react";
+import { InboxOutlined } from "@ant-design/icons";
+
 
 export default function DataTable({
   columns = [],
@@ -15,7 +17,7 @@ export default function DataTable({
 
   const sttColumn = {
     title: "STT",
-    width: 60,
+    width: 50,
     align: "center",
     render: (_, __, index) =>
       (pagination.current - 1) * pagination.pageSize + index + 1,
@@ -47,6 +49,7 @@ export default function DataTable({
       dataSource={data}
       loading={loading}
       rowKey={(record) => record.id || record.key}
+      scroll={{ y: "calc(100vh - 350px)" }}
 
       bordered
       size="middle"
@@ -80,7 +83,18 @@ export default function DataTable({
         showTotal: (total) => `Total Pages: ${Math.ceil(total / pagination.pageSize)}`,
       }}
 
-      locale={{ emptyText: "Không có dữ liệu" }}
+      locale={{
+        emptyText: (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span style={{ color: "#888", fontWeight: 500 }}>
+                No data
+              </span>
+            }
+          />
+        ),
+      }}
     />
   );
 }

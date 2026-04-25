@@ -3,7 +3,6 @@ import { Layout, theme } from "antd";
 const { Header } = Layout;
 
 export default function AppHeader() {
-  console.log("HEADER ĐANG CHẠY");
   const { token } = theme.useToken(); 
 
   return (

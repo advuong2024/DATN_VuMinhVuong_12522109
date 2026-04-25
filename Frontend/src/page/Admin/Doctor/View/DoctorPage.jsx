@@ -101,7 +101,7 @@ export default function PatientManagement() {
   };
 
   const columns = [
-    { title: "Full Name", dataIndex: "name", width: 200, },
+    { title: "Full Name", dataIndex: "name", width: 190, },
     {
       title: "Date of Birth",
       dataIndex: "dob",

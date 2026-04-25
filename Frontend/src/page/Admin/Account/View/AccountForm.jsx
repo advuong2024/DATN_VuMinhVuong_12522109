@@ -1,44 +1,47 @@
 import { Form, Input, Button, Select, Switch, Space } from "antd";
 import { useEffect, useState } from "react";
-
-const ROLE_OPTIONS = [
-  { label: "Admin", value: "ADMIN" },
-  { label: "Staff", value: "STAFF" },
-];
+import { getEmployeesNoAccount } from "../Api/AccountApi";
+import { ROLE_OPTIONS } from "../Constants/account_option"
 
 export default function AccountForm({ initialValues, onSubmit }) {
   const [form] = Form.useForm();
   const [employeeOptions, setEmployeeOptions] = useState([]);
 
   useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue({
-        ...initialValues,
-        status: initialValues.status === "ACTIVE",
-      });
-    } else {
-      form.resetFields();
-    }
-  }, [initialValues, form]);
+    const fetchEmployees = async () => {
+      try {
+        const res = await getEmployeesNoAccount();
+
+        const employees = Array.isArray(res.data) ? res.data : [];
+
+        const options = employees.map(emp => ({
+          label: emp.ten_nhan_vien,
+          value: String(emp.id_nhan_vien),
+        }));
+
+        setEmployeeOptions(options);
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   useEffect(() => {
-    const data = [
-        { id: "1", name: "Nguyễn Văn A" },
-        { id: "2", name: "Trần Thị B" },
-    ];
-
-    setEmployeeOptions(
-        data.map(emp => ({
-        label: emp.name,
-        value: emp.id,
-        }))
-    );
-  }, []);
+    if (initialValues && employeeOptions.length > 0) {
+      form.setFieldsValue({
+        ...initialValues,
+        employeeId: String(initialValues.employeeId),
+      });
+    }
+  }, [initialValues, employeeOptions]);
 
   const handleFinish = (values) => {
     const payload = {
       ...values,
-      status: values.status ? "ACTIVE" : "INACTIVE",
+      trang_thai: values.status ? "HOAT_DONG" : "KHOA",
     };
 
     onSubmit(payload);
@@ -57,10 +60,11 @@ export default function AccountForm({ initialValues, onSubmit }) {
         rules={[{ required: true, message: "Please select an employee" }]}
       >
         <Select
-            placeholder="Select Employee"
-            options={employeeOptions}
-            showSearch
-            optionFilterProp="label"
+          placeholder="Select Employee"
+          options={employeeOptions}
+          showSearch
+          optionFilterProp="label"
+          disabled={!!initialValues}
         />
       </Form.Item>
 

@@ -7,7 +7,6 @@ import { Outlet } from "react-router-dom";
 const { Content } = Layout;
 
 export default function MainLayout() {
-  console.log("MAIN LAYOUT");
   const [collapsed, setCollapsed] = useState(false);
   const { token } = theme.useToken();
 
