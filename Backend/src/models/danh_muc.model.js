@@ -1,13 +1,18 @@
 const {PrismaClient} = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const getAll = () => {
-    return prisma.danh_muc.findMany({
-        orderBy: {
-            id_danh_muc: 'desc',
-        },
-        where: { is_deleted: false },
-    });
+const getAll = (filters = {}) => {
+  const { type } = filters;
+
+  return prisma.danh_muc.findMany({
+    where: {
+      is_deleted: false,
+      ...(type && { loai: type }),
+    },
+    orderBy: {
+      id_danh_muc: "desc",
+    },
+  });
 };
 
 const getById = (id_danh_muc) => {

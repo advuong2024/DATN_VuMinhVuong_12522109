@@ -9,7 +9,7 @@ function normalize(body = {}) {
       : Number(v);
 
   data.id_benh_nhan = toNumOrNull(data.id_benh_nhan);
-  data.id_nhan_vien = toNumOrNull(data.id_nhan_vien);
+  data.id_bac_si = toNumOrNull(data.id_bac_si);
 
   ["trieu_chung", "chan_doan", "ghi_chu"].forEach((k) => {
     if (typeof data[k] === "string") data[k] = data[k].trim();
@@ -53,6 +53,15 @@ exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);
 
+    const { id_benh_nhan, id_nhan_vien } = payload;
+
+    if (!id_benh_nhan) {
+      throw new Error("Thiếu id_benh_nhan");
+    }
+    if (!id_nhan_vien) {
+      throw new Error("Thiếu id_bac_si");
+    }
+
     const created = await PhieuKham.insert(payload);
 
     res.status(201).json(created);
@@ -70,11 +79,22 @@ exports.update = async (req, res) => {
       return res.status(400).json({ error: "id không hợp lệ" });
     }
 
+    const existing = await PhieuKham.findById(id);
+    if (!existing) {
+      return res.status(404).json({ error: "Không tìm thấy phiếu khám" });
+    }
+
     const payload = normalize(req.body);
+    if (!payload) {
+      return res.status(400).json({ error: "Dữ liệu không hợp lệ" });
+    }
 
-    await PhieuKham.update(id, payload);
+    const updated = await PhieuKham.update(id, payload);
 
-    res.json({ message: "Cập nhật thành công" });
+    res.json({
+      message: "Cập nhật thành công",
+      data: updated,
+    });
   } catch (err) {
     console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });

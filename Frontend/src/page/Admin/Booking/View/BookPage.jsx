@@ -13,8 +13,9 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
 import { EyeOutlined } from "@ant-design/icons";
-import { getBookings } from "../Api/BookingApi"
+import { getBookings, updateStatus } from "../Api/BookingApi"
 import { STATUS_COLORS, STATUS_OPTIONS } from "../Constants/booking_option";
+import { toast } from "react-toastify";
 
 export default function BookingManagement() {
   const [data, setData] = useState([]);
@@ -25,6 +26,7 @@ export default function BookingManagement() {
   const [viewRecord, setViewRecord] = useState(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(null);
+  const [updating, setUpdating] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     status: null,
@@ -125,14 +127,23 @@ export default function BookingManagement() {
     },
   ];
 
-  const handleChangeStatus = (value, record) => {
-    const newData = data.map((item) =>
-        item.key === record.key
-        ? { ...item, status: value }
-        : item
-    );
+  const handleChangeStatus = async (value, record) => {
+    try {
+      setUpdating(true);
 
-    setData(newData);
+      const newData = data.map((item) =>
+        item.key === record.key ? { ...item, status: value } : item
+      );
+      setData(newData);
+
+      await updateStatus(record.key, value);
+      toast.success("Updated!");
+    } catch (err) {
+      toast.error("Update failed");
+      fetchData(filters);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const applyFilter = (newFilter) => {

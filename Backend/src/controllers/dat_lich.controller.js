@@ -28,6 +28,16 @@ exports.getAll = async (req, res) => {
   }
 };
 
+exports.getAllDaDen = async (req, res) => {
+  try {
+    const rows = await LichHen.getAllDaDen(req.query);
+    res.json(rows);
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getById = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -97,19 +107,17 @@ exports.update = async (req, res) => {
   }
 };
 
-exports.cancel = async (req, res) => {
+exports.updateStatus = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (!Number.isInteger(id)) {
-      return res.status(400).json({ error: "id không hợp lệ" });
-    }
+    const { trang_thai } = req.body;
 
-    await LichHen.cancel(id);
+    const result = await LichHen.updateStatus(id, trang_thai);
 
-    res.json({ message: "Đã hủy lịch hẹn" });
+    res.json(result);
   } catch (err) {
     console.error("🔥 ERROR:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: "Update failed" });
   }
 };
 

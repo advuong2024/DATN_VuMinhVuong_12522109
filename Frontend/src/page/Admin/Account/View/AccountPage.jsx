@@ -146,14 +146,14 @@ export default function AccountManagement() {
             style={{ width: 130 }}
             onChange={(value) => handleChangeRole(value, record)}
             options={ROLE_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: opt.label
+              value: opt.value,
+              label: opt.label
             }))}
             labelRender={(option) => {
-                const opt = ROLE_OPTIONS.find(o => o.value === option.value);
-                return (
-                  opt?.label
-                );
+              const opt = ROLE_OPTIONS.find(o => o.value === option.value);
+              return (
+                opt?.label
+              );
             }}
         />
       ),

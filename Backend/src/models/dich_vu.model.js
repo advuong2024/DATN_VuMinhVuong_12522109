@@ -3,6 +3,20 @@ const prisma = new PrismaClient();
 
 const getAll = () => {
     return prisma.dich_vu.findMany({
+        include: {
+            danh_muc: {
+                select: {
+                    id_danh_muc: true,
+                    ten_danh_muc: true,
+                }
+            },
+            chuyen_khoa: {
+                select: {
+                    id_chuyen_khoa: true,
+                    ten_chuyen_khoa: true,
+                }
+            }
+        },
         orderBy: {
             id_dich_vu: 'desc',
         },

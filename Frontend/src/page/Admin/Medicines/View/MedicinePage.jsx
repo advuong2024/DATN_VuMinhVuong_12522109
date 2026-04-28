@@ -8,41 +8,68 @@ import {
   Descriptions,
   Form,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "@/components/common/DataTable";
 import MedicineForm from "./MedicineForm";
-import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, DeleteOutlined, } from "@ant-design/icons";
 import { UNIT_OPTIONS } from "../constants/medicine_option";
-
-const mockData = [
-  {
-    key: "1",
-    name: "Paracetamol",
-    price: 50000,
-    quantity: 100,
-    unit: "VIEN",
-    expiryDate: "2026-12-31",
-    category: "GIAM_DAU",
-  },
-];
-
-export const CATEGORY_OPTIONS = [
-  { label: "Kháng sinh", value: "KHANG_SINH" },
-  { label: "Giảm đau", value: "GIAM_DAU" },
-  { label: "Vitamin", value: "VITAMIN" },
-];
+import {
+  getMedicines, createMedicine,
+  updateMedicine, deleteMedicine,
+} from "../Api/MedicinesApi";
+import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 export default function MedicineManagement() {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewRecord, setViewRecord] = useState(null);
   const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const fetchData = async () => {
+    try {
+      const res = await getMedicines();
+
+      const formatted = res.data.map((item) => ({
+        key: item.id_thuoc,
+        name: item.ten_thuoc,
+        price: item.gia,
+        quantity: item.so_luong,
+        unit: item.don_vi_tinh?.toUpperCase(),
+        expiryDate: item.han_su_dung ? dayjs(item.han_su_dung) : null,
+        category: item.danh_muc?.ten_danh_muc,
+      }));
+
+      setData(formatted);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filteredData = data.filter((item) => {
+    const keyword = searchText.toLowerCase();
+
+    return (
+      item.name?.toLowerCase().includes(keyword) ||
+      item.category?.toLowerCase().includes(keyword)
+    );
+  });
 
   const handleAdd = () => {
     setEditingRecord(null);
@@ -52,7 +79,12 @@ export default function MedicineManagement() {
 
   const handleEdit = (record) => {
     setEditingRecord(record);
-    form.setFieldsValue(record);
+
+    form.setFieldsValue({
+      ...record,
+      expiryDate: record.expiryDate ? dayjs(record.expiryDate) : null,
+    });
+
     setOpen(true);
   };
 
@@ -62,24 +94,34 @@ export default function MedicineManagement() {
   };
 
   const handleDelete = (record) => {
-    setData((prev) => prev.filter((item) => item.key !== record.key));
+    Modal.confirm({
+      title: "Xóa thuốc?",
+      content: "Bạn có chắc muốn xóa không?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      onOk: async () => {
+        await deleteMedicine(record.key);
+        fetchData();
+      },
+    });
   };
 
-  const handleSubmit = (values) => {
-    if (editingRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.key === editingRecord.key ? { ...item, ...values } : item
-        )
-      );
-    } else {
-      setData((prev) => [
-        ...prev,
-        { key: Date.now().toString(), ...values },
-      ]);
-    }
+  const handleSubmit = async (values) => {
+    try {
+      if (editingRecord) {
+        await updateMedicine(editingRecord.key, values);
+        toast.success("Update!")
+      } else {
+        await createMedicine(values);
+        toast.success("Created!")
+      }
 
-    setOpen(false);
+      await fetchData();
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error!");
+    }
   };
 
   const columns = [
@@ -89,30 +131,35 @@ export default function MedicineManagement() {
       title: "Price",
       dataIndex: "price",
       width: 150,
-      render: (p) => `${p.toLocaleString()} VND`,
+      render: (p) => (p ? `${Number(p).toLocaleString()} VND` : "0 VND"),
     },
 
     { title: "Quantity", dataIndex: "quantity", width: 120 },
 
     { 
-        title: "Unit", 
-        dataIndex: "unit", 
-        width: 120, 
-        render: (u) => UNIT_OPTIONS.find((x) => x.value === u)?.label,
+      title: "Unit", 
+      dataIndex: "unit", 
+      width: 120, 
+      render: (u) => {
+        const found = UNIT_OPTIONS.find(
+          (x) => x.value === u?.toUpperCase()
+        );
+        return found?.label || u || "-";
+      }
     },
 
     {
       title: "Expiry Date",
       dataIndex: "expiryDate",
       width: 150,
+      align: "center",
+      render: (d) => d ? dayjs(d).format("DD/MM/YYYY") : "-"
     },
 
     {
       title: "Category",
       dataIndex: "category",
       width: 150,
-      render: (c) =>
-        CATEGORY_OPTIONS.find((x) => x.value === c)?.label,
     },
 
     {
@@ -144,7 +191,11 @@ export default function MedicineManagement() {
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={6}>
-          <Input placeholder="Search medicine..." />
+          <Input
+            placeholder="Search by medicine / category"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
         </Col>
 
         <Col>
@@ -154,7 +205,7 @@ export default function MedicineManagement() {
         </Col>
       </Row>
 
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={filteredData} />
 
       <Modal
         centered
@@ -185,7 +236,10 @@ export default function MedicineManagement() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Price">
-              {viewRecord.price.toLocaleString()} VND
+              {viewRecord.price
+                ? `${Number(viewRecord.price).toLocaleString()} VND`
+                : "—"
+              }
             </Descriptions.Item>
 
             <Descriptions.Item label="Quantity">
@@ -197,15 +251,11 @@ export default function MedicineManagement() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Expiry Date">
-              {viewRecord.expiryDate}
+              {dayjs(viewRecord.expiryDate).format("YYYY-MM-DD")}
             </Descriptions.Item>
 
             <Descriptions.Item label="Category">
-              {
-                CATEGORY_OPTIONS.find(
-                  (x) => x.value === viewRecord.category
-                )?.label
-              }
+              { viewRecord.category }
             </Descriptions.Item>
           </Descriptions>
         )}

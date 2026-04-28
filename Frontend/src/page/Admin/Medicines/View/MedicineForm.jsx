@@ -1,22 +1,39 @@
 import { Form, Input, Select, Button, Space, Row, Col, DatePicker } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { UNIT_OPTIONS } from "../constants/medicine_option";
-
-export const CATEGORY_OPTIONS = [
-  { label: "Kháng sinh", value: "KHANG_SINH" },
-  { label: "Giảm đau", value: "GIAM_DAU" },
-  { label: "Vitamin", value: "VITAMIN" },
-];
+import { getCategory } from "../Api/MedicinesApi";
+import dayjs from "dayjs";
 
 export default function MedicineForm({ form, initialValues, onSubmit }) {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (initialValues) {
-      form.setFieldsValue(initialValues);
+      form.setFieldsValue({
+        ...initialValues,
+        expiryDate: initialValues.expiryDate
+          ? dayjs(initialValues.expiryDate)
+          : null,
+      });
     } else {
       form.resetFields();
     }
   }, [initialValues, form]);
+
+  const fetchCategories = async () => {
+    const res = await getCategory();
+  
+    const options = res.data.map((item) => ({
+      label: item.ten_danh_muc,
+      value: item.id_danh_muc,
+    }));
+  
+    setCategories(options);
+  };
 
   const handleFinish = (values) => {
     onSubmit({
@@ -96,7 +113,7 @@ export default function MedicineForm({ form, initialValues, onSubmit }) {
           >
             <Select
               placeholder="Select a category"
-              options={CATEGORY_OPTIONS}
+              options={categories}
             />
           </Form.Item>
         </Col>

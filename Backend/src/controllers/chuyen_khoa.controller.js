@@ -7,7 +7,10 @@ function normalize(body = {}) {
     if (typeof data[k] === "string") data[k] = data[k].trim();
   });
 
-  return data;
+  return {
+    ten_chuyen_khoa: body.name?.trim(),
+    mo_ta: body.description?.trim(),
+  };
 }
 
 exports.getAll = async (_req, res) => {

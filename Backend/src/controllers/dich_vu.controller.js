@@ -1,21 +1,40 @@
 const DichVu = require("../models/dich_vu.model");
 
 function normalize(body = {}) {
-  const data = { ...body };
+  const name = typeof body.name === "string" ? body.name.trim() : undefined;
+  const description =
+    typeof body.description === "string"
+      ? body.description.trim()
+      : undefined;
 
-  ["ten", "mo_ta"].forEach((k) => {
-    if (typeof data[k] === "string") data[k] = data[k].trim();
-  });
+  const price =
+    body.price !== undefined && body.price !== ""
+      ? Number(body.price)
+      : null;
 
-  if (data.gia !== undefined) {
-    data.gia = Number(data.gia);
-  }
+  const categoryId =
+    body.category !== undefined ? Number(body.category) : undefined;
 
-  if (data.id_danh_muc !== undefined) {
-    data.id_danh_muc = Number(data.id_danh_muc);
-  }
+  const specialtyId =
+    body.specialty !== undefined ? Number(body.specialty) : undefined;
 
-  return data;
+  return {
+    ten_dich_vu: body.name?.trim(),
+    gia: body.price ? Number(body.price) : null,
+    mo_ta: body.description?.trim(),
+
+    ...(categoryId && !isNaN(categoryId) && {
+      danh_muc: {
+        connect: { id_danh_muc: categoryId },
+      },
+    }),
+
+    ...(specialtyId && !isNaN(specialtyId) && {
+      chuyen_khoa: {
+        connect: { id_chuyen_khoa: specialtyId },
+      },
+    }),
+  };
 }
 
 exports.getAll = async (_req, res) => {
@@ -49,9 +68,9 @@ exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);
 
-    if (!payload.ten || !payload.gia || !payload.id_danh_muc) {
+    if (!payload.ten_dich_vu || !payload.gia || !payload.danh_muc || !payload.chuyen_khoa) {
       return res.status(400).json({
-        error: "Thiếu thông tin bắt buộc (ten, gia, id_danh_muc)",
+        error: "Thiếu thông tin bắt buộc (ten, gia, id_danh_muc, id_chuyen_khoa)",
       });
     }
 

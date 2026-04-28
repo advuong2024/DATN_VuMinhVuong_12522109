@@ -7,12 +7,18 @@ function normalize(body = {}) {
     if (typeof data[k] === "string") data[k] = data[k].trim();
   });
 
-  return data;
+  return {
+    ten_danh_muc: body.name?.trim(),
+    mo_ta: body.description?.trim(),
+    loai: body.type,
+  };
 }
 
-exports.getAll = async (_req, res) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await DanhMuc.getAll();
+    const { type } = req.query;
+    const rows = await DanhMuc.getAll({ type });
+
     res.json(rows);
   } catch (err) {
     console.error("🔥 ERROR:", err);

@@ -1,26 +1,30 @@
 const NhanVien = require("../models/nhan_vien.model");
 
 function normalize(body = {}) {
-  const data = { ...body };
+  const toDateOrNull = (v) => {
+    if (!v) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  };
 
-  const toNumOrNull = (v) =>
-    v === undefined || v === null || v === "" || Number.isNaN(Number(v))
-      ? null
-      : Number(v);
+  const trim = (v) => (typeof v === "string" ? v.trim() : v);
 
-  data.id_nhan_vien = toNumOrNull(data.id_nhan_vien);
+  const specialtyId = body.specialty ? Number(body.specialty) : null;
 
-  [
-    "ten_nhan_vien",
-    "so_dien_thoai",
-    "dia_chi",
-    "chuc_vu",
-    "chuyen_khoa"
-  ].forEach((k) => {
-    if (typeof data[k] === "string") data[k] = data[k].trim();
-  });
+  return {
+    ten_nhan_vien: trim(body.name),
+    ngay_sinh: toDateOrNull(body.dob),
+    gioi_tinh: trim(body.gender),
+    so_dien_thoai: trim(body.phone),
+    dia_chi: trim(body.address),
+    chuc_vu: trim(body.position),
 
-  return data;
+    ...(specialtyId && {
+      chuyen_khoa: {
+        connect: { id_chuyen_khoa: specialtyId },
+      },
+    }),
+  };
 }
 
 exports.getAll = async (_req, res) => {

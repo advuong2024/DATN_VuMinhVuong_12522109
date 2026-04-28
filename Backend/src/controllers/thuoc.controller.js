@@ -1,27 +1,48 @@
 const Thuoc = require("../models/thuoc.model");
 
 function normalize(body = {}) {
-  const data = { ...body };
+  const name =
+    typeof body.name === "string" ? body.name.trim() : undefined;
 
-  const toNumOrNull = (v) =>
-    v === undefined || v === null || v === "" || Number.isNaN(Number(v))
-      ? null
-      : Number(v);
+  const price =
+    body.price !== undefined && body.price !== ""
+      ? Number(body.price)
+      : null;
 
-  data.id_danh_muc = toNumOrNull(data.id_danh_muc);
-  data.gia_thuoc = toNumOrNull(data.gia_thuoc);
-  data.so_luong = toNumOrNull(data.so_luong);
+  const quantity =
+    body.quantity !== undefined && body.quantity !== ""
+      ? Number(body.quantity)
+      : null;
 
-  ["ten_thuoc", "don_vi_tinh"].forEach((k) => {
-    if (typeof data[k] === "string") data[k] = data[k].trim();
-  });
+  const unit =
+    typeof body.unit === "string" ? body.unit.trim().toUpperCase() : undefined;
 
-  return data;
+  const expiryDate =
+    body.expiryDate ? new Date(body.expiryDate) : undefined;
+
+  const categoryId =
+    body.category !== undefined && body.category !== ""
+      ? Number(body.category)
+      : undefined;
+
+  return {
+    ten_thuoc: name,
+    gia: price,
+    so_luong: quantity,
+    don_vi_tinh: unit,
+    han_su_dung: expiryDate,
+
+    ...(categoryId && !isNaN(categoryId) && {
+      danh_muc: {
+        connect: { id_danh_muc: categoryId },
+      },
+    }),
+  };
 }
 
 exports.getAll = async (_req, res) => {
   try {
-    const rows = await Thuoc.getAll();
+    const rows = await Thuoc.getALL();
     res.json(rows);
   } catch (err) {
     console.error("🔥 ERROR:", err);

@@ -8,14 +8,17 @@ import {
   Col,
   Modal, 
   Descriptions,
+  Tag,
 } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
 import { EyeOutlined } from "@ant-design/icons";
 import BookingForm from "./EncounterForm";
 import { useNavigate } from "react-router-dom";
 import { encounterUrl } from "@/routes/urls";
+import { getBookings } from "../Api/BookingApi"
+import { createEncounter } from "../Api/EncounterApi"
 
 const STATUS_COLORS = {
   Pending: "#faad14",
@@ -31,36 +34,49 @@ const STATUS_OPTIONS = [
   { label: "Cancelled", value: "HUY", color: "#ff4d4f" },
 ]
 
-const mockData = [
-  {
-    key: "1",
-    name: "Nguyễn Văn Anh",
-    phone: "0123456789",
-    specialty: "Khám tổng quát",
-    date: "2026-04-15",
-    time: "09:00",
-    doctor: "Nguyễn Văn Anh",
-    status: "CHO",
-  },
-  {
-    key: "2",
-    name: "Nguyễn Văn Anh",
-    phone: "0123456789",
-    specialty: "Khám tổng quát và xét nghiệm máu, nước tiểu",
-    date: "2026-04-15",
-    time: "09:00",
-    doctor: "Nguyễn Văn Anh",
-    status: "XAC_NHAN",
-  },
-];
-
 export default function BookingManagement() {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [openCreate, setOpenCreate] = useState(false);
   const [viewRecord, setViewRecord] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async (filters = {}) => {
+    try {
+      setLoading(true);
+  
+      const res = await getBookings({
+        ...filters,});
+  
+      const formatted = res.data.map((item) => ({
+        key: item.id_dat_lich,
+        bookingId: item.id_dat_lich,
+        name: item.benh_nhan?.ten_benh_nhan,
+        patientId: item.benh_nhan?.id_benh_nhan,
+        phone: item.benh_nhan?.so_dien_thoai,
+        specialty: item.chuyen_khoa?.ten_chuyen_khoa,
+        date: item.thoi_gian,
+        time: item.thoi_gian
+          ? dayjs(item.thoi_gian).format("HH:mm")
+          : "",
+        doctor: item.bac_si?.ten_nhan_vien,
+        doctorId: item.bac_si?.id_nhan_vien,
+        phieu_kham: item.phieu_kham,
+      }));
+  
+      setData(formatted);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns = [
     { title: "Customer Name", dataIndex: "name", align: "left", width: 185 },
@@ -70,52 +86,89 @@ export default function BookingManagement() {
     { title: "Doctor name", dataIndex: "doctor", align: "left", width: 185 },
     {
       title: "Status",
-      dataIndex: "status",
       align: "center",
       width: 150,
-      render: (status, record) => (
-        <Select
-          value={status}
-          style={{ width: 130 }}
-          onChange={(value) => handleChangeStatus(value, record)}
-          options={STATUS_OPTIONS.map((opt) => ({
-            value: opt.value,
-            label: <span style={{ color: opt.color }}>{opt.label}</span>,
-          }))}
-          labelRender={(option) => {
-            const opt = STATUS_OPTIONS.find(o => o.value === option.value);
-            return (
-              <span style={{ color: opt?.color }}>
-                {opt?.label}
-              </span>
-            );
-          }}
-        />
-      ),
+      render: (_, record) => {
+        const pk = record.phieu_kham;
+
+        if (!pk) {
+          return <Tag color="orange">Chờ khám</Tag>;
+        }
+
+        if (pk.trang_thai === "DANG_KHAM") {
+          return <Tag color="blue">Đang khám</Tag>;
+        }
+
+        if (pk.trang_thai === "HOAN_THANH") {
+          return <Tag color="green">Đã khám xong</Tag>;
+        }
+
+        return null;
+      },
     },
     {
       title: "Actions",
       align: "center",
-      render: (_, record) => (
-        <Button 
+      render: (_, record) => {
+        const pk = record.phieu_kham;
+        const isDone = pk?.trang_thai === "HOAN_THANH";
+
+        return (
+          <Button
             type="primary"
-            onClick={() => navigate(`${encounterUrl}/${record.key}`, { state: record })}
-        >
+            disabled={isDone}
+            onClick={() => handleCreateEncounter(record)}
+          >
             Examination
-        </Button>
-      ),
-      width: 150,
+          </Button>
+        );
+      },
     },
   ];
 
-  const handleChangeStatus = (value, record) => {
-    const newData = data.map((item) =>
-        item.key === record.key
-        ? { ...item, status: value }
-        : item
-    );
+  const handleCreateEncounter = async (record) => {
+    try {
+      const pk = record.phieu_kham;
 
-    setData(newData);
+      if (pk) {
+        navigate(`${encounterUrl}/${record.patientId}`, {
+          state: {
+            ...record,
+            bookingId: record.bookingId,
+            doctorId: record.doctorId,
+            encounterId: pk.id_phieu_kham,
+          },
+        });
+        return;
+      }
+
+      const res = await createEncounter({
+        id_benh_nhan: record.patientId,
+        id_nhan_vien: record.doctorId,
+        id_dat_lich: record.bookingId,
+      });
+
+      const newEncounter = res.data;
+
+      setData((prev) =>
+        prev.map((item) =>
+          item.key === record.key
+            ? { ...item, phieu_kham: newEncounter }
+            : item
+        )
+      );
+
+      navigate(`${encounterUrl}/${record.patientId}`, {
+        state: {
+          ...record,
+          bookingId: record.bookingId,
+          doctorId: record.doctorId,
+          encounterId: newEncounter.id_phieu_kham,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

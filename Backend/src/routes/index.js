@@ -9,7 +9,7 @@ router.use("/dat-lich", require("./dat_lich.route"));
 router.use("/phieu-kham", require("./phieu_kham.route"));
 router.use("/thanh-toan", require("./thanh_toan.route"));
 router.use("/thuoc", require("./thuoc.route"));
-router.use("/danh-muc-thuoc", require("./danh_muc.route"));
+router.use("/danh-muc", require("./danh_muc.route"));
 router.use("/don-thuoc", require("./don_thuoc.route"));
 router.use("/chi-tiet-don-thuoc", require("./chi_tiet_don_thuoc.route"));
 router.use("/chi-tiet-dich-vu", require("./chi_tiet_dich_vu.router"));

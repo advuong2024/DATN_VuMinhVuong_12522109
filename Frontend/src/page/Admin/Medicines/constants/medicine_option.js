@@ -12,4 +12,5 @@ export const UNIT_OPTIONS = [
   { label: "Gram", value: "GRAM" },
   { label: "Ml", value: "ML" },
   { label: "Lít", value: "LIT" },
+  { label: "Sợi", value: "SOI" },
 ];

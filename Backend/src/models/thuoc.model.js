@@ -3,6 +3,14 @@ const prisma = new PrismaClient();
 
 const getALL = () => {
     return prisma.thuoc.findMany({
+        include: {
+            danh_muc: {
+                select: {
+                    ten_danh_muc: true,
+                    id_danh_muc: true,
+                }
+            }
+        },
         orderBy: {
             id_thuoc: 'desc',
         },

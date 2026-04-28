@@ -16,7 +16,16 @@ function normalize(body = {}) {
       if (typeof data[k] === "string") data[k] = data[k].trim();
     });
 
-  return data;
+  return {
+    ten_benh_nhan: body.name,
+    ngay_sinh: body.dob ? new Date(body.dob) : null,
+    gioi_tinh: body.gender,
+    so_dien_thoai: body.phone,
+    CCCD: body.cccd,
+    email: body.email,
+    dia_chi: body.address,
+    tien_su_benh: body.medicalHistory,
+  };
 }
 
 exports.getAll = async (_req, res) => {

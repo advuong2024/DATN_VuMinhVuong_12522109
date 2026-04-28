@@ -12,9 +12,8 @@ import dayjs from "dayjs";
 import { useEffect } from "react";
 import { GENDER_OPTIONS } from "../Constants/customer_option";
 
-export default function PatientForm({ initialValues, onSubmit }) {
-  const [form] = Form.useForm();
-
+export default function PatientForm({ form, initialValues, onSubmit }) {
+  
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue({
@@ -24,12 +23,12 @@ export default function PatientForm({ initialValues, onSubmit }) {
     } else {
       form.resetFields();
     }
-  }, [initialValues, form]);
+  }, [initialValues]);
 
   const handleFinish = (values) => {
     const payload = {
       ...values,
-      dob: values.dob.format("YYYY-MM-DD"),
+      dob: values.dob ? values.dob.format("YYYY-MM-DD") : null,
     };
 
     onSubmit(payload);
@@ -81,7 +80,13 @@ export default function PatientForm({ initialValues, onSubmit }) {
               { pattern: /^[0-9]{10}$/, message: "10 digits" },
             ]}
           >
-            <Input placeholder="Enter phone" />
+            <Input
+              maxLength={10}
+              placeholder="Enter phone"
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) e.preventDefault();
+              }} 
+            />
           </Form.Item>
         </Col>
 
@@ -94,7 +99,13 @@ export default function PatientForm({ initialValues, onSubmit }) {
               { pattern: /^[0-9]{12}$/, message: "12 digits" },
             ]}
           >
-            <Input placeholder="Enter CCCD" />
+            <Input
+              maxLength={12}
+              placeholder="Enter CCCD"
+              onKeyPress={(e) => {
+                if (!/[0-9]/.test(e.key)) e.preventDefault();
+              }} 
+            />
           </Form.Item>
         </Col>
 

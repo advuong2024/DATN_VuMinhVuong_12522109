@@ -6,7 +6,12 @@
     where: { is_deleted: false },
     orderBy: { id_nhan_vien: "desc" },
     include: {
-      chuyen_khoa: true
+      chuyen_khoa: {
+        select: {
+            ten_chuyen_khoa: true,
+            id_chuyen_khoa: true,
+        }
+      }
     }
   });
  };

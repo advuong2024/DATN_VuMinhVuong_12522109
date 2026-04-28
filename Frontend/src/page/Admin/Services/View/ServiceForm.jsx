@@ -1,13 +1,15 @@
 import { Form, Input, Select, Button, Space, Row, Col } from "antd";
-import { useEffect } from "react";
-
-export const CATEGORY_OPTIONS = [
-  { label: "Khám bệnh", value: "KHAM" },
-  { label: "Xét nghiệm", value: "XET_NGHIEM" },
-  { label: "Phẫu thuật", value: "PHAU_THUAT" },
-];
+import { useEffect, useState } from "react";
+import { getCategory, getSpecialty } from "../Api/ServicesApi";
 
 export default function ServiceForm({ form, initialValues, onSubmit }) {
+  const [categories, setCategories] = useState([]);
+  const [specialty, setSpecialty] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSpecialty();
+  }, []);
 
   useEffect(() => {
     if (initialValues) {
@@ -17,7 +19,30 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
     }
   }, [initialValues, form]);
 
+  const fetchCategories = async () => {
+    const res = await getCategory();
+
+    const options = res.data.map((item) => ({
+      label: item.ten_danh_muc,
+      value: item.id_danh_muc,
+    }));
+
+    setCategories(options);
+  };
+
+  const fetchSpecialty = async () => {
+    const res = await getSpecialty();
+
+    const options = res.data.map((item) => ({
+      label: item.ten_chuyen_khoa,
+      value: item.id_chuyen_khoa,
+    }));
+
+    setSpecialty(options);
+  };
+
   const handleFinish = (values) => {
+    console.log("FORM VALUES:", values);
     onSubmit(values);
     form.resetFields();
   };
@@ -51,7 +76,7 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
           </Form.Item>
         </Col>
 
-        <Col span={24}>
+        <Col span={12}>
           <Form.Item
             label="Category"
             name="category"
@@ -61,7 +86,22 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
           >
             <Select
               placeholder="Select category"
-              options={CATEGORY_OPTIONS}
+              options={categories}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col span={12}>
+          <Form.Item
+            label="Specialty"
+            name="specialty"
+            rules={[
+              { required: true, message: "Please select specialty" },
+            ]}
+          >
+            <Select
+              placeholder="Select specialty"
+              options={specialty}
             />
           </Form.Item>
         </Col>

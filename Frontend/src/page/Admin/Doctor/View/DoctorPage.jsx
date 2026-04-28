@@ -11,7 +11,7 @@ import {
   Form,
   DatePicker,
 } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
 import CustomerForm from "./DoctorForm";
@@ -22,27 +22,47 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import { SPECIALTY_OPTIONS, POSITION_OPTIONS } from "../Constants/doctor_option";
-
-const mockData = [
-  {
-    key: "1",
-    name: "Nguyễn Văn A",
-    dob: "2000-01-01",
-    gender: "NU",
-    phone: "0123456789",
-    address: "Hà Nội",
-    position: "BAC_SI",
-    specialty: "NOI",
-  },
-];
+import { getDoctors, deleteDoctor } from "../Api/DoctorApi";
+import { toast } from "react-toastify";
 
 export default function PatientManagement() {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewRecord, setViewRecord] = useState(null);
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  const fetchDoctors = async () => {
+    try {
+      const res = await getDoctors();
+
+      const list = res.data?.data || res.data || [];
+
+      const formatted = list.map((item) => ({
+        key: item.id_nhan_vien || item.id,
+
+        name: item.ten_nhan_vien,
+        phone: item.so_dien_thoai,
+        address: item.dia_chi,
+
+        gender: item.gioi_tinh,
+        dob:  item.ngay_sinh ? dayjs(item.ngay_sinh) : null,
+
+        position: item.chuc_vu,
+        specialty: item.chuyen_khoa?.ten_chuyen_khoa || null,
+      }));
+
+      setData(formatted);
+    } catch (err) {
+      console.error(err);
+      toast.error("Load doctors failed");
+    }
+  }
 
   const handleAdd = () => {
     setEditingRecord(null);
@@ -59,13 +79,22 @@ export default function PatientManagement() {
     setOpen(true);
   };
 
+  const handleDelete = (record) => {
+      Modal.confirm({
+        title: "Xóa bác sĩ?",
+        content: "Bạn có chắc muốn xóa không?",
+        okText: "Xóa",
+        cancelText: "Hủy",
+        onOk: async () => {
+          await deleteDoctor(record.key);
+          fetchDoctors();
+        },
+      });
+  };
+
   const handleView = (record) => {
     setViewRecord(record);
     setOpenView(true);
-  };
-
-  const handleDelete = (record) => {
-    setData((prev) => prev.filter((item) => item.key !== record.key));
   };
 
   const handleChangeStatus = (value, record) => {
@@ -76,30 +105,6 @@ export default function PatientManagement() {
     );
   };
 
-  const handleSubmit = (values) => {
-    const newValues = {
-      ...values,
-      dob: values.dob.format("YYYY-MM-DD"),
-    };
-
-    if (editingRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.key === editingRecord.key
-            ? { ...item, ...newValues }
-            : item
-        )
-      );
-    } else {
-      setData((prev) => [
-        ...prev,
-        { key: Date.now().toString(), ...newValues },
-      ]);
-    }
-
-    setOpen(false);
-  };
-
   const columns = [
     { title: "Full Name", dataIndex: "name", width: 190, },
     {
@@ -107,7 +112,7 @@ export default function PatientManagement() {
       dataIndex: "dob",
       align: "center",
       width: 150,
-      render: (d) => dayjs(d).format("DD/MM/YYYY"),
+      render: (d) => d ? dayjs(d).format("DD/MM/YYYY") : "-",
     },
     {
       title: "Gender",
@@ -129,8 +134,8 @@ export default function PatientManagement() {
       title: "Specialty",
       dataIndex: "specialty",
       width: 130,
-      render: (s) =>
-        SPECIALTY_OPTIONS.find((x) => x.value === s)?.label,
+      render: (value) =>
+        value ? <Tag color="blue">{value}</Tag> : <Tag>Chưa có</Tag>
     },
     {
       title: "Actions",
@@ -192,7 +197,10 @@ export default function PatientManagement() {
         <CustomerForm
             form={form}
             initialValues={editingRecord}
-            onSubmit={handleSubmit}
+            onSuccess={() => {
+              setOpen(false);
+              fetchDoctors();
+            }}
         />
       </Modal>
 

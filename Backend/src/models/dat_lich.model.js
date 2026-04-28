@@ -1,6 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const dayjs = require("dayjs");
+const getTodayRange = () => ({
+  gte: dayjs().startOf("day").toDate(),
+  lte: dayjs().endOf("day").toDate(),
+});
 
 const getAll = (params = {}) => {
   const { search, status, startDate, endDate } = params;
@@ -33,12 +37,14 @@ const getAll = (params = {}) => {
     where.thoi_gian = {};
 
     if (startDate) {
-        where.thoi_gian.gte = dayjs(startDate).startOf("day").toDate();
+      where.thoi_gian.gte = dayjs(startDate).startOf("day").toDate();
     }
 
     if (endDate) {
-        where.thoi_gian.lte = dayjs(endDate).endOf("day").toDate();
+      where.thoi_gian.lte = dayjs(endDate).endOf("day").toDate();
     }
+  } else {
+    where.thoi_gian = getTodayRange();
   }
   return prisma.dat_lich.findMany({
     where,
@@ -66,6 +72,63 @@ const getAll = (params = {}) => {
       },
     },
 
+    orderBy: {
+      id_dat_lich: "desc",
+    },
+  });
+};
+
+const getAllDaDen = (params = {}) => {
+  const { search } = params;
+
+  const where = {
+    trang_thai: "DA_DEN",
+    // thoi_gian: getTodayRange(),
+  };
+
+  if (search) {
+    where.OR = [
+      {
+        benh_nhan: {
+          ten_benh_nhan: { contains: search },
+        },
+      },
+      {
+        benh_nhan: {
+          so_dien_thoai: { contains: search },
+        },
+      },
+    ];
+  }
+
+  return prisma.dat_lich.findMany({
+    where,
+    include: {
+      benh_nhan: {
+        select: {
+          ten_benh_nhan: true,
+          so_dien_thoai: true,
+          id_benh_nhan: true,
+        },
+      },
+      bac_si: {
+        select: {
+          ten_nhan_vien: true,
+          id_nhan_vien: true,
+        },
+      },
+      chuyen_khoa: {
+        select: {
+          ten_chuyen_khoa: true,
+          id_chuyen_khoa: true,
+        },
+      },
+      phieu_kham: {
+        select: {
+          trang_thai: true,
+        }
+      }
+    },
     orderBy: {
       id_dat_lich: "desc",
     },
@@ -108,13 +171,11 @@ const update = (id_dat_lich, data) => {
     });
 };
 
-const cancel = (id_dat_lich) => {
-    return prisma.dat_lich.update({
-        where: { id_dat_lich },
-        data: {
-            trang_thai: "DA_HUY",
-        },
-    });
+const updateStatus = (id_dat_lich, trang_thai) => {
+  return prisma.dat_lich.update({
+    where: { id_dat_lich },
+    data: { trang_thai },
+  });
 };
 
 const remove = (id_dat_lich) => {
@@ -140,10 +201,11 @@ const getByDoctorAndDate = (id_bac_si, date) => {
 
 module.exports = {
     getAll,
+    getAllDaDen,
     getById,
     insert,
     update,
-    cancel,
+    updateStatus,
     remove,
     getByDoctorAndDate,
 };

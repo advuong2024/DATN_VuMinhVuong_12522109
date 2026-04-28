@@ -11,7 +11,7 @@ import {
   Form,
   DatePicker,
 } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
 import CustomerForm from "./CustomerForm";
@@ -21,28 +21,62 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-
-const mockData = [
-  {
-    key: "1",
-    name: "Nguyễn Văn A",
-    dob: "2000-01-01",
-    gender: "NAM",
-    phone: "0123456789",
-    address: "Hà Nội",
-    medicalHistory: "Không có",
-    cccd: "012345678901",
-    email: "a@gmail.com",
-  },
-];
+import {
+  getPatients,
+  createPatient,
+  updatePatient,
+  deletePatient,
+} from "../Api/CustomerApi";
+import { toast } from "react-toastify";
 
 export default function PatientManagement() {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewRecord, setViewRecord] = useState(null);
   const [form] = Form.useForm();
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchData({ search });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const filtered = data.filter(
+    (item) =>
+      item.name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.phone?.includes(search)
+  );
+
+  const fetchData = async () => {
+    try {
+      const res = await getPatients();
+
+      const formatted = res.data.map((item) => ({
+        key: item.id_benh_nhan,
+        name: item.ten_benh_nhan,
+        dob: item.ngay_sinh,
+        gender: item.gioi_tinh,
+        phone: item.so_dien_thoai,
+        address: item.dia_chi,
+        medicalHistory: item.tien_su_benh,
+        cccd: item.CCCD,
+        email: item.email || "N/A",
+      }));
+
+      setData(formatted);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleAdd = () => {
     setEditingRecord(null);
@@ -65,7 +99,16 @@ export default function PatientManagement() {
   };
 
   const handleDelete = (record) => {
-    setData((prev) => prev.filter((item) => item.key !== record.key));
+    Modal.confirm({
+      title: "Xóa bệnh nhân?",
+      content: "Bạn có chắc muốn xóa không?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      onOk: async () => {
+        await deletePatient(record.key);
+        fetchData();
+      },
+    });
   };
 
   const handleChangeStatus = (value, record) => {
@@ -74,30 +117,25 @@ export default function PatientManagement() {
         item.key === record.key ? { ...item, status: value } : item
       )
     );
+
   };
 
-  const handleSubmit = (values) => {
-    const newValues = {
-      ...values,
-      dob: values.dob.format("YYYY-MM-DD"),
-    };
+  const handleSubmit = async (values) => {
+    try {
+      if (editingRecord) {
+        await updatePatient(editingRecord.key, values);
+        toast.success("Updated!");
+      } else {
+        await createPatient(values);
+        toast.success("Created!");
+      }
 
-    if (editingRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.key === editingRecord.key
-            ? { ...item, ...newValues }
-            : item
-        )
-      );
-    } else {
-      setData((prev) => [
-        ...prev,
-        { key: Date.now().toString(), ...newValues },
-      ]);
+      setOpen(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error!");
     }
-
-    setOpen(false);
   };
 
   const columns = [
@@ -170,7 +208,11 @@ export default function PatientManagement() {
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={5}>
-          <Input placeholder="Search by name / phone" />
+          <Input
+            placeholder="Search by name / phone"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </Col>
 
         <Col>
@@ -183,7 +225,7 @@ export default function PatientManagement() {
         </Col>
       </Row>
 
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={filtered} />
 
       <Modal
         centered

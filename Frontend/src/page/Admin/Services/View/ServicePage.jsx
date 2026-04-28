@@ -8,38 +8,69 @@ import {
   Descriptions,
   Form,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "@/components/common/DataTable";
 import ServiceForm from "./ServiceForm";
+import { EyeOutlined, EditOutlined, DeleteOutlined, } from "@ant-design/icons";
 import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-
-const mockData = [
-  {
-    key: "1",
-    name: "Khám tổng quát",
-    price: 200000,
-    category: "KHAM",
-    description: "Khám sức khỏe tổng quát",
-  },
-];
-
-export const CATEGORY_OPTIONS = [
-  { label: "Khám bệnh", value: "KHAM" },
-  { label: "Xét nghiệm", value: "XET_NGHIEM" },
-  { label: "Phẫu thuật", value: "PHAU_THUAT" },
-];
+  getServices, createService,
+  updateService, deleteService,
+} from "../Api/ServicesApi";
+import { toast } from "react-toastify";
 
 export default function ServiceManagement() {
-  const [data, setData] = useState(mockData);
+  const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewRecord, setViewRecord] = useState(null);
   const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const res = await getServices();
+
+      const formatted = res.data.map((item) => ({
+        key: item.id_dich_vu,
+        name: item.ten_dich_vu,
+        price: item.price || item.gia,
+        category: item.danh_muc?.ten_danh_muc,
+        specialty: item.chuyen_khoa?.ten_chuyen_khoa,
+        description: item.mo_ta || null,
+      }));
+
+      setData(formatted);
+      setFilteredData(formatted);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      let temp = [...data];
+
+      if (searchText) {
+        const keyword = searchText.toLowerCase();
+
+        temp = temp.filter((item) =>
+          item.name?.toLowerCase().includes(keyword) ||
+          item.category?.toLowerCase().includes(keyword) ||
+          item.specialty?.toLowerCase().includes(keyword)
+        );
+      }
+
+      setFilteredData(temp);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchText, data]);
 
   const handleAdd = () => {
     setEditingRecord(null);
@@ -59,24 +90,34 @@ export default function ServiceManagement() {
   };
 
   const handleDelete = (record) => {
-    setData((prev) => prev.filter((item) => item.key !== record.key));
+    Modal.confirm({
+      title: "Xóa dịch vụ?",
+      content: "Bạn có chắc muốn xóa không?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      onOk: async () => {
+        await deleteService(record.key);
+        fetchServices();
+      },
+    });
   };
 
-  const handleSubmit = (values) => {
-    if (editingRecord) {
-      setData((prev) =>
-        prev.map((item) =>
-          item.key === editingRecord.key ? { ...item, ...values } : item
-        )
-      );
-    } else {
-      setData((prev) => [
-        ...prev,
-        { key: Date.now().toString(), ...values },
-      ]);
-    }
+  const handleSubmit = async (values) => {
+    try {
+      if (editingRecord) {
+        await updateService(editingRecord.key, values);
+        toast.success("Update!")
+      } else {
+        await createService(values);
+        toast.success("Created!");
+      }
 
-    setOpen(false);
+      fetchServices();
+      setOpen(false);
+    } catch (err) {
+      console.log(err);
+      toast.error("Error!");
+    }
   };
 
   const columns = [
@@ -86,15 +127,20 @@ export default function ServiceManagement() {
       title: "Price",
       dataIndex: "price",
       width: 200,
-      render: (p) => `${p.toLocaleString()} VND`,
+      render: (p) =>
+        p ? `${Number(p).toLocaleString()} VND` : "0 VND",
     },
 
     {
       title: "Category",
       dataIndex: "category",
       width: 200,
-      render: (c) =>
-        CATEGORY_OPTIONS.find((x) => x.value === c)?.label,
+    },
+
+    {
+      title: "Specialty",
+      dataIndex: "specialty",
+      width: 200,
     },
 
     {
@@ -132,7 +178,11 @@ export default function ServiceManagement() {
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={6}>
-          <Input placeholder="Search service..." />
+          <Input
+            placeholder="Search by service, category, specialty "
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
         </Col>
 
         <Col>
@@ -142,9 +192,8 @@ export default function ServiceManagement() {
         </Col>
       </Row>
 
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={filteredData} />
 
-      {/* ADD / EDIT */}
       <Modal
         centered
         open={open}
@@ -163,7 +212,6 @@ export default function ServiceManagement() {
         />
       </Modal>
 
-      {/* VIEW */}
       <Modal
         open={openView}
         onCancel={() => setOpenView(false)}
@@ -177,15 +225,18 @@ export default function ServiceManagement() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Price">
-              {viewRecord.price.toLocaleString()} VND
+              {viewRecord.price
+                ? `${Number(viewRecord.price).toLocaleString()} VND`
+                : "—"
+              }
             </Descriptions.Item>
 
             <Descriptions.Item label="Category">
-              {
-                CATEGORY_OPTIONS.find(
-                  (x) => x.value === viewRecord.category
-                )?.label
-              }
+              { viewRecord.category}
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Specialty">
+              { viewRecord.specialty}
             </Descriptions.Item>
 
             <Descriptions.Item label="Description">

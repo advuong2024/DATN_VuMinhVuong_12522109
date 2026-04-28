@@ -9,63 +9,92 @@ import {
   Descriptions,
   Form,
 } from "antd";
-import { useState } from "react";
-import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-
+import { useState, useEffect  } from "react";
+import { EyeOutlined, EditOutlined, DeleteOutlined, } from "@ant-design/icons";
 import DataTable from "@/components/common/DataTable";
 import CategoryForm from "./CategoryForm";
+import { getCategories, createCategory, updateCategory } from "../Api/CategoryApi";
+import { getSpecialties, createSpecialty, updateSpecialty } from "../Api/SpecialtyApi";
+import { toast } from "react-toastify";
 
 const { TabPane } = Tabs;
 
 export const TYPE_OPTIONS = [
-  { label: "Thuốc", value: "MEDICINE" },
-  { label: "Dịch vụ", value: "SERVICE" },
-];
-
-const medicineCategories = [
-  {
-    key: "1",
-    name: "Kháng sinh",
-    description: "Dùng để điều trị nhiễm khuẩn",
-    type: "MEDICINE",
-  },
-];
-
-const serviceCategories = [
-  {
-    key: "2",
-    name: "Khám tổng quát",
-    description: "Kiểm tra sức khỏe tổng thể",
-    type: "SERVICE",
-  },
-];
-
-const specialtyDataInit = [
-  {
-    key: "3",
-    name: "Nội tổng quát",
-    description: "Khám các bệnh lý nội khoa",
-  },
+  { label: "Thuốc", value: "THUOC" },
+  { label: "Dịch vụ", value: "DICH_VU" },
 ];
 
 export default function CategoryManagement() {
   const [activeTab, setActiveTab] = useState("medicine");
-
-  const [dataMedicine, setDataMedicine] = useState(medicineCategories);
-  const [dataService, setDataService] = useState(serviceCategories);
-  const [dataSpecialty, setDataSpecialty] = useState(specialtyDataInit);
-
+  const [dataMedicine, setDataMedicine] = useState([]);
+  const [dataService, setDataService] = useState([]);
+  const [dataSpecialty, setDataSpecialty] = useState([]);
   const [open, setOpen] = useState(false);
   const [openView, setOpenView] = useState(false);
-
   const [editingRecord, setEditingRecord] = useState(null);
   const [viewRecord, setViewRecord] = useState(null);
-
   const [form] = Form.useForm();
+  const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    if (activeTab === "medicine") fetchMedicine();
+    else if (activeTab === "service") fetchService();
+    else fetchSpecialty();
+  }, [activeTab]);
+
+  useEffect(() => {
+    setSearchText("");
+  }, [activeTab]);
+  
+  const fetchMedicine = async () => {
+    try {
+      const res = await getCategories({ type: "THUOC" });
+
+      const data = res.data.map(item => ({
+        key: item.id_danh_muc,
+        name: item.ten_danh_muc,
+        description: item.mo_ta,
+        type: item.loai,
+      }));
+
+      setDataMedicine(data);
+    } catch (err) {
+      console.error("Fetch medicine error:", err);
+    }
+  };
+
+  const fetchService = async () => {
+    try {
+      const res = await getCategories({ type: "DICH_VU" });
+
+      const data = res.data.map(item => ({
+        key: item.id_danh_muc,
+        name: item.ten_danh_muc,
+        description: item.mo_ta,
+        type: item.loai,
+      }));
+
+      setDataService(data);
+    } catch (err) {
+      console.error("Fetch service error:", err);
+    }
+  };
+
+  const fetchSpecialty = async () => {
+    try {
+      const res = await getSpecialties();
+
+      const data = res.data.map(item => ({
+        key: item.id_chuyen_khoa,
+        name: item.ten_chuyen_khoa,
+        description: item.mo_ta,
+      }));
+
+      setDataSpecialty(data);
+    } catch (err) {
+      console.error("Fetch specialty error:", err);
+    }
+  };
 
   const currentData =
     activeTab === "medicine"
@@ -73,6 +102,10 @@ export default function CategoryManagement() {
       : activeTab === "service"
       ? dataService
       : dataSpecialty;
+
+  const filteredData = currentData.filter(item =>
+    item.name?.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   const setCurrentData =
     activeTab === "medicine"
@@ -98,29 +131,36 @@ export default function CategoryManagement() {
     setOpenView(true);
   };
 
-  const handleDelete = (record) => {
-    setCurrentData((prev) =>
-      prev.filter((item) => item.key !== record.key)
-    );
-  };
+  const handleSubmit = async (values) => {
+    try {
+      if (activeTab === "specialty") {
+        if (editingRecord) {
+          await updateSpecialty(editingRecord.key, values);
+          toast.success("Updated!");
+        } else {
+          await createSpecialty(values);
+          toast.success("Created!");
+        }
+      } else {
+        const type =
+          activeTab === "medicine" ? "THUOC" : "DICH_VU";
 
-  const handleSubmit = (values) => {
-    if (editingRecord) {
-      setCurrentData((prev) =>
-        prev.map((item) =>
-          item.key === editingRecord.key
-            ? { ...item, ...values }
-            : item
-        )
-      );
-    } else {
-      setCurrentData((prev) => [
-        ...prev,
-        { key: Date.now().toString(), ...values },
-      ]);
+        if (editingRecord) {
+          await updateCategory(editingRecord.key, values);
+          toast.success("Updated!");
+        } else {
+          await createCategory({ ...values, type });
+          toast.success("Created!");
+        }
+      }
+
+      fetchMedicine();
+      fetchService();
+      fetchSpecialty();
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
     }
-
-    setOpen(false);
   };
 
   const columns = [
@@ -184,10 +224,6 @@ export default function CategoryManagement() {
             style={{ color: "#faad14", cursor: "pointer", marginRight: 8 }}
             onClick={() => handleEdit(record)}
           />
-          <DeleteOutlined
-            style={{ color: "#ff4d4f", cursor: "pointer" }}
-            onClick={() => handleDelete(record)}
-          />
         </Space>
       ),
     },
@@ -205,18 +241,18 @@ export default function CategoryManagement() {
 
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab="Category Medicine" key="medicine">
-          <Header onAdd={handleAdd} />
-          <DataTable columns={columns} data={dataMedicine} />
+          <Header onAdd={handleAdd} onSearch={setSearchText} />
+          <DataTable columns={columns} data={filteredData} />
         </TabPane>
 
         <TabPane tab="Category Service" key="service">
-          <Header onAdd={handleAdd} />
-          <DataTable columns={columns} data={dataService} />
+          <Header onAdd={handleAdd} onSearch={setSearchText} />
+          <DataTable columns={columns} data={filteredData} />
         </TabPane>
 
         <TabPane tab="Specialty" key="specialty">
-          <Header onAdd={handleAdd} />
-          <DataTable columns={columnsSpecialty} data={dataSpecialty} />
+          <Header onAdd={handleAdd} onSearch={setSearchText} />
+          <DataTable columns={columnsSpecialty} data={filteredData} />
         </TabPane>
       </Tabs>
 
@@ -269,11 +305,14 @@ export default function CategoryManagement() {
   );
 }
 
-function Header({ onAdd }) {
+function Header({ onAdd, onSearch }) {
   return (
     <Row justify="end" style={{ marginBottom: 16 }}>
-      <Col span={6}>
-        <Input placeholder="Search..." />
+      <Col span={5}>
+        <Input 
+          placeholder="Search by name" 
+          onChange={(e) => onSearch(e.target.value)}
+        />
       </Col>
 
       <Col>

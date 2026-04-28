@@ -6,7 +6,9 @@ export const GENDER_OPTIONS = [
 
 export const POSITION_OPTIONS = [
   { label: "Bác sĩ", value: "BAC_SI" },
-  { label: "Y tá", value: "Y_TA" },
+  { label: "Thu ngân", value: "THU_NGAN" },
+  { label: "Lễ tân", value: "LE_TAN" },
+  { label: "Quản lý", value: "QUAN_LY" },
 ];
 
 export const SPECIALTY_OPTIONS = [

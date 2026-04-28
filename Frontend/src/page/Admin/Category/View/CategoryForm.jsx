@@ -19,9 +19,9 @@ export default function CategoryForm({
     let payload = { ...values };
 
     if (activeTab === "medicine") {
-      payload.type = "MEDICINE";
+      payload.type = "THUOC";
     } else if (activeTab === "service") {
-      payload.type = "SERVICE";
+      payload.type = "DICH_VU";
     }
     onSubmit(payload);
   };
