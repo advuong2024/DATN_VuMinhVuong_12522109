@@ -1,6 +1,17 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const findByPhoneOrCCCD = async (phone, cccd) => {
+  return prisma.benh_nhan.findFirst({
+    where: {
+      OR: [
+        phone ? { so_dien_thoai: phone } : undefined,
+        cccd ? { CCCD: cccd } : undefined,
+      ].filter(Boolean),
+    },
+  });
+};
+
 const getAll = () => {
     return prisma.benh_nhan.findMany({
         orderBy: {
@@ -42,6 +53,7 @@ const remove = (id_benh_nhan) => {
 };
 
 module.exports = {
+    findByPhoneOrCCCD,
     getAll,
     getById,
     insert,

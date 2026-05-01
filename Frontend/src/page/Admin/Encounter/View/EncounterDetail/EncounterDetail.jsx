@@ -15,6 +15,8 @@ export default function EncounterPage() {
   const location = useLocation();
   const bookingData = location.state;
 
+  console.log("bookingData:", bookingData);
+
   const [services, setServices] = useState([]);
   const [medicines, setMedicines] = useState([]);
 
@@ -44,6 +46,7 @@ export default function EncounterPage() {
           price: m.gia,
         }))
       );
+
     } catch {
       toast.error("Load data failed!");
     }

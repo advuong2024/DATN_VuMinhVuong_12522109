@@ -1,9 +1,3 @@
-export const GENDER_OPTIONS = [
-  { label: "Nam", value: "NAM" },
-  { label: "Nữ", value: "NU" },
-  { label: "Khác", value: "KHAC" },
-];
-
 export const POSITION_OPTIONS = [
   { label: "Bác sĩ", value: "BAC_SI" },
   { label: "Thu ngân", value: "THU_NGAN" },

@@ -18,7 +18,24 @@ export default function EncounterForm({ services, medicines, onSubmit }) {
 
   return (
     <Card title="Content of examination">
-      <Form form={form} layout="vertical" onFinish={onSubmit}>
+      <Form 
+        form={form} 
+        layout="vertical" 
+        onFinish={onSubmit}
+        onValuesChange={(changed, allValues) => {
+            const services = (allValues.services || []).map((s) => ({
+            ...s,
+            thanh_tien: (s?.gia || 0) * (s?.so_luong || 0),
+            }));
+
+            const medicines = (allValues.medicines || []).map((m) => ({
+            ...m,
+            thanh_tien: (m?.gia || 0) * (m?.so_luong || 0),
+            }));
+
+            form.setFieldsValue({ services, medicines });
+        }}
+      >
         <Form.Item name="trieu_chung" label="Symptom">
           <TextArea rows={3} />
         </Form.Item>
@@ -38,26 +55,49 @@ export default function EncounterForm({ services, medicines, onSubmit }) {
             {(fields, { add, remove }) => (
                 <>
                     {fields.map(({ key, name }) => (
-                        <Row key={key} gutter={8} align="middle" style={{ marginBottom: 8 }}>
+                      <Row key={key} gutter={8} align="middle" style={{ marginBottom: 8 }}>
                         <Col>
                             <Form.Item
-                            name={[name, "id_dich_vu"]}
-                            rules={[{ required: true }]}
-                            style={{ marginBottom: 0 }}
+                                name={[name, "id_dich_vu"]}
+                                rules={[{ required: true }]}
+                                style={{ marginBottom: 0 }}
                             >
                             <Select
                                 placeholder="Select service"
-                                options={services}
                                 style={{ width: 200 }}
+                                options={services.filter((s) => {
+                                    const current = form.getFieldValue("services") || [];
+
+                                    const selectedIds = current
+                                    .map((item) => item?.id_dich_vu)
+                                    .filter(Boolean);
+
+                                    return (
+                                    !selectedIds.includes(s.value) ||
+                                    s.value === form.getFieldValue(["services", name, "id_dich_vu"])
+                                    );
+                                })}
+                                onChange={(value) => {
+                                    const selected = services.find((s) => s.value === value);
+                                    if (selected) {
+                                    const current = form.getFieldValue("services") || [];
+                                    current[name] = {
+                                        ...current[name],
+                                        id_dich_vu: value,
+                                        gia: selected.price,
+                                    };
+                                    form.setFieldsValue({ services: current });
+                                    }
+                                }}
                             />
                             </Form.Item>
                         </Col>
 
                         <Col>
                             <Form.Item
-                            name={[name, "so_luong"]}
-                            rules={[{ required: true }]}
-                            style={{ marginBottom: 0 }}
+                                name={[name, "so_luong"]}
+                                rules={[{ required: true }]}
+                                style={{ marginBottom: 0 }}
                             >
                             <InputNumber min={1} placeholder="quantity" />
                             </Form.Item>
@@ -65,20 +105,29 @@ export default function EncounterForm({ services, medicines, onSubmit }) {
 
                         <Col>
                             <Form.Item
-                            name={[name, "gia"]}
-                            rules={[{ required: true }]}
-                            style={{ marginBottom: 0 }}
+                                name={[name, "gia"]}
+                                rules={[{ required: true }]}
+                                style={{ marginBottom: 0 }}
                             >
-                            <Input min={0} placeholder="price" />
+                            <InputNumber disabled min={0} placeholder="price" />
                             </Form.Item>
                         </Col>
 
                         <Col>
-                            <Button danger onClick={() => remove(name)}>
-                            X
-                            </Button>
+                            <Form.Item
+                                name={[name, "thanh_tien"]}
+                                style={{ marginBottom: 0 }}
+                            >
+                                <InputNumber disabled placeholder="total" style={{ width: 120 }} />
+                            </Form.Item>
                         </Col>
-                        </Row>
+
+                        <Col>
+                          <Button danger onClick={() => remove(name)}>
+                            X
+                          </Button>
+                        </Col>
+                      </Row>
                     ))}
 
                     <Button type="dashed" type="primary" onClick={() => add()}>
@@ -97,7 +146,7 @@ export default function EncounterForm({ services, medicines, onSubmit }) {
                         <Row key={key} gutter={8} align="middle" style={{ marginBottom: 8 }}>
                         
                         <Col>
-                            <Form.Item
+                          <Form.Item
                             name={[name, "id_thuoc"]}
                             rules={[{ required: true }]}
                             style={{ marginBottom: 0 }}
@@ -106,8 +155,32 @@ export default function EncounterForm({ services, medicines, onSubmit }) {
                                 placeholder="Select medicines"
                                 options={medicines}
                                 style={{ width: 200 }}
+                                options={medicines.filter((m) => {
+                                    const current = form.getFieldValue("medicines") || [];
+
+                                    const selectedIds = current
+                                    .map((item) => item?.id_thuoc)
+                                    .filter(Boolean);
+
+                                    return (
+                                    !selectedIds.includes(m.value) ||
+                                    m.value === form.getFieldValue(["medicines", name, "id_thuoc"])
+                                    );
+                                })}
+                                onChange={(value) => {
+                                    const selected = medicines.find(m => m.value === value);
+                                    if (selected) {
+                                    const current = [...form.getFieldValue("medicines") || []];
+                                    current[name] = {
+                                        ...current[name],
+                                        id_thuoc: value,
+                                        gia: selected.price,
+                                    };
+                                    form.setFieldsValue({ medicines: current });
+                                    }
+                                }}
                             />
-                            </Form.Item>
+                          </Form.Item>
                         </Col>
 
                         <Col>
@@ -126,7 +199,16 @@ export default function EncounterForm({ services, medicines, onSubmit }) {
                             rules={[{ required: true }]}
                             style={{ marginBottom: 0 }}
                             >
-                            <Input min={0} placeholder="price" />
+                            <InputNumber disabled min={0} placeholder="price" />
+                            </Form.Item>
+                        </Col>
+
+                        <Col>
+                            <Form.Item
+                                name={[name, "thanh_tien"]}
+                                style={{ marginBottom: 0 }}
+                            >
+                                <InputNumber disabled placeholder="total" style={{ width: 120 }} />
                             </Form.Item>
                         </Col>
 

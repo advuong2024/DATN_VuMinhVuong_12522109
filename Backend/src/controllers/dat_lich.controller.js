@@ -89,6 +89,44 @@ exports.insert = async (req, res) => {
   }
 };
 
+exports.createBooking = async (req, res) => {
+  try {
+    const data = req.body;
+    if (!data?.patient || !data?.booking) {
+      return res.status(400).json({
+        message: "Thiếu thông tin patient hoặc booking",
+      });
+    }
+
+    const { patient, booking } = data;
+
+    if (!patient.phone || !patient.name) {
+      return res.status(400).json({
+        message: "Thiếu thông tin bệnh nhân",
+      });
+    }
+
+    if (!booking.service || !booking.doctor || !booking.date) {
+      return res.status(400).json({
+        message: "Thiếu thông tin lịch khám",
+      });
+    }
+
+    const result = await LichHen.insertBooking(data);
+
+    return res.status(201).json({
+      message: "Đặt lịch thành công",
+      data: result,
+    });
+  } catch (error) {
+    console.error("CREATE BOOKING ERROR:", error);
+
+    return res.status(500).json({
+      message: error.message || "Lỗi server",
+    });
+  }
+};
+
 exports.update = async (req, res) => {
   try {
     const id = Number(req.params.id);

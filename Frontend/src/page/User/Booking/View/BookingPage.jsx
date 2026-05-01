@@ -211,11 +211,7 @@ export default function BookingPage() {
         patientId = values.patient_code;
       }
 
-      console.log("DATE:", values.date);
-      console.log("TIME:", values.time);
-
       const thoi_gian = new Date(`${values.date}T${values.time}:00+07:00`);
-      console.log("FINAL:", thoi_gian);
 
       await postBook({
         id_benh_nhan: Number(patientId),
@@ -268,9 +264,10 @@ export default function BookingPage() {
       setOriginalData(values);
       setIsEditing(false);
 
-      console.log("Update thành công");
+      toast.success("cập nhật thông tin thành công!");
     } catch (err) {
       console.error("Lỗi update:", err);
+      toast.error("cập nhật thông tin thất bại!");
     }
   };
 

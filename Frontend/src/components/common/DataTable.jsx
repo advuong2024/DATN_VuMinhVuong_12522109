@@ -49,7 +49,7 @@ export default function DataTable({
       dataSource={data}
       loading={loading}
       rowKey={(record) => record.id || record.key}
-      scroll={{ y: "calc(100vh - 350px)" }}
+      scroll={{ y: "calc(100vh - 403px)" }}
 
       bordered
       size="middle"

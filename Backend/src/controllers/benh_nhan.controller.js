@@ -59,6 +59,25 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.findPatientByPhone = async (req, res) => {
+  try {
+    const { phone, cccd } = req.query;
+
+    if (!phone && !cccd) {
+      return res.status(400).json({
+        message: "Thiếu phone hoặc cccd",
+      });
+    }
+
+    const patient = await BenhNhan.findByPhoneOrCCCD(phone, cccd);
+
+    return res.json(patient || null);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);

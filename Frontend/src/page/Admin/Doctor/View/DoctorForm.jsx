@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import {
   SPECIALTY_OPTIONS,
   POSITION_OPTIONS,
-  GENDER_OPTIONS,
 } from "../Constants/doctor_option";
+import { GENDER_OPTIONS } from "@/components/common/Options";
 import { createDoctor, updateDoctor,  getSpecialties } from "../Api/DoctorApi";
 import { toast } from "react-toastify";
 

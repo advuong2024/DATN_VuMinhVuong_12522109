@@ -149,6 +149,7 @@ export default function BookingManagement() {
       });
 
       const newEncounter = res.data;
+      console.log("Created encounter:", newEncounter);
 
       setData((prev) =>
         prev.map((item) =>

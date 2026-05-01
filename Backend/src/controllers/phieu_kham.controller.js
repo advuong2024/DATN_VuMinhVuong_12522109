@@ -79,7 +79,7 @@ exports.update = async (req, res) => {
       return res.status(400).json({ error: "id không hợp lệ" });
     }
 
-    const existing = await PhieuKham.findById(id);
+    const existing = await PhieuKham.getById(id);
     if (!existing) {
       return res.status(404).json({ error: "Không tìm thấy phiếu khám" });
     }

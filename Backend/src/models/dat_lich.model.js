@@ -125,6 +125,7 @@ const getAllDaDen = (params = {}) => {
       },
       phieu_kham: {
         select: {
+          id_phieu_kham: true,
           trang_thai: true,
         }
       }
@@ -159,6 +160,51 @@ const insert = (data) => {
 
       chuyen_khoa: {
         connect: { id_chuyen_khoa: data.id_chuyen_khoa },
+      },
+    },
+  });
+};
+
+const insertBooking = async (data) => {
+  const { patient, booking } = data;
+
+  let benhNhan = await prisma.benh_nhan.findFirst({
+    where: {
+      OR: [
+        { so_dien_thoai: patient.phone },
+        { CCCD: patient.CCCD },
+      ],
+    },
+  });
+
+  if (!benhNhan) {
+    benhNhan = await prisma.benh_nhan.create({
+      data: {
+        ten_benh_nhan: patient.name,
+        ngay_sinh: new Date(patient.dob),
+        gioi_tinh: patient.gender,
+        so_dien_thoai: patient.phone,
+        CCCD: patient.CCCD,
+        dia_chi: patient.address,
+      },
+    });
+  }
+
+  return prisma.dat_lich.create({
+    data: {
+      thoi_gian: new Date(`${booking.date} ${booking.time}`),
+      ly_do: booking.reason,
+
+      benh_nhan: {
+        connect: { id_benh_nhan: benhNhan.id_benh_nhan },
+      },
+
+      bac_si: {
+        connect: { id_nhan_vien: booking.doctor },
+      },
+
+      chuyen_khoa: {
+        connect: { id_chuyen_khoa: booking.service },
       },
     },
   });
@@ -204,6 +250,7 @@ module.exports = {
     getAllDaDen,
     getById,
     insert,
+    insertBooking,
     update,
     updateStatus,
     remove,
