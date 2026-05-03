@@ -42,10 +42,32 @@ export default function BookingManagement() {
   const [openCreate, setOpenCreate] = useState(false);
   const [viewRecord, setViewRecord] = useState(null);
   const navigate = useNavigate();
+  const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  
   useEffect(() => {
     fetchData();
   }, []);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const filteredData = data.filter((item) => {
+    if (!searchText) return true;
+
+    const keyword = searchText.toLowerCase();
+
+    return (
+      item.name?.toLowerCase().includes(keyword) ||
+      item.phone?.toLowerCase().includes(keyword)
+    );
+  });
 
   const fetchData = async (filters = {}) => {
     try {
@@ -92,15 +114,15 @@ export default function BookingManagement() {
         const pk = record.phieu_kham;
 
         if (!pk) {
-          return <Tag color="orange">Chờ khám</Tag>;
+          return <Tag color="orange">Pending</Tag>;
         }
 
         if (pk.trang_thai === "DANG_KHAM") {
-          return <Tag color="blue">Đang khám</Tag>;
+          return <Tag color="blue">In Progress</Tag>;
         }
 
         if (pk.trang_thai === "HOAN_THANH") {
-          return <Tag color="green">Đã khám xong</Tag>;
+          return <Tag color="green">Done</Tag>;
         }
 
         return null;
@@ -178,7 +200,11 @@ export default function BookingManagement() {
 
         <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
           <Col span={5}>
-            <Input placeholder="Search by name / phone" />
+            <Input
+              placeholder="Search by name / phone"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
           </Col>
 
           <Col span={2}>
@@ -196,7 +222,7 @@ export default function BookingManagement() {
           </Col>
         </Row>
 
-        <DataTable columns={columns} data={data} loading={false} />
+        <DataTable columns={columns} data={filteredData} loading={false} />
 
         <Modal
             centered

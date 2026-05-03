@@ -149,6 +149,7 @@ const insert = (data) => {
     data: {
       thoi_gian: data.thoi_gian,
       ly_do: data.ly_do,
+      trang_thai: data.trang_thai,
 
       benh_nhan: {
         connect: { id_benh_nhan: data.id_benh_nhan },
@@ -167,6 +168,10 @@ const insert = (data) => {
 
 const insertBooking = async (data) => {
   const { patient, booking } = data;
+
+  if (!booking.doctor) throw new Error("Doctor is required");
+  if (!booking.service) throw new Error("Service is required");
+  if (!booking.date || !booking.time) throw new Error("Date/time missing");
 
   let benhNhan = await prisma.benh_nhan.findFirst({
     where: {
@@ -192,19 +197,25 @@ const insertBooking = async (data) => {
 
   return prisma.dat_lich.create({
     data: {
-      thoi_gian: new Date(`${booking.date} ${booking.time}`),
-      ly_do: booking.reason,
+      thoi_gian: new Date(`${booking.date}T${booking.time}`),
+      ly_do: booking.reason || "",
 
       benh_nhan: {
         connect: { id_benh_nhan: benhNhan.id_benh_nhan },
       },
 
       bac_si: {
-        connect: { id_nhan_vien: booking.doctor },
+        connect: {
+          id_nhan_vien: Number(
+            booking.doctor?.value || booking.doctor
+          ),
+        },
       },
 
       chuyen_khoa: {
-        connect: { id_chuyen_khoa: booking.service },
+        connect: {
+          id_chuyen_khoa: Number(booking.service),
+        },
       },
     },
   });
