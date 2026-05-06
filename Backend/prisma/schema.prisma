@@ -95,6 +95,7 @@ model nhan_vien {
   dat_lichs dat_lich[]
   phieu_khams phieu_kham[]
   chi_tiets chi_tiet_dich_vu[]
+  @@index([ten_nhan_vien])
 }
 
 model tai_khoan {
@@ -129,6 +130,7 @@ model benh_nhan {
 
   dat_lichs dat_lich[]
   phieu_khams phieu_kham[]
+  @@index([ten_benh_nhan])
 }
 
 model danh_muc {

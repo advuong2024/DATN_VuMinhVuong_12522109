@@ -15,8 +15,6 @@ export default function EncounterPage() {
   const location = useLocation();
   const bookingData = location.state;
 
-  console.log("bookingData:", bookingData);
-
   const [services, setServices] = useState([]);
   const [medicines, setMedicines] = useState([]);
 
@@ -62,7 +60,7 @@ export default function EncounterPage() {
         chi_tiets: {
           create: (values.services || []).map((s) => ({
             id_dich_vu: Number(s.id_dich_vu),
-            so_luong: Number(s.so_luong),
+            so_luong: Number(s.so_luong || 1),
             gia: Number(s.gia),
             trang_thai: "HOAN_THANH",
             id_bac_si: bookingData.doctorId,
@@ -75,7 +73,7 @@ export default function EncounterPage() {
                 chi_tiets: {
                   create: values.medicines.map((m) => ({
                     id_thuoc: Number(m.id_thuoc),
-                    so_luong: Number(m.so_luong),
+                    so_luong: Number(m.so_luong || 1),
                     lieu_dung: m.lieu_dung,
                     gia: Number(m.gia),
                   })),
@@ -87,10 +85,18 @@ export default function EncounterPage() {
         trang_thai: "HOAN_THANH",
       };
 
-      await updateEncounter(bookingData.encounterId, payload);
+      const res = await updateEncounter(bookingData.encounterId, payload);
 
-      toast.success("Create success!");
+      const payment = res?.data?.payment;
+
+      toast.success("encounter successfully!");
+
+      if (payment) {
+        toast.info("Don't forget to process the payment!");
+      }
+
       navigate("/admin/encounter");
+
     } catch (err) {
       console.error(err);
       toast.error("Create Error!");

@@ -41,10 +41,56 @@ const remove = (id_thanh_toan) => {
     });
 };
 
+const getPayments = async (params) => {
+  const { keyword, trang_thai } = params;
+
+  return prisma.thanh_toan.findMany({
+    where: {
+      trang_thai,
+      ...(keyword && {
+        OR: [
+          {
+            phieu_kham: {
+              benh_nhan: {
+                ten_benh_nhan: {
+                  contains: keyword,
+                },
+              },
+            },
+          },
+          {
+            phieu_kham: {
+              bac_si: {
+                ten_nhan_vien: {
+                  contains: keyword,
+                },
+              },
+            },
+          },
+        ],
+      }),
+    },
+
+    include: {
+      phieu_kham: {
+        include: {
+          benh_nhan: true,
+          bac_si: true,
+        },
+      },
+    },
+
+    orderBy: {
+      id_thanh_toan: "desc",
+    },
+  });
+};
+
 module.exports = {
     getAll,
     getById,
     insert,
     update,
     remove,
+    getPayments,
 };

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/thanh_toan.controller");
 
+router.get("/trang-thai", controller.getStatus);
 router.get("/", controller.getAll);
 router.get("/:id", controller.getById);
 router.post("/", controller.insert);

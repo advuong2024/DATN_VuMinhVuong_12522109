@@ -89,12 +89,14 @@ exports.update = async (req, res) => {
       return res.status(400).json({ error: "Dữ liệu không hợp lệ" });
     }
 
-    const updated = await PhieuKham.update(id, payload);
+    const result = await PhieuKham.update(id, payload);
 
     res.json({
       message: "Cập nhật thành công",
-      data: updated,
+      encounter: result.encounter,
+      payment: result.payment,
     });
+
   } catch (err) {
     console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
@@ -112,6 +114,23 @@ exports.delete = async (req, res) => {
     await PhieuKham.remove(id);
 
     res.json({ message: "Xóa mềm thành công" });
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getMedicalHistoriesByPatient = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ error: "id_benh_nhan không hợp lệ" });
+    }
+
+    const rows = await PhieuKham.getMedicalHistories(id);
+
+    res.json(rows);
   } catch (err) {
     console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });

@@ -28,6 +28,8 @@ import {
   deletePatient,
 } from "../Api/CustomerApi";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { customerUrl } from "@/routes/urls";
 
 export default function PatientManagement() {
   const [data, setData] = useState([]);
@@ -37,6 +39,7 @@ export default function PatientManagement() {
   const [viewRecord, setViewRecord] = useState(null);
   const [form] = Form.useForm();
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -186,7 +189,7 @@ export default function PatientManagement() {
           <Space>
             <EyeOutlined
                 style={{ fontSize: 18, color: "#1677ff", cursor: "pointer", marginRight: 8 }}
-                onClick={() => handleView(record)}
+                onClick={() => navigate(`${customerUrl}/${record.key}`)}
             />
             <EditOutlined
                 style={{ fontSize: 18, color: "#faad14", cursor: "pointer", marginRight: 8 }}
@@ -243,49 +246,6 @@ export default function PatientManagement() {
           initialValues={editingRecord}
           onSubmit={handleSubmit}
         />
-      </Modal>
-
-      <Modal
-        open={openView}
-        onCancel={() => setOpenView(false)}
-        footer={null}
-        title={<div style={{ textAlign: "center" }}>Patient Details</div>}
-      >
-        {viewRecord && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="Full Name">
-              {viewRecord.name}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Date of Birth">
-              {dayjs(viewRecord.dob).format("DD/MM/YYYY")}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Gender">
-              {viewRecord.gender === "NAM" ? "Nam" : "Nữ"}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Phone">
-              {viewRecord.phone}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="CCCD">
-              {viewRecord.cccd}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Email">
-              {viewRecord.email}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Address">
-              {viewRecord.address}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Medical History">
-              {viewRecord.medicalHistory}
-            </Descriptions.Item>
-          </Descriptions>
-        )}
       </Modal>
     </div>
   );

@@ -97,3 +97,37 @@ exports.delete = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getStatus = async (req, res) => {
+  try {
+    const { keyword, trang_thai } = req.query;
+
+    const data = await ThanhToan.getPayments({
+      keyword,
+      trang_thai,
+    });
+
+    const validStatus = ["CHUA_THANH_TOAN", "DA_THANH_TOAN"];
+
+    if (trang_thai && !validStatus.includes(trang_thai)) {
+      return res.status(400).json({ message: "Trạng thái không hợp lệ" });
+    }
+
+    const result = data.map((item) => ({
+      id_thanh_toan: item.id_thanh_toan,
+      tong_tien: item.tong_tien,
+      trang_thai: item.trang_thai,
+      ngay_thanh_toan: item.ngay_thanh_toan,
+      ngay_kham: item.phieu_kham?.ngay_kham,
+
+      patient_name: item.phieu_kham?.benh_nhan?.ten_benh_nhan,
+      patient_phone: item.phieu_kham?.benh_nhan?.so_dien_thoai,
+      doctor_name: item.phieu_kham?.bac_si?.ten_nhan_vien,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};

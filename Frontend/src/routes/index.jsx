@@ -14,7 +14,8 @@ import EncounterPage from "@/page/Admin/Encounter/View/EncounterPage";
 import EncounterDetail from "@/page/Admin/Encounter/View/EncounterDetail/EncounterDetail";
 import MedicinePage from "@/page/Admin/Medicines/View/MedicinePage";
 import CategoryPage from "@/page/Admin/Category/View/CategoryPage";
-// import BillPage from "@/page/Admin/Bill/View/BillPage";
+import BillPage from "@/page/Admin/Bill/View/BillPage";
+import HistoryPage from "@/page/Admin/Customer/View/CustomerHistory/CustomerHistoryForm";
 
 import {
   loginUrl,
@@ -60,7 +61,8 @@ const router = createBrowserRouter([
       { path: doctorUrl, element: <DoctorPage /> },
       { path: MedicineUrl, element: <MedicinePage /> },
       { path: categoryUrl, element: <CategoryPage /> },
-      // { path: billUrl, element: <BillPage /> },
+      { path: billUrl, element: <BillPage /> },
+      { path: `${customerUrl}/:id`, element: <HistoryPage /> },
     ],
   },
 
