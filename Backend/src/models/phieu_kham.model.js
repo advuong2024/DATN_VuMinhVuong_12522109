@@ -33,21 +33,103 @@ const getById = (id_phieu_kham) => {
   });
 };
 
-const insert = (data) => {
-  const { id_benh_nhan, id_nhan_vien, id_dat_lich, ...rest } = data;
+const insert = async (data) => {
+  let {
+    id_benh_nhan,
+    id_bac_si,
+    id_dat_lich,
+    trang_thai,
+    trieu_chung,
+    chan_doan,
+    ghi_chu,
+    chi_tiets,
+  } = data;
 
-  if (!id_benh_nhan) throw new Error("Thiếu id_benh_nhan");
-  if (!id_nhan_vien) throw new Error("Thiếu id_nhan_vien");
+  if (id_dat_lich) {
+    const booking = await prisma.dat_lich.findUnique({
+      where: { id_dat_lich },
+    });
+
+    if (!booking) throw new Error("Không tìm thấy lịch đặt");
+
+    id_benh_nhan = booking.id_benh_nhan;
+    id_bac_si = booking.id_bac_si;
+  }
 
   return prisma.phieu_kham.create({
     data: {
-      ...rest,
+      trieu_chung,
+      chan_doan,
+      ghi_chu,
 
-      id_benh_nhan: id_benh_nhan,
-      id_bac_si: id_nhan_vien,
-
+      id_benh_nhan,
+      id_bac_si,
       id_dat_lich: id_dat_lich || null,
-    }
+      trang_thai: trang_thai || "DANG_KHAM",
+    },
+  });
+};
+
+const upsertPayment = async (tx, id_phieu_kham, loai, items) => {
+  if (!items || items.length === 0) {
+    await tx.thanh_toan.deleteMany({
+      where: {
+        id_phieu_kham,
+        loai_thanh_toan: loai,
+      },
+    });
+    return null;
+  }
+
+  const total = items.reduce(
+    (sum, i) => sum + Number(i.gia || 0) * Number(i.so_luong || 0),
+    0
+  );
+
+  const existed = await tx.thanh_toan.findUnique({
+    where: {
+      id_phieu_kham_loai_thanh_toan: {
+        id_phieu_kham,
+        loai_thanh_toan: loai,
+      },
+    },
+  });
+
+  const mappedItems = items.map((i) => ({
+    loai_item: loai,
+    id_item: i.id_chi_tiet,
+    gia: i.gia,
+    so_luong: i.so_luong,
+  }));
+
+  if (existed) {
+    return tx.thanh_toan.update({
+      where: { id_thanh_toan: existed.id_thanh_toan },
+      data: {
+        tong_tien: total,
+
+        chi_tiets: {
+          deleteMany: {},
+          create: mappedItems,
+        },
+      },
+      include: {
+        chi_tiets: true,
+      },
+    });
+  }
+
+  return tx.thanh_toan.create({
+    data: {
+      id_phieu_kham,
+      loai_thanh_toan: loai,
+      tong_tien: total,
+      trang_thai: "CHUA_THANH_TOAN",
+
+      chi_tiets: {
+        create: mappedItems,
+      },
+    },
   });
 };
 
@@ -61,15 +143,11 @@ const update = async (id_phieu_kham, data) => {
         ...rest,
 
         ...(id_benh_nhan && {
-          benh_nhan: {
-            connect: { id_benh_nhan },
-          },
+          benh_nhan: { connect: { id_benh_nhan } },
         }),
 
         ...(id_bac_si && {
-          bac_si: {
-            connect: { id_nhan_vien: id_bac_si },
-          },
+          bac_si: { connect: { id_nhan_vien: id_bac_si } },
         }),
 
         ...(chi_tiets && {
@@ -105,43 +183,27 @@ const update = async (id_phieu_kham, data) => {
       },
     });
 
-    const serviceTotal = encounter.chi_tiets.reduce(
-      (sum, s) => sum + Number(s.gia) * s.so_luong,
-      0
+    const servicePayment = await upsertPayment(
+      tx,
+      id_phieu_kham,
+      "DICH_VU",
+      encounter.chi_tiets
     );
 
-    const medicineTotal =
-      encounter.don_thuoc?.chi_tiets.reduce(
-        (sum, m) => sum + Number(m.gia) * m.so_luong,
-        0
-      ) || 0;
+    const medicinePayment = await upsertPayment(
+      tx,
+      id_phieu_kham,
+      "THUOC",
+      encounter.don_thuoc?.chi_tiets || []
+    );
 
-    const total = serviceTotal + medicineTotal;
-
-    const existedPayment = await tx.thanh_toan.findUnique({
-      where: { id_phieu_kham },
-    });
-
-    let payment;
-
-    if (existedPayment) {
-      payment = await tx.thanh_toan.update({
-        where: { id_phieu_kham },
-        data: {
-          tong_tien: total,
-        },
-      });
-    } else {
-      payment = await tx.thanh_toan.create({
-        data: {
-          id_phieu_kham,
-          tong_tien: total,
-          trang_thai: "CHUA_THANH_TOAN",
-        },
-      });
-    }
-
-    return { encounter, payment };
+    return {
+      encounter,
+      payment: {
+        service: servicePayment,
+        medicine: medicinePayment,
+      },
+    };
   });
 };
 
@@ -169,11 +231,37 @@ const getMedicalHistories = (id) => {
     });
 };
 
+const startEncounter = async (id_phieu_kham) => {
+  const id = Number(id_phieu_kham);
+
+  const pk = await prisma.phieu_kham.findUnique({
+    where: { id_phieu_kham: id },
+  });
+
+  if (!pk) throw new Error("Không tìm thấy phiếu khám");
+
+  if (pk.trang_thai === "DA_HUY") {
+    throw new Error("Phiếu đã hủy, không thể bắt đầu khám");
+  }
+
+  if (pk.trang_thai === "DANG_KHAM") {
+    return pk;
+  }
+
+  return prisma.phieu_kham.update({
+    where: { id_phieu_kham: id },
+    data: {
+      trang_thai: "DANG_KHAM",
+    },
+  });
+};
+
 module.exports = {
   getAll,
   getById,
   insert,
   update,
   remove,
+  startEncounter,
   getMedicalHistories,
 };

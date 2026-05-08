@@ -1,4 +1,10 @@
-const { PrismaClient, GioiTinh, VaiTro, TrangThaiLichHen, TrangThaiPhieuKham, TrangThaiThanhToan, PhuongThucThanhToan, TrangThaiDichVu, TrangThaiTaiKhoan } = require('@prisma/client');
+const { 
+  PrismaClient, 
+  Prisma,
+  GioiTinh, VaiTro, TrangThaiLichHen, TrangThaiPhieuKham,
+  TrangThaiThanhToan, PhuongThucThanhToan, TrangThaiDichVu,
+  TrangThaiTaiKhoan, LoaiThanhToan
+} = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
@@ -207,13 +213,102 @@ async function main() {
     });
 
     // E. Thanh toán
-    await prisma.thanh_toan.create({
+    const dvKham = allDV[0]; // lấy dịch vụ khám
+
+    const ctKham = await prisma.chi_tiet_dich_vu.create({
       data: {
-        tong_tien: allDV[i].gia.add(allThuoc[i].gia.mul(10)),
-        trang_thai: 'DA_THANH_TOAN',
-        phuong_thuc: 'TIEN_MAT',
+        so_luong: 1,
+        gia: dvKham.gia,
+        trang_thai: TrangThaiDichVu.HOAN_THANH,
+        id_phieu_kham: phieu.id_phieu_kham,
+        id_dich_vu: dvKham.id_dich_vu,
+        id_bac_si: phieu.id_bac_si
+      }
+    });
+
+    const tt1 = await prisma.thanh_toan.create({
+      data: {
+        tong_tien: dvKham.gia,
+        trang_thai: TrangThaiThanhToan.DA_THANH_TOAN,
+        phuong_thuc: PhuongThucThanhToan.TIEN_MAT,
         ngay_thanh_toan: new Date(),
-        id_phieu_kham: phieu.id_phieu_kham
+        id_phieu_kham: phieu.id_phieu_kham,
+        loai_thanh_toan: LoaiThanhToan.PHI_KHAM
+      }
+    });
+
+    await prisma.thanh_toan_chi_tiet.create({
+      data: {
+        id_thanh_toan: tt1.id_thanh_toan,
+        loai_item: "DICH_VU",
+        id_item: ctKham.id_chi_tiet
+      }
+    });
+
+
+    // E2. Thanh toán dịch vụ (Xét nghiệm)
+    const dvXetNghiem = allDV[(i + 1) % allDV.length];
+
+    const ctDV = await prisma.chi_tiet_dich_vu.create({
+      data: {
+        so_luong: 1,
+        gia: dvXetNghiem.gia,
+        trang_thai: TrangThaiDichVu.HOAN_THANH,
+        id_phieu_kham: phieu.id_phieu_kham,
+        id_dich_vu: dvXetNghiem.id_dich_vu,
+        id_bac_si: phieu.id_bac_si
+      }
+    });
+
+    const tt2 = await prisma.thanh_toan.create({
+      data: {
+        tong_tien: dvXetNghiem.gia,
+        trang_thai: TrangThaiThanhToan.DA_THANH_TOAN,
+        phuong_thuc: PhuongThucThanhToan.TIEN_MAT,
+        ngay_thanh_toan: new Date(),
+        id_phieu_kham: phieu.id_phieu_kham,
+        loai_thanh_toan: LoaiThanhToan.DICH_VU
+      }
+    });
+
+    await prisma.thanh_toan_chi_tiet.create({
+      data: {
+        id_thanh_toan: tt2.id_thanh_toan,
+        loai_item: "DICH_VU",
+        id_item: ctDV.id_chi_tiet
+      }
+    });
+
+
+    // E3. Thanh toán thuốc
+    const ctThuoc = await prisma.chi_tiet_don_thuoc.create({
+      data: {
+        so_luong: 10,
+        lieu_dung: 'Ngày uống 2 lần',
+        gia: allThuoc[i].gia,
+        id_don_thuoc: don.id_don_thuoc,
+        id_thuoc: allThuoc[i].id_thuoc
+      }
+    });
+
+    const tongThuoc = allThuoc[i].gia.mul(new Prisma.Decimal(10));
+
+    const tt3 = await prisma.thanh_toan.create({
+      data: {
+        tong_tien: tongThuoc,
+        trang_thai: TrangThaiThanhToan.DA_THANH_TOAN,
+        phuong_thuc: PhuongThucThanhToan.TIEN_MAT,
+        ngay_thanh_toan: new Date(),
+        id_phieu_kham: phieu.id_phieu_kham,
+        loai_thanh_toan: LoaiThanhToan.THUOC
+      }
+    });
+
+    await prisma.thanh_toan_chi_tiet.create({
+      data: {
+        id_thanh_toan: tt3.id_thanh_toan,
+        loai_item: "THUOC",
+        id_item: ctThuoc.id_chi_tiet
       }
     });
   }

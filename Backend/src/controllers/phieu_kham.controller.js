@@ -53,13 +53,15 @@ exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);
 
-    const { id_benh_nhan, id_nhan_vien } = payload;
+    const { id_benh_nhan, id_bac_si, id_dat_lich } = payload;
 
-    if (!id_benh_nhan) {
-      throw new Error("Thiếu id_benh_nhan");
-    }
-    if (!id_nhan_vien) {
-      throw new Error("Thiếu id_bac_si");
+    if (!id_dat_lich) {
+      if (!id_benh_nhan) {
+        throw new Error("Thiếu id_benh_nhan");
+      }
+      if (!id_bac_si) {
+        throw new Error("Thiếu id_bac_si");
+      }
     }
 
     const created = await PhieuKham.insert(payload);
@@ -134,5 +136,23 @@ exports.getMedicalHistoriesByPatient = async (req, res) => {
   } catch (err) {
     console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.startEncounter = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await PhieuKham.startEncounter(id);
+
+    return res.json({
+      message: "Bắt đầu khám thành công",
+      data: result,
+    });
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    return res.status(400).json({
+      message: err.message,
+    });
   }
 };

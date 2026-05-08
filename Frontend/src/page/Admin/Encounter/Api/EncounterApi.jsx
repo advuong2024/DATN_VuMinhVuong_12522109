@@ -19,3 +19,9 @@ export const createEncounter = (data) => {
 export const updateEncounter = (id, data) => {
   return axiosClient.put(`/phieu-kham/${id}`, data);
 };
+
+export const updateEncounterStatus = (id, status) => {
+  return axiosClient.put(`/phieu-kham/${id}/status`, {
+    trang_thai: status,
+  });
+};

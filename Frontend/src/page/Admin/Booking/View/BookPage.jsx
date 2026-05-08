@@ -16,6 +16,7 @@ import { EyeOutlined } from "@ant-design/icons";
 import { getBookings, updateStatus } from "../Api/BookingApi"
 import { STATUS_COLORS, STATUS_OPTIONS } from "../Constants/booking_option";
 import { toast } from "react-toastify";
+import EncounterForm from "./ReceptionPaymentForm";
 
 export default function BookingManagement() {
   const [data, setData] = useState([]);
@@ -33,6 +34,8 @@ export default function BookingManagement() {
     startDate: null,
     endDate: null,
   });
+  const [openEncounter, setOpenEncounter] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -71,6 +74,7 @@ export default function BookingManagement() {
           : "",
         doctor: item.bac_si?.ten_nhan_vien,
         status: item.trang_thai,
+        reason: item.ly_do,
       }));
 
       setData(formatted);
@@ -79,6 +83,49 @@ export default function BookingManagement() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderStatusSelect = (status, record, handleChangeStatus) => {
+    const isDone = status === "DA_DEN";
+    const isCancelled = status === "DA_HUY";
+
+    let options = STATUS_OPTIONS;
+
+    if (isCancelled) {
+      options = STATUS_OPTIONS.filter(opt => opt.value === "DA_DEN");
+    }
+
+    const renderLabel = (opt) => (
+      <span style={{ color: opt.color }}>
+        {opt.label}
+      </span>
+    );
+
+    if (isDone) {
+      return (
+        <Select
+          value={status}
+          style={{ width: 130 }}
+          disabled
+          options={options.map(opt => ({
+            value: opt.value,
+            label: renderLabel(opt),
+          }))}
+        />
+      );
+    }
+
+    return (
+      <Select
+        value={status}
+        style={{ width: 130 }}
+        onChange={(value) => handleChangeStatus(value, record)}
+        options={options.map(opt => ({
+          value: opt.value,
+          label: renderLabel(opt),
+        }))}
+      />
+    );
   };
 
   const columns = [
@@ -95,25 +142,7 @@ export default function BookingManagement() {
       dataIndex: "status",
       align: "center",
       width: 150,
-      render: (status, record) => (
-        <Select
-          value={status}
-          style={{ width: 130 }}
-          onChange={(value) => handleChangeStatus(value, record)}
-          options={STATUS_OPTIONS.map((opt) => ({
-            value: opt.value,
-            label: <span style={{ color: opt.color }}>{opt.label}</span>,
-          }))}
-          labelRender={(option) => {
-            const opt = STATUS_OPTIONS.find(o => o.value === option.value);
-            return (
-              <span style={{ color: opt?.color }}>
-                {opt?.label}
-              </span>
-            );
-          }}
-        />
-      ),
+      render: (status, record) => renderStatusSelect(status, record, handleChangeStatus),
     },
     {
       title: "Actions",
@@ -128,6 +157,12 @@ export default function BookingManagement() {
   ];
 
   const handleChangeStatus = async (value, record) => {
+    if (value === "DA_DEN") {
+      setSelectedBooking(record);
+      setOpenEncounter(true);
+      return;
+    }
+
     try {
       setUpdating(true);
 
@@ -246,6 +281,23 @@ export default function BookingManagement() {
         <DataTable columns={columns} data={data} loading={false} />
 
         <Modal
+          open={openEncounter}
+          onCancel={() => setOpenEncounter(false)}
+          footer={null}
+          title="Create Medical Record"
+          width={800}
+          centered
+        >
+          <EncounterForm
+            booking={selectedBooking}
+            onSuccess={() => {
+              setOpenEncounter(false);
+              fetchData();
+            }}
+          />
+        </Modal>
+
+        <Modal
           open={openView}
           onCancel={() => setOpenView(false)}
           footer={null}
@@ -277,12 +329,8 @@ export default function BookingManagement() {
                 {viewRecord.doctor}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Status">
-                {
-                  STATUS_OPTIONS.find(
-                    (x) => x.value === viewRecord.status
-                  )?.label
-                }
+              <Descriptions.Item label="Reason">
+                {viewRecord.reason || "-"}
               </Descriptions.Item>
             </Descriptions>
           )}

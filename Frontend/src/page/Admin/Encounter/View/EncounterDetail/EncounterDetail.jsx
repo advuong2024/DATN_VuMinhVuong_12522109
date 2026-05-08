@@ -1,4 +1,4 @@
-import { Card, Breadcrumb } from "antd";
+import { Card, Breadcrumb, Row, Col } from "antd";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import EncounterForm from "./EncounterFrom";
@@ -105,21 +105,43 @@ export default function EncounterPage() {
 
   return (
     <div style={{ padding: 16 }}>
-      <Breadcrumb style={{ marginBottom: 16 }}>
-        <Breadcrumb.Item onClick={() => navigate("/admin/encounter")} style={{ cursor: "pointer" }}>
-          Encounter Management
-        </Breadcrumb.Item>
-
-        <Breadcrumb.Item>Examination</Breadcrumb.Item>
-      </Breadcrumb>
+      <Breadcrumb
+        items={[
+          {
+            title: (
+              <span onClick={() => navigate("/admin/encounter")} style={{ cursor: "pointer" }}>
+                Encounter Management
+              </span>
+            ),
+          },
+          {
+            title: "Examination",
+          },
+        ]}
+      />
       <Card title="Explore information" style={{ marginBottom: 16 }}>
-        <p><b>Patient:</b> {bookingData?.name}</p>
-        <p><b>Docter:</b> {bookingData?.doctor}</p>
+        <Row gutter={[16, 8]}>
+          <Col span={12}>
+            <b>Patient:</b> {bookingData?.name}
+          </Col>
+
+          <Col span={12}>
+            <b>Doctor:</b> {bookingData?.doctor}
+          </Col>
+
+          <Col span={12}>
+            <b>Phone:</b> {bookingData?.phone}
+          </Col>
+
+          <Col span={12}>
+            <b>Specialty:</b> {bookingData?.specialty}
+          </Col>
+        </Row>
       </Card>
 
       <EncounterForm
-        services={services}
-        medicines={medicines}
+        servicesOptions={services}
+        medicinesOptions={medicines}
         onSubmit={handleSubmit}
       />
     </div>

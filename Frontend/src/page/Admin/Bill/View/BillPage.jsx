@@ -4,13 +4,13 @@ import {
   Tabs,
   Tag,
   Space,
+  Modal,
 } from "antd";
 import { useState, useEffect } from "react";
 import DataTable from "@/components/common/DataTable";
 import { getBills } from "../Api/BillApi";
 import dayjs from "dayjs";
-
-const { TabPane } = Tabs;
+import PaymentForm from "./BillPageFrom";
 
 const BillingPage = () => {
   const [activeTab, setActiveTab] = useState("pending");
@@ -18,53 +18,65 @@ const BillingPage = () => {
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
 
+  const [open, setOpen] = useState(false);
+  const [selectedBill, setSelectedBill] = useState(null);
+  const [mode, setMode] = useState("view");
+
   useEffect(() => {
     const timeout = setTimeout(() => {
-        setDebouncedKeyword(keyword);
+      setDebouncedKeyword(keyword);
     }, 500);
 
     return () => clearTimeout(timeout);
   }, [keyword]);
 
   useEffect(() => {
-   fetchData();
+    fetchData();
   }, [activeTab, debouncedKeyword]);
 
   const fetchData = async () => {
     try {
-        const res = await getBills({
+      const res = await getBills({
         keyword: debouncedKeyword,
         trang_thai:
-            activeTab === "pending"
+          activeTab === "pending"
             ? "CHUA_THANH_TOAN"
             : "DA_THANH_TOAN",
-        });
+      });
 
-        const mapped = res.data.map((item) => ({
-            key: item.id_thanh_toan,
-            invoiceId: "IN" + item.id_thanh_toan,
-            name: item.patient_name,
-            phone: item.patient_phone,
-            date: dayjs(item.ngay_thanh_toan || item.ngay_kham).format("DD/MM/YYYY"),
-            doctor: item.doctor_name,
-            total: Number(item.tong_tien).toLocaleString() + " VND",
-            status:
-                item.trang_thai === "CHUA_THANH_TOAN"
-                ? "pending"
-                : "paid",
-        }));
+      const mapped = res.data.map((item) => ({
+        key: item.id_thanh_toan,
+        invoiceId: "IN" + item.id_thanh_toan,
+        name: item.patient_name,
+        phone: item.patient_phone,
+        date: dayjs(item.ngay_thanh_toan || item.ngay_kham).format("DD/MM/YYYY"),
+        doctor: item.doctor_name,
+        total: Number(item.tong_tien).toLocaleString() + " VND",
+        status:
+          item.trang_thai === "CHUA_THANH_TOAN"
+            ? "pending"
+            : "paid",
+        raw: item,
+      }));
 
-        setData(mapped);
+      setData(mapped);
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
+  };
+
+
+  const openModal = (record, type) => {
+    setSelectedBill(record);
+    setMode(type);
+    setOpen(true);
   };
 
   const columns = [
     {
       title: "Customer Name",
       dataIndex: "name",
-      width: 185,
+      width: 180,
     },
     {
       title: "Phone Number",
@@ -80,7 +92,7 @@ const BillingPage = () => {
     {
       title: "Doctor Name",
       dataIndex: "doctor",
-      width: 185,
+      width: 180,
     },
     {
       title: "Total Amount",
@@ -90,38 +102,40 @@ const BillingPage = () => {
     {
       title: "Status",
       dataIndex: "status",
-      width: 150,
+      width: 140,
       align: "center",
       render: (_, record) => (
-        <Tag color={record.status === "pending" ? "green" : "blue"}>
+        <Tag color={record.status === "pending" ? "orange" : "green"}>
           {record.status === "pending"
-            ? "Pending Payment"
+            ? "Pending"
             : "Paid"}
         </Tag>
       ),
     },
     {
       title: "Actions",
-      width: 160,
+      width: 180,
       align: "center",
       render: (_, record) => (
-        <Button type="primary">
-          {record.status === "pending"
-            ? "Process Payment"
-            : "View"}
-        </Button>
-      ),
-    },
-  ];
+        <Space>
+          {record.status === "paid" && (
+            <Button
+              onClick={() => openModal(record, "view")}
+            >
+              View
+            </Button>
+          )}
 
-  const tabItems = [
-    {
-        key: "pending",
-        label: "Waiting for Payment",
-    },
-    {
-        key: "paid",
-        label: "Paid Invoices",
+          {record.status === "pending" && (
+            <Button
+              type="primary"
+              onClick={() => openModal(record, "process")}
+            >
+              Process
+            </Button>
+          )}
+        </Space>
+      ),
     },
   ];
 
@@ -132,14 +146,17 @@ const BillingPage = () => {
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
-        items={tabItems}
+        items={[
+          { key: "pending", label: "Waiting Payment" },
+          { key: "paid", label: "Paid Invoices" },
+        ]}
       />
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
         <Input
-            placeholder="Search by invoice / customer"
-            style={{ width: 300 }}
-            onChange={(e) => setKeyword(e.target.value)}
+          placeholder="Search invoice / customer"
+          style={{ width: 300 }}
+          onChange={(e) => setKeyword(e.target.value)}
         />
       </div>
 
@@ -148,6 +165,20 @@ const BillingPage = () => {
         columns={columns}
         data={data}
       />
+
+      <Modal
+        open={open}
+        onCancel={() => setOpen(false)}
+        footer={null}
+        width={900}
+        destroyOnHidden
+        centered
+      >
+        <PaymentForm
+          record={selectedBill}
+          mode={mode}
+        />
+      </Modal>
     </div>
   );
 };

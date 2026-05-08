@@ -10,3 +10,18 @@ export const updateStatus = async (id, status) => {
   });
   return res;
 };
+
+export const createEncounter = async (data) => {
+  const res = await axiosClient.post("/phieu-kham", data);
+  return res;
+};
+
+export const createPayment = async (data) => {
+  const res = await axiosClient.post("/thanh-toan", data);
+  return res;
+};
+
+export const getServices = async () => {
+  const res = await axiosClient.get("/dich-vu");
+  return res;
+};
