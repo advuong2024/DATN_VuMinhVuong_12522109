@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `don_thuoc` ADD COLUMN `trang_thai_mua` ENUM('CHUA_QUYET_DINH', 'DA_MUA', 'KHONG_MUA') NOT NULL DEFAULT 'CHUA_QUYET_DINH';

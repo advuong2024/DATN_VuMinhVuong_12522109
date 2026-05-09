@@ -1,11 +1,33 @@
-import { Card, Table, Button, Checkbox, Divider, message } from "antd";
+import {
+  Card,
+  Table,
+  Button,
+  Checkbox,
+  Divider,
+  message,
+  Descriptions,
+  Select,
+} from "antd";
 import { useEffect, useState } from "react";
+import { payBill } from "../Api/BillApi";
+import { toast } from "react-toastify";
 
-export default function PaymentForm({ record, mode }) {
+export default function PaymentForm({ record, mode, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+
   const [hasMedicine, setHasMedicine] = useState(false);
 
-  const [service, setService] = useState({ items: [], total: 0 });
-  const [medicine, setMedicine] = useState({ items: [], total: 0 });
+  const [paymentMethod, setPaymentMethod] = useState("TIEN_MAT");
+
+  const [service, setService] = useState({
+    items: [],
+    total: 0,
+  });
+
+  const [medicine, setMedicine] = useState({
+    items: [],
+    total: 0,
+  });
 
   useEffect(() => {
     if (!record) return;
@@ -23,101 +45,207 @@ export default function PaymentForm({ record, mode }) {
       0
     );
 
-    setService({ items: serviceItems, total: serviceTotal });
-    setMedicine({ items: medicineItems, total: medicineTotal });
+    setService({
+      items: serviceItems,
+      total: serviceTotal,
+    });
 
-    setHasMedicine(false);
+    setMedicine({
+      items: medicineItems,
+      total: medicineTotal,
+    });
+
+    setHasMedicine(record?.medicine?.items?.length > 0);
   }, [record]);
 
   const serviceColumns = [
-    { title: "Service", dataIndex: "name" },
-    { title: "Price", dataIndex: "price" },
-    { title: "Qty", dataIndex: "quantity" },
+    {
+      title: "Service",
+      dataIndex: "name",
+    },
+    {
+      title: "Qty",
+      dataIndex: "quantity",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      render: (v) => Number(v).toLocaleString(),
+    },
   ];
 
   const medicineColumns = [
-    { title: "Medicine", dataIndex: "name" },
-    { title: "Price", dataIndex: "price" },
-    { title: "Qty", dataIndex: "quantity" },
+    {
+      title: "Medicine",
+      dataIndex: "name",
+    },
+    {
+      title: "Qty",
+      dataIndex: "quantity",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      render: (v) => Number(v).toLocaleString(),
+    },
   ];
 
   const total =
     service.total + (hasMedicine ? medicine.total : 0);
 
-  const handlePay = () => {
-    const payload = {
-      id_phieu_kham: record?.key,
-      tong_tien: total,
-      dich_vu: service.items,
-      thuoc: hasMedicine ? medicine.items : [],
-      co_mua_thuoc: hasMedicine,
-    };
+  const handlePay = async () => {
+    try {
+      setLoading(true);
 
-    console.log("PAYLOAD:", payload);
+      const payload = {
+        id_phieu_kham: record?.id_phieu_kham,
+        phuong_thuc: paymentMethod,
+        co_mua_thuoc: hasMedicine,
+      };
 
-    message.success("Payment success");
+      await payBill(payload);
+
+      toast.success("Payment success");
+
+      onSuccess?.();
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Payment failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (!record) return null;
+
   return (
-    <div>
-      <h2>
+    <div style={{ maxWidth: 850, margin: "0 auto" }}>
+      <h3 style={{ marginBottom: 12 }}>
         {mode === "view"
           ? "View Payment Detail"
           : "Process Payment"}
-      </h2>
+      </h3>
 
-      <Card title="Service Payment" style={{ marginBottom: 16 }}>
+      <Card size="small" style={{ marginBottom: 12 }}>
+        <Descriptions size="small" column={2}>
+          <Descriptions.Item label="Patient">
+            {record?.name || "-"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Phone">
+            {record?.phone || "-"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Doctor">
+            {record?.doctor || "-"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Invoice">
+            {record?.invoiceId || "-"}
+          </Descriptions.Item>
+        </Descriptions>
+      </Card>
+
+      <Card
+        size="small"
+        title="Services"
+        style={{ marginBottom: 12 }}
+      >
         <Table
+          size="small"
           dataSource={service.items}
           columns={serviceColumns}
           pagination={false}
           rowKey="id"
         />
 
-        <div style={{ textAlign: "right", marginTop: 12 }}>
-          <b>Service Total: {service.total}</b>
+        <div style={{ textAlign: "right", marginTop: 8 }}>
+          <b>
+            Service Total:{" "}
+            {service.total.toLocaleString()}
+          </b>
         </div>
       </Card>
 
-      <Card title="Medicine (Optional)">
+      <Card
+        size="small"
+        title="Medicine (Optional)"
+        style={{ marginBottom: 12 }}
+      >
         <Table
+          size="small"
           dataSource={medicine.items}
           columns={medicineColumns}
           pagination={false}
           rowKey="id"
         />
 
-        <Divider />
+        <Divider style={{ margin: "10px 0" }} />
 
         <Checkbox
           disabled={mode === "view"}
           checked={hasMedicine}
-          onChange={(e) => setHasMedicine(e.target.checked)}
+          onChange={(e) =>
+            setHasMedicine(e.target.checked)
+          }
         >
           Customer buys medicine
         </Checkbox>
 
-        <div style={{ textAlign: "right", marginTop: 12 }}>
+        <div style={{ textAlign: "right", marginTop: 8 }}>
           <b>
             Medicine Total:{" "}
-            {hasMedicine ? medicine.total : 0}
+            {(
+              hasMedicine ? medicine.total : 0
+            ).toLocaleString()}
           </b>
         </div>
       </Card>
 
-      {/* ===== FINAL TOTAL + SINGLE BUTTON ===== */}
-      <Card style={{ marginTop: 16, textAlign: "right" }}>
-        <h3>
-          Total Payment: {total}
-        </h3>
+      <Card size="small">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <b>Payment Method:</b>
+
+            <Select
+              value={paymentMethod}
+              style={{ width: 180, marginLeft: 10 }}
+              onChange={setPaymentMethod}
+              options={[
+                {
+                  label: "Cash",
+                  value: "TIEN_MAT",
+                },
+                {
+                  label: "Bank Transfer",
+                  value: "CHUYEN_KHOAN",
+                },
+              ]}
+            />
+          </div>
+
+          <h3>
+            Total: {total.toLocaleString()}
+          </h3>
+        </div>
 
         {mode === "process" && (
-          <Button
-            type="primary"
-            onClick={handlePay}
-          >
-            Payment Bill
-          </Button>
+          <div style={{ textAlign: "right", marginTop: 16 }}>
+            <Button
+              type="primary"
+              loading={loading}
+              onClick={handlePay}
+            >
+              Payment Bill
+            </Button>
+          </div>
         )}
       </Card>
     </div>

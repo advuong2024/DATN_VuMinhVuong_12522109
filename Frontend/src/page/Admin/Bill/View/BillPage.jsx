@@ -8,7 +8,7 @@ import {
 } from "antd";
 import { useState, useEffect } from "react";
 import DataTable from "@/components/common/DataTable";
-import { getBills } from "../Api/BillApi";
+import { getBills, getBillDetails } from "../Api/BillApi";
 import dayjs from "dayjs";
 import PaymentForm from "./BillPageFrom";
 
@@ -21,6 +21,7 @@ const BillingPage = () => {
   const [open, setOpen] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [mode, setMode] = useState("view");
+  const [reload, setReload] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -32,7 +33,7 @@ const BillingPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, [activeTab, debouncedKeyword]);
+  }, [activeTab, debouncedKeyword, reload]);
 
   const fetchData = async () => {
     try {
@@ -52,12 +53,15 @@ const BillingPage = () => {
         date: dayjs(item.ngay_thanh_toan || item.ngay_kham).format("DD/MM/YYYY"),
         doctor: item.doctor_name,
         total: Number(item.tong_tien).toLocaleString() + " VND",
+        loai_thanh_toan: item.loai_thanh_toan,
         status:
           item.trang_thai === "CHUA_THANH_TOAN"
             ? "pending"
             : "paid",
         raw: item,
       }));
+
+      console.log("FETCHED BILLS:", mapped);
 
       setData(mapped);
     } catch (err) {
@@ -66,22 +70,28 @@ const BillingPage = () => {
   };
 
 
-  const openModal = (record, type) => {
-    setSelectedBill(record);
-    setMode(type);
-    setOpen(true);
+  const openModal = async (record, type) => {
+    try {
+      const res = await getBillDetails(record.key);
+
+      const merged = {
+        ...record,
+        ...res.data,
+      };
+
+      setSelectedBill(merged);
+      setMode(type);
+      setOpen(true);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const columns = [
     {
       title: "Customer Name",
       dataIndex: "name",
-      width: 180,
-    },
-    {
-      title: "Phone Number",
-      dataIndex: "phone",
-      width: 150,
+      width: 170,
     },
     {
       title: "Date",
@@ -92,7 +102,7 @@ const BillingPage = () => {
     {
       title: "Doctor Name",
       dataIndex: "doctor",
-      width: 180,
+      width: 170,
     },
     {
       title: "Total Amount",
@@ -100,9 +110,20 @@ const BillingPage = () => {
       width: 150,
     },
     {
+      title: "Payment Method",
+      dataIndex: "loai_thanh_toan",
+      width: 180,
+      render: (value) => {
+        if (value === "PHI_KHAM") return "Examination Fee";
+        if (value === "THUOC") return "Medication";
+        if (value === "DICH_VU") return "Service";
+        return value || "-";
+      },
+    },
+    {
       title: "Status",
       dataIndex: "status",
-      width: 140,
+      width: 120,
       align: "center",
       render: (_, record) => (
         <Tag color={record.status === "pending" ? "orange" : "green"}>
@@ -114,12 +135,13 @@ const BillingPage = () => {
     },
     {
       title: "Actions",
-      width: 180,
+      width: 130,
       align: "center",
       render: (_, record) => (
         <Space>
           {record.status === "paid" && (
             <Button
+              type="primary"
               onClick={() => openModal(record, "view")}
             >
               View
@@ -177,6 +199,10 @@ const BillingPage = () => {
         <PaymentForm
           record={selectedBill}
           mode={mode}
+          onSuccess={() => {
+            setOpen(false);
+            setReload(!reload);
+          }}
         />
       </Modal>
     </div>

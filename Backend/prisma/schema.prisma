@@ -70,6 +70,12 @@ enum LoaiItemThanhToan {
   THUOC
 }
 
+enum ThuocTrangThai {
+  CHUA_QUYET_DINH
+  DA_MUA
+  KHONG_MUA
+}
+
 //////////////////////////////////////////////////////
 // MASTER DATA
 //////////////////////////////////////////////////////
@@ -266,7 +272,7 @@ model don_thuoc {
   ngay_ke_don DateTime @default(now())
   id_phieu_kham Int @unique
   phieu_kham phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
-
+  trang_thai_mua ThuocTrangThai @default(CHUA_QUYET_DINH)
   chi_tiets chi_tiet_don_thuoc[]
 }
 

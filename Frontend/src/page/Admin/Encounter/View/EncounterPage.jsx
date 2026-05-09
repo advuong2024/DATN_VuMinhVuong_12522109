@@ -220,14 +220,13 @@ export default function BookingManagement() {
                 console.log(values);
 
                 const newItem = {
-                    key: Date.now().toString(),
-                    name: values.patient?.name,
-                    phone: values.patient?.phone,
-                    specialty: values.booking?.service,
-                    date: values.booking?.date,
-                    time: values.booking?.time,
-                    doctor: values.booking?.doctor,
-                    status: "CHO",
+                  key: Date.now().toString(),
+                  name: values.patient?.name,
+                  phone: values.patient?.phone,
+                  specialty: values.booking?.service,
+                  date: values.booking?.date,
+                  time: values.booking?.time,
+                  doctor: values.booking?.doctor,
                 };
 
                 setData((prev) => [newItem, ...prev]);
