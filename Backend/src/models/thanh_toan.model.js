@@ -167,15 +167,13 @@ const getPaymentDetailByPhieuKham = async (
       },
       include: {
         phieu_kham: true,
+        chi_tiets: true,
       },
     });
 
   if (!payment) {
     throw new Error("Not found");
   }
-
-  const id_phieu_kham =
-    payment.id_phieu_kham;
 
   let consultation = null;
 
@@ -189,74 +187,115 @@ const getPaymentDetailByPhieuKham = async (
     total: 0,
   };
 
-  if (
-    payment.loai_thanh_toan === "PHI_KHAM"
-  ) {
-    consultation = {
-      name: "Phí khám",
-      price: Number(
-        payment.phieu_kham.phi_kham || 0
-      ),
-      quantity: 1,
-      total: Number(
-        payment.phieu_kham.phi_kham || 0
-      ),
-    };
-  }
+  const servicePaymentDetails =
+    payment.chi_tiets.filter(
+      (i) =>
+        i.loai_item === "PHI_KHAM" ||
+        i.loai_item === "DICH_VU"
+    );
 
-  if (
-    payment.loai_thanh_toan === "DICH_VU"
-  ) {
-    const data =
+  if (servicePaymentDetails.length > 0) {
+    const chiTietIds =
+      servicePaymentDetails.map(
+        (i) => i.id_item
+      );
+
+    const chiTietDichVus =
       await prisma.chi_tiet_dich_vu.findMany({
-        where: { id_phieu_kham },
+        where: {
+          id_chi_tiet: {
+            in: chiTietIds,
+          },
+        },
         include: {
           dich_vu: true,
         },
       });
 
-    const items = data.map((i) => ({
-      id: i.id_dich_vu,
-      name: i.dich_vu.ten_dich_vu,
-      price: Number(i.gia),
-      quantity: i.so_luong,
-      total:
-        Number(i.gia) * i.so_luong,
-    }));
+    const mappedItems =
+      servicePaymentDetails.map((p) => {
+        const detail =
+          chiTietDichVus.find(
+            (d) =>
+              d.id_chi_tiet === p.id_item
+          );
+
+        return {
+          id: p.id_item,
+          loai_item: p.loai_item,
+          name:
+            detail?.dich_vu
+              ?.ten_dich_vu || "",
+          price: Number(p.gia),
+          quantity: p.so_luong,
+          total:
+            Number(p.gia) * p.so_luong,
+        };
+      });
+
+    consultation =
+      mappedItems.find(
+        (i) =>
+          i.loai_item === "PHI_KHAM"
+      ) || null;
+
+    const serviceItems =
+      mappedItems.filter(
+        (i) =>
+          i.loai_item === "DICH_VU"
+      );
 
     services = {
-      items,
-      total: items.reduce(
+      items: serviceItems,
+      total: serviceItems.reduce(
         (s, i) => s + i.total,
         0
       ),
     };
   }
 
-  if (
-    payment.loai_thanh_toan === "THUOC"
-  ) {
-    const donThuoc =
-      await prisma.don_thuoc.findFirst({
-        where: { id_phieu_kham },
-        include: {
-          chi_tiets: {
-            include: {
-              thuoc: true,
-            },
+  const medicinePaymentDetails =
+    payment.chi_tiets.filter(
+      (i) => i.loai_item === "THUOC"
+    );
+
+  if (medicinePaymentDetails.length > 0) {
+    const chiTietThuocIds =
+      medicinePaymentDetails.map(
+        (i) => i.id_item
+      );
+
+    const chiTietThuocs =
+      await prisma.chi_tiet_don_thuoc.findMany({
+        where: {
+          id_chi_tiet: {
+            in: chiTietThuocIds,
           },
+        },
+        include: {
+          thuoc: true,
         },
       });
 
     const items =
-      donThuoc?.chi_tiets?.map((i) => ({
-        id: i.id_thuoc,
-        name: i.thuoc.ten_thuoc,
-        price: Number(i.gia),
-        quantity: i.so_luong,
-        total:
-          Number(i.gia) * i.so_luong,
-      })) || [];
+      medicinePaymentDetails.map((p) => {
+        const detail =
+          chiTietThuocs.find(
+            (t) =>
+              t.id_chi_tiet === p.id_item
+          );
+
+        return {
+          id: p.id_item,
+          name:
+            detail?.thuoc
+              ?.ten_thuoc || "",
+          price: Number(p.gia),
+          quantity: p.so_luong,
+          total:
+            Number(p.gia) * p.so_luong,
+        };
+      });
 
     medicines = {
       items,
@@ -271,10 +310,8 @@ const getPaymentDetailByPhieuKham = async (
     id_thanh_toan:
       payment.id_thanh_toan,
 
-    id_phieu_kham,
-
-    loai_thanh_toan:
-      payment.loai_thanh_toan,
+    id_phieu_kham:
+      payment.id_phieu_kham,
 
     consultation,
 

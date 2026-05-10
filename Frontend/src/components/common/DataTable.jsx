@@ -9,6 +9,7 @@ export default function DataTable({
   loading = false,
   showSTT = true,
   pageSizeDefault = 10,
+  expandable,
 }) {
   const [pagination, setPagination] = useState({
     current: 1,
@@ -40,12 +41,17 @@ export default function DataTable({
   });
 
   const finalColumns = showSTT
-    ? [sttColumn, ...enhanceColumns]
-    : enhanceColumns;
+  ? [
+      sttColumn,
+      ...enhanceColumns,
+      Table.EXPAND_COLUMN,
+    ]
+  : [...enhanceColumns, Table.EXPAND_COLUMN];
 
   return (
     <Table
       columns={finalColumns}
+      expandable={expandable}
       dataSource={data}
       loading={loading}
       rowKey={(record) => record.id || record.key}

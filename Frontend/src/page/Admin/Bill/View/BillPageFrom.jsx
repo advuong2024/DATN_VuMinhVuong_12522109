@@ -29,34 +29,45 @@ export default function PaymentForm({ record, mode, onSuccess }) {
     total: 0,
   });
 
-  useEffect(() => {
-    if (!record) return;
+useEffect(() => {
+  if (!record) return;
 
-    const serviceItems = record?.service?.items || [];
-    const medicineItems = record?.medicine?.items || [];
+  const consultationItem = record.consultation
+    ? [
+        {
+          id: record.consultation.id,
+          name: record.consultation.name,
+          price: record.consultation.price,
+          quantity: record.consultation.quantity,
+        },
+      ]
+    : [];
 
-    const serviceTotal = serviceItems.reduce(
-      (sum, i) => sum + i.price * (i.quantity || 1),
-      0
-    );
+  const serviceItems = [
+    ...consultationItem,
+    ...(record?.services?.items || []),
+  ];
 
-    const medicineTotal = medicineItems.reduce(
-      (sum, i) => sum + i.price * (i.quantity || 1),
-      0
-    );
+  const medicineItems =
+    record?.medicines?.items || [];
 
-    setService({
-      items: serviceItems,
-      total: serviceTotal,
-    });
+  setService({
+    items: serviceItems,
+    total:
+      (record?.consultation?.total || 0) +
+      (record?.services?.total || 0),
+  });
 
-    setMedicine({
-      items: medicineItems,
-      total: medicineTotal,
-    });
+  setMedicine({
+    items: medicineItems,
+    total:
+      record?.medicines?.total || 0,
+  });
 
-    setHasMedicine(record?.medicine?.items?.length > 0);
-  }, [record]);
+  setHasMedicine(
+    medicineItems.length > 0
+  );
+}, [record]);
 
   const serviceColumns = [
     {

@@ -119,10 +119,11 @@ exports.getStatus = async (req, res) => {
       trang_thai: item.trang_thai,
       ngay_thanh_toan: item.ngay_thanh_toan,
       ngay_kham: item.phieu_kham?.ngay_kham,
-      loai_thanh_toan: item.loai_thanh_toan,
+      loai_item: item.chi_tiets?.[0]?.loai_item,
       patient_name: item.phieu_kham?.benh_nhan?.ten_benh_nhan,
       patient_phone: item.phieu_kham?.benh_nhan?.so_dien_thoai,
       doctor_name: item.phieu_kham?.bac_si?.ten_nhan_vien,
+      id_phieu_kham: item.id_phieu_kham,
     }));
 
     res.json(result);

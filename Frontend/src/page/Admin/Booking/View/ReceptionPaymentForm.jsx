@@ -68,7 +68,6 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
 
         await createPayment({
           id_phieu_kham: encounterId,
-          loai_thanh_toan: "PHI_KHAM",
           trang_thai: "DA_THANH_TOAN",
           tong_tien: values.tam_ung || 0,
           phuong_thuc: values.phuong_thuc,

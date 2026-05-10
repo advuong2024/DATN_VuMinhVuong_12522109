@@ -65,11 +65,6 @@ enum LoaiThanhToan {
   THUOC
 }
 
-enum LoaiItemThanhToan {
-  DICH_VU
-  THUOC
-}
-
 enum ThuocTrangThai {
   CHUA_QUYET_DINH
   DA_MUA
@@ -298,10 +293,8 @@ model thanh_toan {
 
   id_phieu_kham Int
   phieu_kham phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
-  loai_thanh_toan LoaiThanhToan?
   chi_tiets thanh_toan_chi_tiet[]
   created_at DateTime @default(now())
-  @@unique([id_phieu_kham, loai_thanh_toan])
 }
 
 model thanh_toan_chi_tiet {
@@ -310,11 +303,11 @@ model thanh_toan_chi_tiet {
   id_thanh_toan Int
   thanh_toan thanh_toan @relation(fields: [id_thanh_toan], references: [id_thanh_toan])
 
-  loai_item LoaiItemThanhToan
+  loai_item LoaiThanhToan
   id_item Int
 
-  gia Float?
-  so_luong Int?
+  gia Decimal @db.Decimal(10,2)
+  so_luong Int
 
   created_at DateTime @default(now())
 
