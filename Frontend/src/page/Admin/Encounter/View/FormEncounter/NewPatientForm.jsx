@@ -55,14 +55,14 @@ export default function NewPatientForm() {
         }
 
         const patientPayload = {
-            name: values.name,
-            phone: values.phone,
-            gender: values.gender,
-            dob: values.dob?.format("YYYY-MM-DD"),
-            address: values.address,
-            cccd: values.cccd,
-            email: values.email,
-            medicalHistory: values.medicalHistory,
+          name: values.name,
+          phone: values.phone,
+          gender: values.gender,
+          dob: values.dob?.format("YYYY-MM-DD"),
+          address: values.address,
+          cccd: values.cccd,
+          email: values.email,
+          medicalHistory: values.medicalHistory,
         };
 
         const newPatient = await createPatient(patientPayload);
@@ -75,12 +75,12 @@ export default function NewPatientForm() {
         }
 
         const bookingPayload = {
-            id_benh_nhan: patientId,
-            id_chuyen_khoa: Number(values.service),
-            id_bac_si: Number(values.doctor),
-            thoi_gian: dayjs().toISOString(),
-            ly_do: values.note || "",
-            trang_thai: "DA_DEN",
+          id_benh_nhan: patientId,
+          id_chuyen_khoa: Number(values.service),
+          id_bac_si: Number(values.doctor),
+          thoi_gian: dayjs().toISOString(),
+          ly_do: values.note || "",
+          trang_thai: "DA_DEN",
         };
 
         console.log("BOOKING:", bookingPayload);

@@ -18,8 +18,9 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { getCK, getDoctorCK, getCustomer, 
   postBook, postCustomer, updateCustomer, 
-  getBookedSlots, 
+  getBookedSlots, getFindPatient,
 } from "../Api/BookingApi"
+import { toast } from "react-toastify";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -33,12 +34,16 @@ export default function BookingPage() {
   const [patientLoaded, setPatientLoaded] = useState(false);
   const [timeError, setTimeError] = useState("");
   const [form] = Form.useForm();
+  const [lookupForm] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const [specialty, setSpecialty] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [bookedSlots, setBookedSlots] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [patientCode, setPatientCode] = useState(null);
 
   useEffect(() => {
     fetchCK();
@@ -61,6 +66,7 @@ export default function BookingPage() {
       );
     } catch (err) {
       console.error(err);
+      toast.error("Không tìm thấy thông tin chuyên khoa")
     }
   };
 
@@ -193,14 +199,14 @@ export default function BookingPage() {
 
       if (patientType === "new") {
         const customerRes = await postCustomer({
-          ten_benh_nhan: values.ten_benh_nhan,
-          so_dien_thoai: values.so_dien_thoai,
-          ngay_sinh: values.ngay_sinh,
-          gioi_tinh: values.gioi_tinh,
-          CCCD: values.CCCD,
+          name: values.ten_benh_nhan,
+          phone: values.so_dien_thoai,
+          dob: values.ngay_sinh,
+          gender: values.gioi_tinh,
+          cccd: values.CCCD,
           email: values.email,
-          dia_chi: values.dia_chi,
-          tien_su_benh: values.tien_su_benh,
+          address: values.dia_chi,
+          medicalhistory: values.tien_su_benh,
         });
 
         patientId = customerRes?.id_benh_nhan || customerRes?.data?.id_benh_nhan;
@@ -242,7 +248,7 @@ export default function BookingPage() {
       // setStep(0);
     } catch (err) {
       console.error("Lỗi đặt lịch:", err);
-      message.error("Đặt lịch thất bại ❌");
+      toast.error("Đặt lịch thất bại ❌");
     }
   };
 
@@ -251,14 +257,14 @@ export default function BookingPage() {
       const values = form.getFieldsValue(true);
 
       await updateCustomer(values.id_benh_nhan, {
-        ten_benh_nhan: values.ten_benh_nhan,
-        so_dien_thoai: values.so_dien_thoai,
-        ngay_sinh: values.ngay_sinh,
-        gioi_tinh: values.gioi_tinh,
-        CCCD: values.CCCD,
+        name: values.ten_benh_nhan,
+        phone: values.so_dien_thoai,
+        dob: values.ngay_sinh,
+        gender: values.gioi_tinh,
+        cccd: values.CCCD,
         email: values.email,
-        dia_chi: values.dia_chi,
-        tien_su_benh: values.tien_su_benh,
+        address: values.dia_chi,
+        medicalhistory: values.tien_su_benh,
       });
 
       setOriginalData(values);
@@ -282,11 +288,38 @@ export default function BookingPage() {
     setSelectedTime(null);
   };
 
+  const handleSearch = async (values) => {
+    try {
+      setLoading(true);
+      setPatientCode(null);
+
+      const keyword = values.keyword;
+
+      const isPhone = /^0\d{9}$/.test(keyword);
+
+      const res = await getFindPatient({
+        phone: isPhone ? keyword : "",
+        cccd: isPhone ? "" : keyword,
+      });
+
+      setPatientCode(res.id_benh_nhan);
+    } catch (err) {
+      console.error(err);
+      toast.error("Không tìm thấy bệnh nhân");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const maskedCCCD = form
+    .getFieldValue("CCCD")
+    ?.replace(/^(\d{3})\d{6}(\d{3})$/, "$1******$2");
+
   return (
     <div
       style={{
         background: "#f5f7fa",
-        minHeight: "100vh",
+        minHeight: "70vh",
         padding: "40px 0",
       }}
     >
@@ -366,7 +399,6 @@ export default function BookingPage() {
                     validateStatus={timeError ? "error" : ""}
                     help={timeError}
                   >
-
                     <Row gutter={12}>
                         {dates.map((item) => (
                         <Col key={item.value}>
@@ -527,12 +559,6 @@ export default function BookingPage() {
                 <TextArea rows={5} placeholder="Triệu chứng của bạn..." />
               </Form.Item>
 
-              <Form.Item label="Hình ảnh triệu chứng (nếu có)">
-                <Upload>
-                  <Button type="primary" icon={<UploadOutlined />}>Tải lên</Button>
-                </Upload>
-              </Form.Item>
-
               <Button type="primary" size="large" block onClick={nextStep}>
                 Tiếp theo
               </Button>
@@ -552,16 +578,16 @@ export default function BookingPage() {
                       setPatientType(value);
                       setPatientLoaded(false);
                       form.resetFields([
-                          "patient_code",
-                          "ten_benh_nhan",
-                          "so_dien_thoai",
-                          "ngay_sinh",
-                          "gioi_tinh",
-                          "CCCD",
-                          "email",
-                          "dia_chi",
-                          "tien_su_benh",
-                        ]);
+                        "patient_code",
+                        "ten_benh_nhan",
+                        "so_dien_thoai",
+                        "ngay_sinh",
+                        "gioi_tinh",
+                        "CCCD",
+                        "email",
+                        "dia_chi",
+                        "tien_su_benh",
+                      ]);
                     }}
                     options={[
                       { label: "Đã từng khám", value: "old" },
@@ -600,9 +626,76 @@ export default function BookingPage() {
                       </Button>
                     </Form.Item>
                   </Col>
+
+                  {!patientLoaded && (
+                    <Col span={4}>
+                      <Form.Item label=" ">
+                        <Button
+                          type="primary"
+                          block
+                          onClick={() => setOpen(true)}
+                        >
+                          Quên mã bệnh nhân
+                        </Button>
+                      </Form.Item>
+                    </Col>
+                  )}
                 </>
               )}
             </Row>
+
+            <Modal
+              open={open}
+              title="Tra cứu mã bệnh nhân"
+              footer={null}
+              onCancel={() => {
+                setOpen(false);
+                lookupForm.resetFields();
+                setPatientCode(null);
+              }}
+            >
+              <Form
+                form={lookupForm}
+                layout="vertical"
+                onFinish={handleSearch}
+              >
+                <Form.Item
+                  label="CCCD hoặc số điện thoại"
+                  name="keyword"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng nhập CCCD hoặc số điện thoại",
+                    },
+                  ]}
+                >
+                  <Input placeholder="Nhập CCCCD hoặc số điện thoại" />
+                </Form.Item>
+
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  block
+                >
+                  Tra cứu
+                </Button>
+              </Form>
+
+              {patientCode && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    padding: 12,
+                    border: "1px solid #d9d9d9",
+                    borderRadius: 8,
+                  }}
+                >
+                  <b>Mã bệnh nhân:</b> {patientCode}
+                </div>
+              )}
+            </Modal>
+
             {patientType === "old" && patientLoaded && (
               <div style={{ marginBottom: 20 }}>
                 {!isEditing ? (
@@ -618,6 +711,7 @@ export default function BookingPage() {
                       Lưu
                     </Button>
                     <Button
+                      type="primary"
                       style={{ marginLeft: 20 }}
                       onClick={() => {
                         form.setFieldsValue(originalData);
@@ -706,8 +800,7 @@ export default function BookingPage() {
 
                 <Row gutter={16}>
                   <Col span={12}>
-                    <Form.Item
-                      label="CCCD"
+                    <Form.Item label="CCCD"
                       name="CCCD"
                       rules={[
                         { required: true, message: "Vui lòng nhập CCCD" },
@@ -720,9 +813,31 @@ export default function BookingPage() {
                       <Input
                         size="large"
                         maxLength={12}
+                        value={
+                          patientType === "old" && !isEditing
+                            ? form
+                                .getFieldValue("CCCD")
+                                ?.replace(
+                                  /^(\d{3})\d{6}(\d{3})$/,
+                                  "$1******$2"
+                                )
+                            : form.getFieldValue("CCCD")
+                        }
+                        onFocus={() => {
+                          if (patientType === "old") {
+                            setIsEditing(true);
+                          }
+                        }}
                         disabled={patientType === "old" && !isEditing}
+                        onChange={(e) => {
+                          form.setFieldsValue({
+                            CCCD: e.target.value,
+                          });
+                        }}
                         onKeyPress={(e) => {
-                          if (!/[0-9]/.test(e.key)) e.preventDefault();
+                          if (!/[0-9]/.test(e.key)) {
+                            e.preventDefault();
+                          }
                         }}
                       />
                     </Form.Item>
@@ -758,9 +873,15 @@ export default function BookingPage() {
                 Quay lại
               </Button>
 
-              <Button type="primary" size="large" htmlType="submit">
-                Xác nhận đặt lịch
-              </Button>
+              {(patientType === "new" || patientLoaded) && (
+                <Button
+                  type="primary"
+                  size="large"
+                  htmlType="submit"
+                >
+                  Xác nhận đặt lịch
+                </Button>
+              )}
             </div>
           </>
         )}

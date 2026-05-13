@@ -34,7 +34,16 @@ exports.login = async (req, res) => {
       refreshToken
     );
 
-    const { password: _, refresh_token, ...safeUser } = account;
+    const safeUser = {
+      vai_tro: account.vai_tro,
+      trang_thai: account.trang_thai,
+
+      nhan_vien: {
+        ten_nhan_vien: account.nhan_vien?.ten_nhan_vien,
+        id_chuyen_khoa: account.nhan_vien?.id_chuyen_khoa,
+        chuc_vu: account.nhan_vien?.chuc_vu,
+      },
+    };
 
     return res.json({
       accessToken,

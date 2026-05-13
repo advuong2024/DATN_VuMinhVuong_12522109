@@ -33,7 +33,6 @@ const insert = async (data) => {
   const {
     id_phieu_kham,
     tong_tien,
-    loai_thanh_toan,
     phuong_thuc,
     items,
   } = data;
@@ -41,7 +40,6 @@ const insert = async (data) => {
   const existed = await prisma.thanh_toan.findFirst({
     where: {
       id_phieu_kham: Number(id_phieu_kham),
-      loai_thanh_toan,
     },
   });
 
@@ -54,9 +52,9 @@ const insert = async (data) => {
       data: {
         id_phieu_kham: Number(id_phieu_kham),
         tong_tien: tong_tien ?? 0,
-        loai_thanh_toan,
         phuong_thuc: phuong_thuc ?? null,
         trang_thai: "DA_THANH_TOAN",
+        ngay_thanh_toan: new Date(),
       },
     });
 
@@ -66,6 +64,8 @@ const insert = async (data) => {
           id_thanh_toan: tt.id_thanh_toan,
           loai_item: i.loai_item,
           id_item: i.id_item,
+          gia: i.gia,
+          so_luong: i.so_luong,
         })),
       });
     }
@@ -345,6 +345,47 @@ const pay = async (data) => {
     });
 
     if (isBuyMedicine) {
+      const chiTietThuoc =
+        await tx.chi_tiet_don_thuoc.findMany({
+          where: {
+            don_thuoc: {
+              id_phieu_kham,
+            },
+          },
+          select: {
+            id_thuoc: true,
+            so_luong: true,
+          },
+        });
+
+      for (const item of chiTietThuoc) {
+        const thuoc = await tx.thuoc.findUnique({
+          where: {
+            id_thuoc: item.id_thuoc,
+          },
+        });
+
+        if (!thuoc) {
+          throw new Error("Không tìm thấy thuốc");
+        }
+
+        if (thuoc.so_luong_ton < item.so_luong) {
+          throw new Error(
+            `Thuốc ${thuoc.ten_thuoc} không đủ số lượng tồn`
+          );
+        }
+
+        await tx.thuoc.update({
+          where: {
+            id_thuoc: item.id_thuoc,
+          },
+          data: {
+            so_luong_ton: {
+              decrement: item.so_luong,
+            },
+          },
+        });
+      }
 
       await tx.thanh_toan.updateMany({
         where: {
@@ -368,9 +409,7 @@ const pay = async (data) => {
           trang_thai_mua: "DA_MUA",
         },
       });
-
     } else {
-
       await tx.thanh_toan.updateMany({
         where: {
           id_phieu_kham,

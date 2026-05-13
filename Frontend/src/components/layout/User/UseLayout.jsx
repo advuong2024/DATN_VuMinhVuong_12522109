@@ -10,7 +10,7 @@ export default function UserLayout() {
         <Layout style={{ minHeight: "100vh", background: "#f5f7fa" }}>
             <AppHeader />
 
-            <Content style={{ flex: 1, paddingTop: 80}}>
+            <Content style={{ flex: 1, paddingTop: 100}}>
                 <Outlet />
             </Content>
 

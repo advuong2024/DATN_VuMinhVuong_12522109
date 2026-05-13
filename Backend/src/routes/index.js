@@ -13,7 +13,8 @@ router.use("/danh-muc", require("./danh_muc.route"));
 router.use("/don-thuoc", require("./don_thuoc.route"));
 router.use("/chi-tiet-don-thuoc", require("./chi_tiet_don_thuoc.route"));
 router.use("/chi-tiet-dich-vu", require("./chi_tiet_dich_vu.router"));
-router.use("/chuyen-khoa", require("./chuyen_khoa.router"));
+router.use("/chuyen-khoa", require("./chuyen_khoa.route"));
 router.use("/dich-vu", require("./dich_vu.router"));
+router.use("/thong-ke", require("./thong_ke.route"));
 
 module.exports = router;

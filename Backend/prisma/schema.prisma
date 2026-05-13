@@ -290,11 +290,13 @@ model thanh_toan {
   trang_thai TrangThaiThanhToan
   phuong_thuc PhuongThucThanhToan?
   ngay_thanh_toan DateTime?
+  loai_thanh_toan LoaiThanhToan @default(PHI_KHAM)
 
   id_phieu_kham Int
   phieu_kham phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
   chi_tiets thanh_toan_chi_tiet[]
   created_at DateTime @default(now())
+  @@unique([id_phieu_kham, loai_thanh_toan])
 }
 
 model thanh_toan_chi_tiet {

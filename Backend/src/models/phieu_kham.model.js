@@ -47,7 +47,7 @@ const insert = async (data) => {
 
   if (id_dat_lich) {
     const booking = await prisma.dat_lich.findUnique({
-      where: { id_dat_lich },
+      where: { id_dat_lich: Number(id_dat_lich) },
     });
 
     if (!booking) throw new Error("Không tìm thấy lịch đặt");
@@ -61,11 +61,25 @@ const insert = async (data) => {
       trieu_chung,
       chan_doan,
       ghi_chu,
-
       id_benh_nhan,
       id_bac_si,
       id_dat_lich: id_dat_lich || null,
       trang_thai: trang_thai || "DANG_KHAM",
+
+      chi_tiets: chi_tiets?.length
+        ? {
+            create: chi_tiets.map((i) => ({
+              id_dich_vu: i.id_dich_vu,
+              so_luong: i.so_luong,
+              gia: i.gia,
+              id_bac_si,
+              trang_thai: "HOAN_THANH",
+            })),
+          }
+        : undefined,
+    },
+    include: {
+      chi_tiets: true,
     },
   });
 };
@@ -122,7 +136,6 @@ const upsertPayment = async (tx, id_phieu_kham, loai, items) => {
   return tx.thanh_toan.create({
     data: {
       id_phieu_kham,
-      loai_thanh_toan: loai,
       tong_tien: total,
       trang_thai: "CHUA_THANH_TOAN",
 

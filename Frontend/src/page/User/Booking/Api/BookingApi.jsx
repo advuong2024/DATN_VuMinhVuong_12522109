@@ -36,3 +36,14 @@ export const getBookedSlots = async (params) => {
   });
   return res.data;
 };
+
+export const getFindPatient = async ({ phone, cccd }) => {
+  const res = await axiosClient.get("/benh-nhan/tim-kiem", {
+    params: {
+      phone,
+      cccd,
+    },
+  });
+
+  return res.data;
+};

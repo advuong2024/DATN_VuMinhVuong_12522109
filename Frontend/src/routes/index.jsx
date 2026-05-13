@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import UserLayout from "@/components/layout/User/UseLayout";
 import MainLayout from "@/components/layout/Admin/MainLayout";
-
+import DashboardPage from "@/page/Admin/Dashboard/View/DashboardPage";
 import LoginForm from "@/page/Login/Views/loginView";
 import BookingPage from "@/page/User/Booking/View/BookingPage";
 import BookPage from "@/page/Admin/Booking/View/BookPage";
@@ -51,7 +51,7 @@ const router = createBrowserRouter([
       </ProtectedAdminRoute>
     ),
     children: [
-      { index: true, element: <h2>Admin Dashboard</h2> },
+      { index: true, element: <DashboardPage /> },
       { path: BookingUrl, element: <BookPage /> },
       { path: accountUrl, element: <AccountPage /> },
       { path: serviceUrl, element: <ServicePage /> },

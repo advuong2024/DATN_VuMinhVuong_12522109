@@ -54,23 +54,42 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
             trieu_chung: "",
             chan_doan: "",
             ghi_chu: "",
-            chi_tiets: {
-              create: values.services.map((id) => ({
-                id_dich_vu: id,
-                so_luong: 1,
-                gia: services.find((s) => s.id_dich_vu === id)?.gia || 0,
-              })),
-            },
+            chi_tiets: values.services.map((id) => ({
+              id_dich_vu: id,
+              so_luong: 1,
+              gia: services.find((s) => s.id_dich_vu === id)?.gia || 0,
+            })),
             trang_thai: "CHO_KHAM",
         });
 
-        const encounterId = res.data.id_phieu_kham;
+        const encounter = res.data;
+
+        const map = new Map(
+          encounter.chi_tiets.map(ct => [ct.id_dich_vu, ct.id_chi_tiet])
+        );
+
+        const items = values.services.map((id) => {
+          const service = services.find((s) => s.id_dich_vu === id);
+
+          return {
+            loai_item: "PHI_KHAM",
+            id_item: map.get(id),
+            gia: service?.gia || 0,
+            so_luong: 1,
+          };
+        });
 
         await createPayment({
-          id_phieu_kham: encounterId,
-          trang_thai: "DA_THANH_TOAN",
-          tong_tien: values.tam_ung || 0,
+          id_phieu_kham: encounter.id_phieu_kham,
+
+          tong_tien: items.reduce(
+            (sum, i) => sum + i.gia * i.so_luong,
+            0
+          ),
+
           phuong_thuc: values.phuong_thuc,
+
+          items,
         });
 
         await updateStatus(booking.key, "DA_DEN");
@@ -133,6 +152,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
       <Form.Item
         name="phuong_thuc"
         label="Payment Method"
+        initialValue="TIEN_MAT"
         rules={[{ required: true }]}
       >
         <Select

@@ -241,7 +241,9 @@ async function main() {
       data: {
         id_thanh_toan: tt1.id_thanh_toan,
         loai_item: "DICH_VU",
-        id_item: ctKham.id_chi_tiet
+        id_item: ctKham.id_chi_tiet,
+        gia: ctKham.gia,
+        so_luong: ctKham.so_luong
       }
     });
 
@@ -275,7 +277,9 @@ async function main() {
       data: {
         id_thanh_toan: tt2.id_thanh_toan,
         loai_item: "DICH_VU",
-        id_item: ctDV.id_chi_tiet
+        id_item: ctDV.id_chi_tiet,
+        gia: ctDV.gia,
+        so_luong: ctDV.so_luong
       }
     });
 
@@ -308,7 +312,9 @@ async function main() {
       data: {
         id_thanh_toan: tt3.id_thanh_toan,
         loai_item: "THUOC",
-        id_item: ctThuoc.id_chi_tiet
+        id_item: ctThuoc.id_chi_tiet,
+        gia: ctThuoc.gia,
+        so_luong: ctThuoc.so_luong
       }
     });
   }

@@ -44,7 +44,7 @@ export default function DataTable({
   ? [
       sttColumn,
       ...enhanceColumns,
-      Table.EXPAND_COLUMN,
+      Table.EXPAND_COLUMN
     ]
   : [...enhanceColumns, Table.EXPAND_COLUMN];
 

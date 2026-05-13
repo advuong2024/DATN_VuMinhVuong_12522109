@@ -10,14 +10,14 @@ export default function BookingPage() {
     <>
       <Space style={{ marginBottom: 0 }}>
         <Button
-          type={mode === "old" ? "primary" : "default"}
+          type={mode === "old" ? "primary" : "primary"}
           onClick={() => setMode("old")}
         >
           Existing Patient
         </Button>
 
         <Button
-          type={mode === "new" ? "primary" : "default"}
+          type={mode === "new" ? "primary" : "primary"}
           onClick={() => setMode("new")}
         >
           New Patient

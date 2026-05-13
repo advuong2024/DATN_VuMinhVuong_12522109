@@ -18,7 +18,7 @@ import BookingForm from "./EncounterForm";
 import { useNavigate } from "react-router-dom";
 import { encounterUrl } from "@/routes/urls";
 import { getBookings } from "../Api/BookingApi"
-import { createEncounter, updateEncounterStatus } from "../Api/EncounterApi"
+import { updateEncounterStatus, createEncounter } from "../Api/EncounterApi"
 
 const STATUS_COLORS = {
   Pending: "#faad14",
@@ -131,6 +131,7 @@ export default function BookingManagement() {
     {
       title: "Actions",
       align: "center",
+      width: 150,
       render: (_, record) => {
         const pk = record.phieu_kham;
         const isDone = pk?.trang_thai === "HOAN_THANH";
@@ -150,24 +151,33 @@ export default function BookingManagement() {
 
   const handleCreateEncounter = async (record) => {
     try {
-      const pk = record.phieu_kham;
+      let encounterId = record.phieu_kham?.id_phieu_kham;
 
-      if (!pk?.id_phieu_kham) {
-        console.warn("No encounter found");
-        return;
+      if (!encounterId) {
+        const res = await createEncounter({
+          id_dat_lich: record.bookingId,
+          trang_thai: "DANG_KHAM",
+          trieu_chung: "",
+          chan_doan: "",
+          ghi_chu: "",
+        });
+
+        encounterId = res.data.id_phieu_kham;
+      } else {
+        await updateEncounterStatus(
+          encounterId,
+          "DANG_KHAM"
+        );
       }
-
-      await updateEncounterStatus(pk.id_phieu_kham, "DANG_KHAM");
 
       navigate(`${encounterUrl}/${record.patientId}`, {
         state: {
           ...record,
           bookingId: record.bookingId,
           doctorId: record.doctorId,
-          encounterId: pk.id_phieu_kham,
+          encounterId,
         },
       });
-
     } catch (err) {
       console.error(err);
     }

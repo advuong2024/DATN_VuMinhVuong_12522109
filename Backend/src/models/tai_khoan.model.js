@@ -69,8 +69,22 @@ const remove = (id_tai_khoan) => {
 const findByUsername = (username) => {
   return prisma.tai_khoan.findUnique({
     where: { username },
-    include: {
-      nhan_vien: true,
+
+    select: {
+      vai_tro: true,
+      trang_thai: true,
+      id_tai_khoan: true,
+      username: true,
+      password: true,
+
+      nhan_vien: {
+        select: {
+          id_nhan_vien: true,
+          ten_nhan_vien: true,
+          chuc_vu: true,
+          id_chuyen_khoa: true,
+        },
+      },
     },
   });
 };
