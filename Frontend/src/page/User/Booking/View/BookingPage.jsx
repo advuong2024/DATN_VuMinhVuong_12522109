@@ -18,9 +18,11 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { getCK, getDoctorCK, getCustomer, 
   postBook, postCustomer, updateCustomer, 
-  getBookedSlots, getFindPatient,
+  getBookedSlots, getFindPatient, getHistory,
+  getCanBook,
 } from "../Api/BookingApi"
 import { toast } from "react-toastify";
+import HistoryFrom from "./BookingFrom";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -44,6 +46,9 @@ export default function BookingPage() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [patientCode, setPatientCode] = useState(null);
+  const [historyData, setHistoryData] = useState([]);
+  const [openHistory, setOpenHistory] = useState(false);
+  const [canBook, setCanBook] = useState(true);
 
   useEffect(() => {
     fetchCK();
@@ -67,6 +72,33 @@ export default function BookingPage() {
     } catch (err) {
       console.error(err);
       toast.error("Không tìm thấy thông tin chuyên khoa")
+    }
+  };
+
+  const checkCanBook = async (patientId) => {
+    try {
+      const res = await getCanBook(patientId);
+
+      setCanBook(res.data.canBook);
+    } catch (err) {
+      console.error(err);
+      setCanBook(false);
+    }
+  };
+
+  const handleOpenHistory = async () => {
+    try {
+      const id = form.getFieldValue("patient_code");
+      console.log("id: ", id)
+
+      const res = await getHistory({ id });
+
+      setHistoryData(res.data);
+
+      setOpenHistory(true);
+    } catch (err) {
+      console.error(err);
+      toast.error("Không lấy được lịch sử khám");
     }
   };
 
@@ -115,6 +147,7 @@ export default function BookingPage() {
       if (!code) return;
 
       const data = await getCustomer(code);
+      await checkCanBook(data.id_benh_nhan);
 
       form.setFieldsValue({
         ...data,
@@ -177,17 +210,17 @@ export default function BookingPage() {
 
   const nextStep = async () => {
     try {
-        await form.validateFields(["specialty", "doctor", "reason", "date", "time"]);
+      await form.validateFields(["specialty", "doctor", "reason", "date", "time"]);
 
-        const time = form.getFieldValue("time");
+      const time = form.getFieldValue("time");
 
-        if (!time) {
+      if (!time) {
         setTimeError("Vui lòng chọn giờ khám");
         return;
-        }
+      }
 
-        setTimeError("");
-        setStep(1);
+      setTimeError("");
+      setStep(1);
     } catch (err) {}
   };
 
@@ -196,6 +229,17 @@ export default function BookingPage() {
     let isNewPatient = false;
     try {
       let patientId = null;
+
+      if (patientType === "old") {
+        const patientIdCheck = form.getFieldValue("patient_code");
+
+        const res = await getCanBook(patientIdCheck);
+
+        if (!res.data.canBook) {
+          toast.error("Bạn hôm nay đã đặt lịch không thể đặt thêm khi chưa hoàn thành khám");
+          return;
+        }
+      }
 
       if (patientType === "new") {
         const customerRes = await postCustomer({
@@ -234,12 +278,14 @@ export default function BookingPage() {
             <p>Bạn đã đặt lịch khám thành công.</p>
 
             {isNewPatient && (
-              <p>
-                👉 <b>Mã bệnh nhân của bạn là: {patientId}</b>
-              </p>
+              <>
+                <p>
+                  👉 <b>Mã bệnh nhân của bạn là: {patientId}</b>
+                </p>
+                <p>Vui lòng lưu lại để sử dụng cho lần sau.</p>
+              </>
             )}
 
-            <p>Vui lòng lưu lại để sử dụng cho lần sau.</p>
           </div>
         ),
       });
@@ -320,7 +366,7 @@ export default function BookingPage() {
       style={{
         background: "#f5f7fa",
         minHeight: "70vh",
-        padding: "40px 0",
+        padding: "30px 0",
       }}
     >
       <Card
@@ -699,9 +745,18 @@ export default function BookingPage() {
             {patientType === "old" && patientLoaded && (
               <div style={{ marginBottom: 20 }}>
                 {!isEditing ? (
-                  <Button type="primary" onClick={() => setIsEditing(true)}>
-                    Sửa thông tin
-                  </Button>
+                  <>
+                    <Button type="primary" onClick={() => setIsEditing(true)}>
+                      Sửa thông tin
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      style={{ marginLeft: 20 }}
+                      onClick={handleOpenHistory}
+                    >
+                      Lịch sử đặt lịch
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button
@@ -724,6 +779,15 @@ export default function BookingPage() {
                 )}
               </div>
             )}
+
+            <Modal
+              open={openHistory}
+              footer={null}
+              width={1200}
+              onCancel={() => setOpenHistory(false)}
+            >
+              <HistoryFrom data={historyData} />
+            </Modal>
 
             {(patientType === "new" || patientLoaded) && (
               <>

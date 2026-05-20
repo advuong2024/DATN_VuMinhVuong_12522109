@@ -13,6 +13,7 @@ import { BsClipboardCheck } from "react-icons/bs";
 import { MdOutlineCategory } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
 import { icons } from "antd/es/image/PreviewGroup";
+import { getUser } from "../../common/utils/auth"
 
 const { Sider } = Layout;
 
@@ -20,52 +21,71 @@ const menuItems = [
   {
     key: "/admin",
     label: "Dashboard",
-    icon: <FiHome size={16}/>,
+    icon: <FiHome size={16} />,
+    roles: ["ADMIN", "BAC_SI", "LE_TAN", "THU_NGAN"],
   },
+
   {
     key: "/admin/account",
     label: "Accounts",
-    icon: <RiAccountCircleLine size={16}/>,
+    icon: <RiAccountCircleLine size={16} />,
+    roles: ["ADMIN"],
   },
+
   {
     key: "/admin/booking",
     label: "Booking",
-    icon: <FiCalendar size={16}/>,
+    icon: <FiCalendar size={16} />,
+    roles: ["ADMIN", "LE_TAN"],
   },
+
   {
     key: "/admin/encounter",
     label: "Encounter",
-    icon: <BsClipboardCheck size={16}/>,
+    icon: <BsClipboardCheck size={16} />,
+    roles: ["ADMIN", "BAC_SI"],
   },
+
   {
     key: "/admin/customer",
     label: "Patients",
-    icon: <FiUser size={16}/>,
+    icon: <FiUser size={16} />,
+    roles: ["ADMIN", "BAC_SI", "LE_TAN"],
   },
+
   {
     key: "/admin/doctor",
     label: "Doctors",
-    icon: <FaUserDoctor size={16}/>,
+    icon: <FaUserDoctor size={16} />,
+    roles: ["ADMIN"],
   },
+
   {
     key: "/admin/service",
     label: "Services",
-    icon: <RiServiceLine size={16}/>,
+    icon: <RiServiceLine size={16} />,
+    roles: ["ADMIN"],
   },
+
   {
     key: "/admin/medicine",
     label: "Medicines",
-    icon: <GiMedicines size={16}/>,
+    icon: <GiMedicines size={16} />,
+    roles: ["ADMIN", "BAC_SI"],
   },
+
   {
     key: "/admin/category",
     label: "Category",
-    icon: <MdOutlineCategory size={16}/>,
+    icon: <MdOutlineCategory size={16} />,
+    roles: ["ADMIN"],
   },
+
   {
     key: "/admin/bill",
     label: "Bills",
-    icon: <PiInvoice size={16}/>,
+    icon: <PiInvoice size={16} />,
+    roles: ["ADMIN", "LE_TAN", "THU_NGAN"],
   },
 ];
 
@@ -73,7 +93,7 @@ export default function Sidebar({ collapsed, onToggle }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
-
+  const user = getUser();
   const [openKeys, setOpenKeys] = useState(["hq"]);
 
   const onOpenChange = (keys) => {
@@ -86,6 +106,11 @@ export default function Sidebar({ collapsed, onToggle }) {
     .sort((a, b) => b.key.length - a.key.length)
     .find(item => location.pathname.startsWith(item.key))
   ?.key;
+
+  const filteredMenuItems =
+    menuItems.filter((item) =>
+      item.roles.includes(user?.vai_tro)
+    );
 
   return (
     <Sider
@@ -111,7 +136,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         inlineCollapsed={collapsed}
         selectedKeys={[selectedKey]}
         onClick={(e) => navigate(e.key)}
-        items={menuItems}
+        items={filteredMenuItems}
         style={{
           background: "transparent",
           fontSize: 18,

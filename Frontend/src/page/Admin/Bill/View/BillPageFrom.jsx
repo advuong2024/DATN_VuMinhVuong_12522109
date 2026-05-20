@@ -14,60 +14,50 @@ import { toast } from "react-toastify";
 
 export default function PaymentForm({ record, mode, onSuccess }) {
   const [loading, setLoading] = useState(false);
-
   const [hasMedicine, setHasMedicine] = useState(false);
-
   const [paymentMethod, setPaymentMethod] = useState("TIEN_MAT");
-
+  const [processType, setProcessType] = useState("");
   const [service, setService] = useState({
     items: [],
     total: 0,
   });
-
   const [medicine, setMedicine] = useState({
     items: [],
     total: 0,
   });
 
-useEffect(() => {
-  if (!record) return;
+  useEffect(() => {
+    if (!record) return;
 
-  const consultationItem = record.consultation
-    ? [
-        {
-          id: record.consultation.id,
-          name: record.consultation.name,
-          price: record.consultation.price,
-          quantity: record.consultation.quantity,
-        },
-      ]
-    : [];
+    const serviceItems = [
+      ...(record?.consultation?.items || []),
+      ...(record?.services?.items || []),
+    ];
 
-  const serviceItems = [
-    ...consultationItem,
-    ...(record?.services?.items || []),
-  ];
+    const medicineItems =
+      record?.medicines?.items || [];
 
-  const medicineItems =
-    record?.medicines?.items || [];
+    setService({
+      items: serviceItems,
+      total:
+        (record?.consultation?.total || 0) +
+        (record?.services?.total || 0),
+    });
 
-  setService({
-    items: serviceItems,
-    total:
-      (record?.consultation?.total || 0) +
-      (record?.services?.total || 0),
-  });
+    setMedicine({
+      items: medicineItems,
+      total:
+        record?.medicines?.total || 0,
+    });
 
-  setMedicine({
-    items: medicineItems,
-    total:
-      record?.medicines?.total || 0,
-  });
+    setHasMedicine(
+      medicineItems.length > 0
+    );
 
-  setHasMedicine(
-    medicineItems.length > 0
-  );
-}, [record]);
+    setProcessType(
+      record?.loai_dang_xu_ly || ""
+    );
+  }, [record]);
 
   const serviceColumns = [
     {
@@ -112,6 +102,7 @@ useEffect(() => {
         id_phieu_kham: record?.id_phieu_kham,
         phuong_thuc: paymentMethod,
         co_mua_thuoc: hasMedicine,
+        loai_dang_xu_ly: processType,
       };
 
       await payBill(payload);
@@ -158,61 +149,49 @@ useEffect(() => {
         </Descriptions>
       </Card>
 
-      <Card
-        size="small"
-        title="Services"
-        style={{ marginBottom: 12 }}
-      >
-        <Table
-          size="small"
-          dataSource={service.items}
-          columns={serviceColumns}
-          pagination={false}
-          rowKey="id"
-        />
+      {service.items.length > 0 && (
+        <Card size="small" title="Services" style={{ marginBottom: 12 }}>
+          <Table
+            size="small"
+            dataSource={service.items}
+            columns={serviceColumns}
+            pagination={false}
+            rowKey="id"
+          />
 
-        <div style={{ textAlign: "right", marginTop: 8 }}>
-          <b>
-            Service Total:{" "}
-            {service.total.toLocaleString()}
-          </b>
-        </div>
-      </Card>
+          <div style={{ textAlign: "right", marginTop: 8 }}>
+            <b>Service Total: {service.total.toLocaleString()}</b>
+          </div>
+        </Card>
+      )}
 
-      <Card
-        size="small"
-        title="Medicine (Optional)"
-        style={{ marginBottom: 12 }}
-      >
-        <Table
-          size="small"
-          dataSource={medicine.items}
-          columns={medicineColumns}
-          pagination={false}
-          rowKey="id"
-        />
+      {medicine.items.length > 0 && (
+        <Card size="small" title="Medicine (Optional)" style={{ marginBottom: 12 }}>
+          <Table
+            size="small"
+            dataSource={medicine.items}
+            columns={medicineColumns}
+            pagination={false}
+            rowKey="id"
+          />
 
-        <Divider style={{ margin: "10px 0" }} />
+          <Divider style={{ margin: "10px 0" }} />
 
-        <Checkbox
-          disabled={mode === "view"}
-          checked={hasMedicine}
-          onChange={(e) =>
-            setHasMedicine(e.target.checked)
-          }
-        >
-          Customer buys medicine
-        </Checkbox>
+          <Checkbox
+            disabled={mode === "view"}
+            checked={hasMedicine}
+            onChange={(e) => setHasMedicine(e.target.checked)}
+          >
+            Customer buys medicine
+          </Checkbox>
 
-        <div style={{ textAlign: "right", marginTop: 8 }}>
-          <b>
-            Medicine Total:{" "}
-            {(
-              hasMedicine ? medicine.total : 0
-            ).toLocaleString()}
-          </b>
-        </div>
-      </Card>
+          <div style={{ textAlign: "right", marginTop: 8 }}>
+            <b>
+              Medicine Total: {(hasMedicine ? medicine.total : 0).toLocaleString()}
+            </b>
+          </div>
+        </Card>
+      )}
 
       <Card size="small">
         <div
@@ -227,6 +206,7 @@ useEffect(() => {
 
             <Select
               value={paymentMethod}
+              disabled={mode === "view"}
               style={{ width: 180, marginLeft: 10 }}
               onChange={setPaymentMethod}
               options={[

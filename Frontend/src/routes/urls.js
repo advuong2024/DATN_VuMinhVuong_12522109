@@ -1,4 +1,11 @@
 export const homeUrl = "/";
+export const BookUrl = "/booking"
+export const SpecialtyUrl = "/specialty";
+export const specialtyDetailUrl = "/chuyen-khoa/:id";
+export const ServiceUrl = "/service";
+export const serviceDetailUrl = "/dich-vu/:id";
+export const DoctorUrl = "/doctor";
+export const MyUrl = "/myself"; 
 
 export const adminUrl = "/admin";
 export const BookingUrl = "/admin/booking";

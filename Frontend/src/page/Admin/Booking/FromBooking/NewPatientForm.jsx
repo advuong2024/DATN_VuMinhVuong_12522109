@@ -10,7 +10,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { createBooking, getCK, getDoctorCK, createPatient } from "../../Api/BookingApi";
+import { createBooking, getCK, getDoctorCK, createPatient } from "../Api/BookingApi";
 import { GENDER_OPTIONS } from "@/components/common/Options";
 import { toast } from "react-toastify";
 
@@ -80,7 +80,7 @@ export default function NewPatientForm() {
           id_bac_si: Number(values.doctor),
           thoi_gian: dayjs().toISOString(),
           ly_do: values.note || "",
-          trang_thai: "DA_DEN",
+          trang_thai: "DA_DAT",
         };
 
         console.log("BOOKING:", bookingPayload);

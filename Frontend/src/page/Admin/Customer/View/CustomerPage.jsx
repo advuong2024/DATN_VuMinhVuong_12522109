@@ -53,6 +53,12 @@ export default function PatientManagement() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
+  const role = user?.vai_tro;
+
   const filtered = data.filter(
     (item) =>
       item.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -188,17 +194,39 @@ export default function PatientManagement() {
         <Space>
           <Space>
             <EyeOutlined
-                style={{ fontSize: 18, color: "#1677ff", cursor: "pointer", marginRight: 8 }}
-                onClick={() => navigate(`${customerUrl}/${record.key}`)}
+              style={{ fontSize: 18, color: "#1677ff", cursor: "pointer", marginRight: 8 }}
+              onClick={() => navigate(`${customerUrl}/${record.key}`)}
             />
-            <EditOutlined
-                style={{ fontSize: 18, color: "#faad14", cursor: "pointer", marginRight: 8 }}
-                onClick={() => handleEdit(record)}
-            />
-            <DeleteOutlined 
-                style={{ fontSize: 18, color: "#ff4d4f", cursor: "pointer" }}
-                onClick={() => handleDelete(record)} 
-            />
+            {
+              ["ADMIN", "LE_TAN"].includes(role) && (
+                <EditOutlined
+                  style={{
+                    fontSize: 18,
+                    color: "#faad14",
+                    cursor: "pointer",
+                    marginRight: 8,
+                  }}
+                  onClick={() =>
+                    handleEdit(record)
+                  }
+                />
+              )
+            }
+
+            {
+              role === "ADMIN" && (
+                <DeleteOutlined
+                  style={{
+                    fontSize: 18,
+                    color: "#ff4d4f",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    handleDelete(record)
+                  }
+                />
+              )
+            }
           </Space>
         </Space>
       ),
@@ -219,12 +247,17 @@ export default function PatientManagement() {
         </Col>
 
         <Col>
-          <Button
-            style={{ marginLeft: 10, backgroundColor: "#af050e" }}
-            onClick={handleAdd}
-          >
-            ADD
-          </Button>
+          {
+            ["ADMIN", "LE_TAN"].includes(role) && ( 
+              <Button
+                type="primary"
+                style={{ marginLeft: 10, backgroundColor: "#af050e" }}
+                onClick={handleAdd}
+              >
+                ADD
+              </Button>
+            )
+          }
         </Col>
       </Row>
 

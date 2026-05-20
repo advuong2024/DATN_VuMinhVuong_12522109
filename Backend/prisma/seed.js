@@ -27,43 +27,57 @@ async function main() {
 
   // 1. CHUYÊN KHOA
   const chuyenKhoas = [
-    { ten_chuyen_khoa: 'Nội Tổng Quát', mo_ta: 'Khám nội khoa' },
-    { ten_chuyen_khoa: 'Nhi Khoa', mo_ta: 'Sức khỏe trẻ em' },
-    { ten_chuyen_khoa: 'Sản Phụ Khoa', mo_ta: 'Sản và phụ khoa' },
-    { ten_chuyen_khoa: 'Răng Hàm Mặt', mo_ta: 'Nha khoa' },
-    { ten_chuyen_khoa: 'Tai Mũi Họng', mo_ta: 'Tai mũi họng' },
-    { ten_chuyen_khoa: 'Da Liễu', mo_ta: 'Da liễu' },
-    { ten_chuyen_khoa: 'Mắt', mo_ta: 'Nhãn khoa' },
-    { ten_chuyen_khoa: 'Cơ Xương Khớp', mo_ta: 'Xương khớp' },
-    { ten_chuyen_khoa: 'Tim Mạch', mo_ta: 'Tim mạch' },
-    { ten_chuyen_khoa: 'Xét Nghiệm', mo_ta: 'Xét nghiệm' }
+    { ten_chuyen_khoa: 'Nội Tổng Quát', mo_ta: 'Khám nội khoa', hinh_anh: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Nhi Khoa', mo_ta: 'Sức khỏe trẻ em', hinh_anh: 'https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Sản Phụ Khoa', mo_ta: 'Sản và phụ khoa', hinh_anh: 'https://images.unsplash.com/photo-1531012278480-db7475a50f61?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Răng Hàm Mặt', mo_ta: 'Nha khoa', hinh_anh: 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Tai Mũi Họng', mo_ta: 'Tai mũi họng', hinh_anh: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Da Liễu', mo_ta: 'Da liễu', hinh_anh: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Mắt', mo_ta: 'Nhãn khoa', hinh_anh: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Cơ Xương Khớp', mo_ta: 'Xương khớp', hinh_anh: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Tim Mạch', mo_ta: 'Tim mạch', hinh_anh: 'https://images.unsplash.com/photo-1628595351029-c2bf17511435?auto=format&fit=crop&q=80&w=800' },
+    { ten_chuyen_khoa: 'Xét Nghiệm', mo_ta: 'Xét nghiệm', hinh_anh: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=800' }
   ];
   await prisma.chuyen_khoa.createMany({ data: chuyenKhoas });
   const allCK = await prisma.chuyen_khoa.findMany();
 
-  // 2. NHÂN VIÊN & TÀI KHOẢN (Sử dụng Enum chuẩn)
+  // 2. NHÂN VIÊN & TÀI KHOẢN
   const nvRaw = [
-    { ten: 'Trần Văn Nam', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM },
-    { ten: 'Lê Thị Mỹ', vt: VaiTro.BAC_SI, gt: GioiTinh.NU },
-    { ten: 'Phạm Gia Bình', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM },
-    { ten: 'Hoàng Thu Thủy', vt: VaiTro.BAC_SI, gt: GioiTinh.NU },
-    { ten: 'Đặng Quốc Bảo', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM },
-    { ten: 'Nguyễn An', vt: VaiTro.BAC_SI, gt: GioiTinh.KHAC },
-    { ten: 'Vũ Cường', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM },
-    { ten: 'Lễ Tân Hoa', vt: VaiTro.LE_TAN, gt: GioiTinh.NU },
-    { ten: 'Thu Ngân Dũng', vt: VaiTro.THU_NGAN, gt: GioiTinh.NAM },
-    { ten: 'Vũ Minh Vương', vt: VaiTro.ADMIN, gt: GioiTinh.NAM },
+    { ten: 'Trần Văn Nam', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM, cv: 'Trưởng khoa Nội', bang: 'Thạc sĩ - Bác sĩ CKII', kn: 20, cs: 'Cơ sở 1 - TP. Hưng Yên', mt: 'Hơn 20 năm kinh nghiệm trong chẩn đoán và điều trị các bệnh lý nội khoa, tiêu hóa. Nguyên Trưởng khoa tại bệnh viện lớn.', cc: ['Chứng chỉ Nội soi tiêu hóa can thiệp', 'Chứng chỉ Siêu âm tổng quát'], ha: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Lê Thị Mỹ', vt: VaiTro.BAC_SI, gt: GioiTinh.NU, cv: 'Phó khoa Nhi', bang: 'Bác sĩ Chuyên khoa I Nhi', kn: 12, cs: 'Cơ sở 1 - TP. Hưng Yên', mt: 'Chuyên gia điều trị các bệnh lý hô hấp, tiêu hóa, tư vấn dinh dưỡng cho trẻ em.', cc: ['Chứng chỉ an toàn tiêm chủng', 'Chứng chỉ Cấp cứu Nhi khoa'], ha: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Phạm Gia Bình', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM, cv: 'Trưởng khoa Tim mạch', bang: 'Tiến sĩ Y học - Bác sĩ CKII', kn: 25, cs: 'Cơ sở 1 - TP. Hưng Yên', mt: 'Chuyên gia hàng đầu về can thiệp tim mạch, đặt stent mạch vành, điều trị suy tim.', cc: ['Chứng chỉ can thiệp tim mạch quốc tế', 'Chứng chỉ Siêu âm tim nâng cao'], ha: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Hoàng Thu Thủy', vt: VaiTro.BAC_SI, gt: GioiTinh.NU, cv: 'Bác sĩ Sản phụ khoa', bang: 'Thạc sĩ Sản phụ khoa', kn: 15, cs: 'Cơ sở 2 - Phố Nối', mt: 'Chuyên khám thai, siêu âm 4D, điều trị các bệnh lý phụ khoa và hỗ trợ sinh sản.', cc: ['Chứng chỉ Siêu âm sản phụ khoa', 'Chứng chỉ Phẫu thuật nội soi sản khoa'], ha: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Đặng Quốc Bảo', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM, cv: 'Bác sĩ Tai Mũi Họng', bang: 'Bác sĩ CKII Tai Mũi Họng', kn: 18, cs: 'Cơ sở 1 - TP. Hưng Yên', mt: 'Phẫu thuật viên chính các ca nội soi, phẫu thuật tai mũi họng khó.', cc: ['Chứng chỉ Phẫu thuật nội soi TMH', 'Chứng chỉ Điều trị dị ứng TMH'], ha: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Nguyễn Văn An', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM, cv: 'Trưởng khoa Răng Hàm Mặt', bang: 'Bác sĩ CKII RHM', kn: 22, cs: 'Cơ sở 2 - Phố Nối', mt: 'Chuyên gia implant, phẫu thuật hàm mặt, chỉnh nha thẩm mỹ.', cc: ['Chứng chỉ Implant nha khoa quốc tế', 'Chứng chỉ Chỉnh nha Invisalign'], ha: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Vũ Thanh Hải', vt: VaiTro.BAC_SI, gt: GioiTinh.NAM, cv: 'Bác sĩ Mắt', bang: 'Thạc sĩ Nhãn khoa', kn: 14, cs: 'Cơ sở 1 - TP. Hưng Yên', mt: 'Khám và điều trị các bệnh lý về mắt, phẫu thuật Lasik, đục thủy tinh thể.', cc: ['Chứng chỉ Phẫu thuật Lasik', 'Chứng chỉ Điều trị Glaucoma'], ha: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400' },
+    { ten: 'Lễ Tân Hoa', vt: VaiTro.LE_TAN, gt: GioiTinh.NU, cv: 'Lễ tân', bang: null, kn: null, cs: null, mt: null, cc: [], ha: null },
+    { ten: 'Thu Ngân Dũng', vt: VaiTro.THU_NGAN, gt: GioiTinh.NAM, cv: 'Thu ngân', bang: null, kn: null, cs: null, mt: null, cc: [], ha: null },
+    { ten: 'Vũ Minh Vương', vt: VaiTro.ADMIN, gt: GioiTinh.NAM, cv: 'Quản trị viên', bang: null, kn: null, cs: null, mt: null, cc: [], ha: null },
   ];
 
   for (let i = 0; i < nvRaw.length; i++) {
     const item = nvRaw[i];
+    const isBacSi = item.vt === VaiTro.BAC_SI;
     await prisma.nhan_vien.create({
       data: {
         ten_nhan_vien: item.ten,
         so_dien_thoai: `0901000${i}55`,
         gioi_tinh: item.gt,
-        chuc_vu: item.vt === VaiTro.BAC_SI ? 'Bác sĩ chuyên khoa' : 'Nhân viên nghiệp vụ',
-        id_chuyen_khoa: item.vt === VaiTro.BAC_SI ? allCK[i % allCK.length].id_chuyen_khoa : null,
+        ngay_sinh: isBacSi ? new Date(`${1975 + (i % 20)}-0${(i % 9) + 1}-15`) : null,
+        chuc_vu: item.cv,
+        bang_cap: item.bang,
+        hinh_anh: item.ha,
+        mo_ta_ngan: item.mt,
+        co_so: item.cs,
+        nam_kinh_nghiem: item.kn,
+        id_chuyen_khoa: isBacSi ? allCK[i % allCK.length].id_chuyen_khoa : null,
+        chung_chis: item.cc.length > 0 ? {
+          create: item.cc.map((ten) => ({
+            ten_chung_chi: ten,
+            noi_cap: 'Bộ Y tế',
+            nam_cap: 2015 + (i % 8),
+          }))
+        } : undefined,
         tai_khoan: {
           create: {
             username: `user_0${i}`,
@@ -75,7 +89,7 @@ async function main() {
       }
     });
   }
-  const allBS = await prisma.nhan_vien.findMany({ where: { chuc_vu: 'Bác sĩ chuyên khoa' } });
+  const allBS = await prisma.nhan_vien.findMany({ where: { id_chuyen_khoa: { not: null } } });
 
   // 3. BỆNH NHÂN (Sử dụng Enum chuẩn)
   const benhNhanData = [
@@ -112,16 +126,16 @@ async function main() {
   const allDM = await prisma.danh_muc.findMany();
 
   const dichVuData = [
-    { ten: 'Khám Nội Tổng Quát', gia: 150000, ck: allCK[0].id_chuyen_khoa, dm: allDM[0].id_danh_muc },
-    { ten: 'Khám Nhi', gia: 200000, ck: allCK[1].id_chuyen_khoa, dm: allDM[0].id_danh_muc },
-    { ten: 'Siêu âm ổ bụng', gia: 350000, ck: allCK[9].id_chuyen_khoa, dm: allDM[1].id_danh_muc },
-    { ten: 'X-Quang ngực thẳng', gia: 250000, ck: allCK[9].id_chuyen_khoa, dm: allDM[2].id_danh_muc },
-    { ten: 'Tổng phân tích tế bào máu', gia: 180000, ck: allCK[9].id_chuyen_khoa, dm: allDM[3].id_danh_muc },
-    { ten: 'Khám Răng', gia: 100000, ck: allCK[3].id_chuyen_khoa, dm: allDM[0].id_danh_muc },
-    { ten: 'Lấy cao răng', gia: 300000, ck: allCK[3].id_chuyen_khoa, dm: allDM[1].id_danh_muc },
-    { ten: 'Khám Tai Mũi Họng', gia: 150000, ck: allCK[4].id_chuyen_khoa, dm: allDM[0].id_danh_muc },
-    { ten: 'Nội soi tai mũi họng', gia: 450000, ck: allCK[4].id_chuyen_khoa, dm: allDM[1].id_danh_muc },
-    { ten: 'Khám Mắt tổng quát', gia: 200000, ck: allCK[6].id_chuyen_khoa, dm: allDM[0].id_danh_muc },
+    { ten: 'Khám Nội Tổng Quát', gia: 150000, ck: allCK[0].id_chuyen_khoa, dm: allDM[0].id_danh_muc, ha: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Khám Nhi', gia: 200000, ck: allCK[1].id_chuyen_khoa, dm: allDM[0].id_danh_muc, ha: 'https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Siêu âm ổ bụng', gia: 350000, ck: allCK[9].id_chuyen_khoa, dm: allDM[1].id_danh_muc, ha: 'https://images.unsplash.com/photo-1530497614244-7e72a14a8c83?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'X-Quang ngực thẳng', gia: 250000, ck: allCK[9].id_chuyen_khoa, dm: allDM[2].id_danh_muc, ha: 'https://images.unsplash.com/photo-1581595219315-a187dd40c322?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Tổng phân tích tế bào máu', gia: 180000, ck: allCK[9].id_chuyen_khoa, dm: allDM[3].id_danh_muc, ha: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Khám Răng', gia: 100000, ck: allCK[3].id_chuyen_khoa, dm: allDM[0].id_danh_muc, ha: 'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Lấy cao răng', gia: 300000, ck: allCK[3].id_chuyen_khoa, dm: allDM[1].id_danh_muc, ha: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Khám Tai Mũi Họng', gia: 150000, ck: allCK[4].id_chuyen_khoa, dm: allDM[0].id_danh_muc, ha: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Nội soi tai mũi họng', gia: 450000, ck: allCK[4].id_chuyen_khoa, dm: allDM[1].id_danh_muc, ha: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&q=80&w=800' },
+    { ten: 'Khám Mắt tổng quát', gia: 200000, ck: allCK[6].id_chuyen_khoa, dm: allDM[0].id_danh_muc, ha: 'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?auto=format&fit=crop&q=80&w=800' },
   ];
   for (const dv of dichVuData) {
     await prisma.dich_vu.create({
@@ -129,7 +143,8 @@ async function main() {
         ten_dich_vu: dv.ten,
         gia: dv.gia,
         id_chuyen_khoa: dv.ck,
-        id_danh_muc: dv.dm
+        id_danh_muc: dv.dm,
+        hinh_anh: dv.ha
       }
     });
   }

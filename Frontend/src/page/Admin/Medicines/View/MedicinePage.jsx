@@ -29,6 +29,11 @@ export default function MedicineManagement() {
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const role = JSON.parse(
+    localStorage.getItem("user")
+  );
+  const isAdmin = role?.vai_tro === "ADMIN";
+  const canManageMedicine = ["ADMIN", "BAC_SI"].includes(role);
 
   useEffect(() => {
     fetchData();
@@ -41,6 +46,8 @@ export default function MedicineManagement() {
 
     return () => clearTimeout(timer);
   }, [searchText]);
+
+
 
   const fetchData = async () => {
     try {
@@ -88,10 +95,10 @@ export default function MedicineManagement() {
     setOpen(true);
   };
 
-  const handleView = (record) => {
-    setViewRecord(record);
-    setOpenView(true);
-  };
+  // const handleView = (record) => {
+  //   setViewRecord(record);
+  //   setOpenView(true);
+  // };
 
   const handleDelete = (record) => {
     Modal.confirm({
@@ -168,18 +175,22 @@ export default function MedicineManagement() {
       width: 120,
       render: (_, record) => (
         <Space>
-          <EyeOutlined
+          {/* <EyeOutlined
             style={{ color: "#1677ff", cursor: "pointer", marginRight: 8 }}
             onClick={() => handleView(record)}
-          />
+          /> */}
           <EditOutlined
             style={{ color: "#faad14", cursor: "pointer", marginRight: 8 }}
             onClick={() => handleEdit(record)}
           />
-          <DeleteOutlined
-            style={{ color: "#ff4d4f", cursor: "pointer" }}
-            onClick={() => handleDelete(record)}
-          />
+          {
+            isAdmin && (
+              <DeleteOutlined
+                style={{ color: "#ff4d4f", cursor: "pointer" }}
+                onClick={() => handleDelete(record)}
+              />
+            )
+          }
         </Space>
       ),
     },
@@ -199,7 +210,7 @@ export default function MedicineManagement() {
         </Col>
 
         <Col>
-          <Button style={{ marginLeft: 10, backgroundColor: "#af050e" }} onClick={handleAdd}>
+          <Button type="primary" style={{ marginLeft: 10, backgroundColor: "#af050e" }} onClick={handleAdd}>
             ADD
           </Button>
         </Col>
@@ -223,7 +234,7 @@ export default function MedicineManagement() {
         />
       </Modal>
 
-      <Modal
+      {/* <Modal
         open={openView}
         onCancel={() => setOpenView(false)}
         footer={null}
@@ -251,7 +262,7 @@ export default function MedicineManagement() {
             </Descriptions.Item>
 
             <Descriptions.Item label="Expiry Date">
-              {dayjs(viewRecord.expiryDate).format("YYYY-MM-DD")}
+              {dayjs(viewRecord.expiryDate).format("DD-MM-YYYY")}
             </Descriptions.Item>
 
             <Descriptions.Item label="Category">
@@ -259,7 +270,7 @@ export default function MedicineManagement() {
             </Descriptions.Item>
           </Descriptions>
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 }

@@ -10,6 +10,7 @@ function normalize(body = {}) {
   return {
     ten_chuyen_khoa: body.name?.trim(),
     mo_ta: body.description?.trim(),
+    hinh_anh: body.hinh_anh?.trim() || null,
   };
 }
 

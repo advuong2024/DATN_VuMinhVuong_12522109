@@ -5,8 +5,8 @@ import {
   findPatientByPhone,
   createBooking,
   getCK,
-  getDoctorCK,
-} from "../../Api/BookingApi";
+  getDoctorCK, getCanBook
+} from "../Api/BookingApi";
 import { toast } from "react-toastify";
 
 export default function OldPatientForm() {
@@ -15,6 +15,8 @@ export default function OldPatientForm() {
   const [serviceOptions, setServiceOptions] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const selectedService = Form.useWatch("service", form);
+  const [canBookState, setCanBookState] = useState(true);
+  const [canBookMessage, setCanBookMessage] = useState("");
 
   useEffect(() => {
     const fetchCK = async () => {
@@ -50,8 +52,18 @@ export default function OldPatientForm() {
         setPatient(res.data);
 
         form.setFieldsValue({
-        name: res.data.ten_benh_nhan,
+            name: res.data.ten_benh_nhan,
         });
+
+        try {
+            const check = await canBook(res.data.id_benh_nhan);
+
+            setCanBookState(check.data.canBook);
+            setCanBookMessage(check.data.message || "");
+        } catch (err) {
+            setCanBookState(false);
+            setCanBookMessage("Cannot check booking");
+        }
     } else {
         setPatient(null);
         form.setFieldsValue({
@@ -83,6 +95,11 @@ export default function OldPatientForm() {
   const handleFinish = async (values) => {
     if (!patient?.id_benh_nhan) return;
 
+    if (!canBookState) {
+        toast.warning(canBookMessage || "Patient cannot book");
+        return;
+    }
+
     if (!values.doctor) {
         return alert("Please select doctor");
     }
@@ -92,7 +109,7 @@ export default function OldPatientForm() {
         id_bac_si: values.doctor,
         id_chuyen_khoa: values.service,
         ly_do: values.note || "",
-        trang_thai: "DA_DEN",
+        trang_thai: "DA_DAT",
         thoi_gian: dayjs().toISOString(),
     };
 

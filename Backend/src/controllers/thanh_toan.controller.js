@@ -154,6 +154,7 @@ exports.pay = async (req, res) => {
       id_phieu_kham,
       phuong_thuc,
       co_mua_thuoc,
+      loai_dang_xu_ly
     } = req.body;
 
     if (!id_phieu_kham) {
@@ -166,6 +167,7 @@ exports.pay = async (req, res) => {
       id_phieu_kham,
       phuong_thuc,
       co_mua_thuoc,
+      loai_dang_xu_ly,
     });
 
     return res.status(200).json({

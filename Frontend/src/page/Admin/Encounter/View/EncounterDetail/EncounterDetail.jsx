@@ -56,42 +56,40 @@ export default function EncounterPage() {
         trieu_chung: values.trieu_chung,
         chan_doan: values.chan_doan,
         ghi_chu: values.ghi_chu,
+        trang_thai: values.trang_thai,
 
-        chi_tiets: {
-          create: (values.services || []).map((s) => ({
+        chi_tiets: (values.services || [])
+          .filter((s) => s.id_dich_vu)
+          .map((s) => ({
+            id_chi_tiet: s.id_chi_tiet,
             id_dich_vu: Number(s.id_dich_vu),
             so_luong: Number(s.so_luong || 1),
             gia: Number(s.gia),
             trang_thai: "HOAN_THANH",
             id_bac_si: bookingData.doctorId,
+            loai_chi_tiet: s.loai_chi_tiet || "DICH_VU",
           })),
-        },
 
-        don_thuoc: values.medicines?.length
-          ? {
-              create: {
-                chi_tiets: {
-                  create: values.medicines.map((m) => ({
-                    id_thuoc: Number(m.id_thuoc),
-                    so_luong: Number(m.so_luong || 1),
-                    lieu_dung: m.lieu_dung,
-                    gia: Number(m.gia),
-                  })),
-                },
-              },
-            }
-          : undefined,
-
-        trang_thai: "HOAN_THANH",
+        don_thuoc: (values.medicines || [])
+          .filter((m) => m.id_thuoc)
+          .map((m) => ({
+            id_chi_tiet: m.id_chi_tiet,
+            id_thuoc: Number(m.id_thuoc),
+            so_luong: Number(m.so_luong || 1),
+            lieu_dung: m.lieu_dung,
+            gia: Number(m.gia),
+          })),
       };
 
       const res = await updateEncounter(bookingData.encounterId, payload);
-
       const payment = res?.data?.payment;
+      if (values.trang_thai === "NHAP") {
+        toast.success("Examination paused successfully!");
+      } else {
+        toast.success("Examination completed successfully!");
+      }
 
-      toast.success("encounter successfully!");
-
-      if (payment) {
+      if ( values.trang_thai === "HOAN_THANH" && payment) {
         toast.info("Don't forget to process the payment!");
       }
 
@@ -140,9 +138,15 @@ export default function EncounterPage() {
       </Card>
 
       <EncounterForm
+        bookingData= {bookingData}
         servicesOptions={services}
         medicinesOptions={medicines}
         onSubmit={handleSubmit}
+        initialValues={{
+          trieu_chung: bookingData?.trieu_chung,
+          chan_doan: bookingData?.chan_doan,
+          ghi_chu: bookingData?.ghi_chu,
+        }}
       />
     </div>
   );

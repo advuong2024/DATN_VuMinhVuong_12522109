@@ -6,7 +6,6 @@ const getAll = () => {
         orderBy: {
             id_thanh_toan: 'desc',
         },
-        where: { is_deleted: false },
     });
 };
 
@@ -14,7 +13,6 @@ const getById = (id_thanh_toan) => {
   return prisma.thanh_toan.findFirst({
     where: { 
       id_thanh_toan,
-      is_deleted: false
     },
 
     include: {
@@ -84,11 +82,8 @@ const update = (id_thanh_toan, data) => {
 };
 
 const remove = (id_thanh_toan) => {
-    return prisma.thanh_toan.update({
+    return prisma.thanh_toan.delete({
         where: { id_thanh_toan },
-        data: {
-            is_deleted: true,
-        },
     });
 };
 
@@ -175,7 +170,10 @@ const getPaymentDetailByPhieuKham = async (
     throw new Error("Not found");
   }
 
-  let consultation = null;
+  let consultation = {
+    items: [],
+    total: 0,
+  };
 
   let services = {
     items: [],
@@ -233,17 +231,25 @@ const getPaymentDetailByPhieuKham = async (
         };
       });
 
-    consultation =
-      mappedItems.find(
+    const consultations =
+      mappedItems.filter(
         (i) =>
           i.loai_item === "PHI_KHAM"
-      ) || null;
+      );
 
     const serviceItems =
       mappedItems.filter(
         (i) =>
           i.loai_item === "DICH_VU"
       );
+
+    consultation = {
+      items: consultations,
+      total: consultations.reduce(
+        (s, i) => s + i.total,
+        0
+      )
+    }
 
     services = {
       items: serviceItems,
@@ -274,6 +280,7 @@ const getPaymentDetailByPhieuKham = async (
         },
         include: {
           thuoc: true,
+          don_thuoc: true
         },
       });
 
@@ -284,6 +291,14 @@ const getPaymentDetailByPhieuKham = async (
             (t) =>
               t.id_chi_tiet === p.id_item
           );
+
+        if (
+          ["KHONG_MUA", "CHUA_QUYET_DINH"].includes(
+            detail?.don_thuoc?.trang_thai
+          )
+        ) {
+          return null;
+        }
 
         return {
           id: p.id_item,
@@ -326,71 +341,15 @@ const pay = async (data) => {
     id_phieu_kham,
     phuong_thuc,
     co_mua_thuoc,
+    loai_dang_xu_ly,
   } = data;
 
-  const isBuyMedicine = Boolean(co_mua_thuoc);
-
   return prisma.$transaction(async (tx) => {
-    await tx.thanh_toan.updateMany({
-      where: {
-        id_phieu_kham,
-        loai_thanh_toan: "DICH_VU",
-        trang_thai: "CHUA_THANH_TOAN",
-      },
-      data: {
-        trang_thai: "DA_THANH_TOAN",
-        phuong_thuc,
-        ngay_thanh_toan: new Date(),
-      },
-    });
-
-    if (isBuyMedicine) {
-      const chiTietThuoc =
-        await tx.chi_tiet_don_thuoc.findMany({
-          where: {
-            don_thuoc: {
-              id_phieu_kham,
-            },
-          },
-          select: {
-            id_thuoc: true,
-            so_luong: true,
-          },
-        });
-
-      for (const item of chiTietThuoc) {
-        const thuoc = await tx.thuoc.findUnique({
-          where: {
-            id_thuoc: item.id_thuoc,
-          },
-        });
-
-        if (!thuoc) {
-          throw new Error("Không tìm thấy thuốc");
-        }
-
-        if (thuoc.so_luong_ton < item.so_luong) {
-          throw new Error(
-            `Thuốc ${thuoc.ten_thuoc} không đủ số lượng tồn`
-          );
-        }
-
-        await tx.thuoc.update({
-          where: {
-            id_thuoc: item.id_thuoc,
-          },
-          data: {
-            so_luong_ton: {
-              decrement: item.so_luong,
-            },
-          },
-        });
-      }
-
+    if( loai_dang_xu_ly === "DICH_VU" ) {
       await tx.thanh_toan.updateMany({
         where: {
           id_phieu_kham,
-          loai_thanh_toan: "THUOC",
+          loai_thanh_toan: "DICH_VU",
           trang_thai: "CHUA_THANH_TOAN",
         },
         data: {
@@ -399,37 +358,102 @@ const pay = async (data) => {
           ngay_thanh_toan: new Date(),
         },
       });
+    }
 
-      await tx.don_thuoc.updateMany({
-        where: {
-          id_phieu_kham,
-          trang_thai_mua: "CHUA_QUYET_DINH",
-        },
-        data: {
-          trang_thai_mua: "DA_MUA",
-        },
-      });
-    } else {
-      await tx.thanh_toan.updateMany({
-        where: {
-          id_phieu_kham,
-          loai_thanh_toan: "THUOC",
-          trang_thai: "CHUA_THANH_TOAN",
-        },
-        data: {
-          trang_thai: "HUY",
-        },
-      });
+    if ( loai_dang_xu_ly === "THUOC" ) {
+      const isBuyMedicine = Boolean(co_mua_thuoc);
 
-      await tx.don_thuoc.updateMany({
-        where: {
-          id_phieu_kham,
-          trang_thai_mua: "CHUA_QUYET_DINH",
-        },
-        data: {
-          trang_thai_mua: "KHONG_MUA",
-        },
-      });
+      if (isBuyMedicine) {
+        const chiTietThuoc =
+          await tx.chi_tiet_don_thuoc.findMany({
+            where: {
+              don_thuoc: {
+                id_phieu_kham,
+              },
+            },
+            select: {
+              id_thuoc: true,
+              so_luong: true,
+            },
+          });
+  
+        for (const item of chiTietThuoc) {
+          const thuoc = await tx.thuoc.findUnique({
+            where: {
+              id_thuoc: item.id_thuoc,
+            },
+          });
+  
+          if (!thuoc) {
+            throw new Error("Không tìm thấy thuốc");
+          }
+  
+          if (thuoc.so_luong < item.so_luong) {
+            throw new Error(
+              `Thuốc ${thuoc.ten_thuoc} không đủ số lượng tồn`
+            );
+          }
+  
+          await tx.thuoc.update({
+            where: {
+              id_thuoc: item.id_thuoc,
+            },
+            data: {
+              so_luong: {
+                decrement: item.so_luong,
+              },
+            },
+          });
+        }
+  
+        await tx.thanh_toan.updateMany({
+          where: {
+            id_phieu_kham,
+            loai_thanh_toan: "THUOC",
+            trang_thai: "CHUA_THANH_TOAN",
+          },
+          data: {
+            trang_thai: "DA_THANH_TOAN",
+            phuong_thuc,
+            ngay_thanh_toan: new Date(),
+          },
+        });
+  
+        await tx.don_thuoc.updateMany({
+          where: {
+            id_phieu_kham,
+            trang_thai_mua: "CHUA_QUYET_DINH",
+          },
+          data: {
+            trang_thai_mua: "DA_MUA",
+          },
+        });
+      } else {
+        await tx.thanh_toan.updateMany({
+          where: {
+            id_phieu_kham,
+            loai_thanh_toan: "THUOC",
+            trang_thai: "CHUA_THANH_TOAN",
+          },
+          data: {
+            trang_thai: "HUY",
+          },
+        });
+
+        await tx.thanh_toan_chi_tiet.delete({
+          where: {id_thanh_toan}
+        });
+  
+        await tx.don_thuoc.updateMany({
+          where: {
+            id_phieu_kham,
+            trang_thai_mua: "CHUA_QUYET_DINH",
+          },
+          data: {
+            trang_thai_mua: "KHONG_MUA",
+          },
+        });
+      }
     }
 
     return true;

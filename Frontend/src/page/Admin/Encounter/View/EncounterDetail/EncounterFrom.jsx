@@ -1,14 +1,56 @@
 import { Card, Form, Input, Button, Tabs, Table, InputNumber, Select, Space } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const { TextArea } = Input;
 
-export default function EncounterForm({ servicesOptions, medicinesOptions, onSubmit }) {
+export default function EncounterForm({ bookingData, servicesOptions, medicinesOptions, onSubmit }) {
   const [form] = Form.useForm();
   const [services, setServices] = useState([]);
   const [medicines, setMedicines] = useState([]);
+  const [hiddenServices, setHiddenServices] = useState([]);
 
   const calcTotal = (gia = 0, so_luong = 0) => gia * so_luong;
+
+  useEffect(() => {
+    if (!bookingData) return;
+
+    const pk = bookingData.phieu_kham;
+
+    const allServices =
+      pk?.chi_tiets?.map((ct) => ({
+        id_chi_tiet: ct.id_chi_tiet,
+        id_dich_vu: ct.id_dich_vu,
+        so_luong: ct.so_luong,
+        gia: Number(ct.gia),
+        thanh_tien: ct.so_luong * Number(ct.gia),
+        loai_chi_tiet: ct.loai_chi_tiet,
+        is_paid: ct.is_paid,
+      })) || [];
+
+    const visibleServices = allServices.filter(s => s.loai_chi_tiet !== "PHI_KHAM");
+    const internalServices = allServices.filter(s => s.loai_chi_tiet === "PHI_KHAM");
+
+    const medicineData =
+      bookingData.don_thuoc?.chi_tiets?.map((ct) => ({
+        id_chi_tiet: ct.id_chi_tiet,
+        id_thuoc: ct.id_thuoc,
+        so_luong: ct.so_luong,
+        lieu_dung: ct.lieu_dung,
+        gia: Number(ct.gia),
+        thanh_tien: ct.so_luong * Number(ct.gia),
+      })) || [];
+
+    setServices(visibleServices);
+    setHiddenServices(internalServices);
+    setMedicines(medicineData);
+
+    form.setFieldsValue({
+      trieu_chung: pk?.trieu_chung,
+      chan_doan: pk?.chan_doan,
+      ghi_chu: bookingData.ghi_chu,
+      trang_thai: bookingData.trang_thai,
+    });
+  }, [bookingData]);
 
   const serviceColumns = [
     {
@@ -20,6 +62,7 @@ export default function EncounterForm({ servicesOptions, medicinesOptions, onSub
           style={{ width: 200 }}
           placeholder="Select"
           value={record.id_dich_vu}
+          disabled={record.is_paid}
           options={servicesOptions}
           onChange={(value) => {
             const selected = servicesOptions.find(s => s.value === value);
@@ -42,6 +85,7 @@ export default function EncounterForm({ servicesOptions, medicinesOptions, onSub
         <InputNumber
           min={1}
           value={record.so_luong}
+          disabled={record.is_paid}
           onChange={(value) => {
             const newData = [...services];
             newData[index].so_luong = value;
@@ -66,8 +110,8 @@ export default function EncounterForm({ servicesOptions, medicinesOptions, onSub
     {
       title: "",
       align: "center",
-      render: (_, __, index) => (
-        <Button danger onClick={() => setServices(services.filter((_, i) => i !== index))}>
+      render: (_, record, index) => (
+        <Button danger disabled={record.is_paid} onClick={() => setServices(services.filter((_, i) => i !== index))}>
           X
         </Button>
       )
@@ -153,23 +197,80 @@ export default function EncounterForm({ servicesOptions, medicinesOptions, onSub
     }
   ];
 
-  const handleSubmit = () => {
-    const values = form.getFieldsValue();
-    onSubmit({
-      ...values,
-      services,
-      medicines
-    });
+  const handlePauseExamination = async () => {
+    try {
+      const values = form.getFieldsValue();
+
+      onSubmit({
+        ...values,
+        services: [...hiddenServices, ...services],
+        medicines,
+        trang_thai: "NHAP",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleCompleteExamination = async () => {
+    try {
+      const values = form.getFieldsValue();
+
+      onSubmit({
+        ...values,
+        services: [...hiddenServices, ...services],
+        medicines,
+        trang_thai: "HOAN_THANH",
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <Card title="Examination">
       <Form layout="vertical" form={form}>
-        <Form.Item name="trieu_chung" label="Symptom">
+        <Form.Item
+          name="trieu_chung"
+          label="Symptom"
+          rules={[
+            {
+              validator: (_, value) => {
+                if (!value || !value.trim()) {
+                  return Promise.reject(
+                    new Error(
+                      "Please enter symptom"
+                    )
+                  );
+                }
+
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
           <TextArea />
         </Form.Item>
 
-        <Form.Item name="chan_doan" label="Diagnose">
+        <Form.Item
+          name="chan_doan"
+          label="Diagnose"
+          rules={[
+            {
+              validator: (_, value) => {
+                if (!value || !value.trim()) {
+                  return Promise.reject(
+                    new Error(
+                      "Please enter diagnose"
+                    )
+                  );
+                }
+
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
           <TextArea />
         </Form.Item>
 
@@ -225,7 +326,10 @@ export default function EncounterForm({ servicesOptions, medicinesOptions, onSub
         />
 
         <Space style={{ marginTop: 20 }}>
-          <Button type="primary" onClick={handleSubmit}>
+          <Button type="primary" onClick={handlePauseExamination}>
+            Pause Examination
+          </Button>
+          <Button type="primary" onClick={handleCompleteExamination}>
             Complete Examination
           </Button>
         </Space>

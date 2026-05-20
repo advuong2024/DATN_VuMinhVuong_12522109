@@ -17,6 +17,7 @@ import { getBookings, updateStatus } from "../Api/BookingApi"
 import { STATUS_COLORS, STATUS_OPTIONS } from "../Constants/booking_option";
 import { toast } from "react-toastify";
 import EncounterForm from "./ReceptionPaymentForm";
+import BookingForm from "./BookingForm";
 
 export default function BookingManagement() {
   const [data, setData] = useState([]);
@@ -28,6 +29,7 @@ export default function BookingManagement() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     status: null,
@@ -276,9 +278,55 @@ export default function BookingManagement() {
               CLEAR
             </Button>
           </Col>
+
+          <Col span={2}>
+            <Button
+                block
+                style={{
+                    fontWeight: 600,
+                    backgroundColor: "#af050e",
+                    color: "#fff",
+                }}
+                onClick={() => setOpenCreate(true)}
+                >
+                ADD
+            </Button>
+          </Col>
         </Row>
 
         <DataTable columns={columns} data={data} loading={false} />
+
+        <Modal
+          centered
+          open={openCreate}
+          onCancel={() => setOpenCreate(false)}
+          footer={null}
+          style={{ textAlign: "center" }}
+          title="ADD BOOKING"
+          width={800}
+        >
+          <BookingForm
+            services={[]}
+            doctors={[]}
+            staffs={[]}
+            onSubmit={(values) => {
+              console.log(values);
+        
+              const newItem = {
+                key: Date.now().toString(),
+                name: values.patient?.name,
+                phone: values.patient?.phone,
+                specialty: values.booking?.service,
+                date: values.booking?.date,
+                time: values.booking?.time,
+                doctor: values.booking?.doctor,
+              };
+        
+              setData((prev) => [newItem, ...prev]);
+              setOpenCreate(false);
+            }}
+          />
+        </Modal>
 
         <Modal
           open={openEncounter}

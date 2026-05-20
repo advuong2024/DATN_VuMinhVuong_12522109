@@ -8,8 +8,7 @@ import {
 } from "antd";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { updateStatus, createEncounter, 
-    createPayment, getServices } from "../Api/BookingApi"
+import { updateStatus, createEncounter, createPayment, getServices } from "../Api/BookingApi"
 import { PATIENT_OPTIONS } from "@/components/common/Options";
 
 export default function ReceptionPaymentForm({ booking, onSuccess }) {
@@ -19,26 +18,31 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
 
   const selectedServices = Form.useWatch("services", form);
 
-  
   useEffect(() => {
     fetchServices();
   }, []);
     
   useEffect(() => {
-    if (!selectedServices || services.length === 0) return;
+    if (!services || services.length === 0) return;
+
+    if (!selectedServices || selectedServices.length === 0) {
+      form.setFieldsValue({ tam_ung: 0 });
+      return;
+    }
     
     const total = selectedServices.reduce((sum, id) => {
-        const service = services.find((s) => s.id_dich_vu === id);
-        return sum + (service?.gia || 0);
+        const service = services.find((s) => String(s.id_dich_vu) === String(id));
+        const giaDichVu = service ? Number(service.gia) : 0; 
+        return sum + giaDichVu;
     }, 0);
     
     form.setFieldsValue({ tam_ung: total });
-  }, [selectedServices, services]);
+  }, [selectedServices, services, form]);
 
   const fetchServices = async () => {
     try {
       const res = await getServices();
-      setServices(res.data);
+      setServices(res.data || []);
     } catch (err) {
       console.error(err);
       toast.error("Cannot load services");
@@ -54,41 +58,42 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
             trieu_chung: "",
             chan_doan: "",
             ghi_chu: "",
-            chi_tiets: values.services.map((id) => ({
-              id_dich_vu: id,
-              so_luong: 1,
-              gia: services.find((s) => s.id_dich_vu === id)?.gia || 0,
-            })),
+            chi_tiets: values.services.map((id) => {
+              const service = services.find((s) => String(s.id_dich_vu) === String(id));
+              return {
+                id_dich_vu: id,
+                so_luong: 1,
+                gia: service ? Number(service.gia) : 0,
+                loai_chi_tiet: "PHI_KHAM"
+              };
+            }),
             trang_thai: "CHO_KHAM",
         });
 
         const encounter = res.data;
 
+        if (!encounter || !encounter.chi_tiets) {
+          throw new Error("Không nhận được phản hồi chi tiết từ hệ thống tạo phiếu khám.");
+        }
+
         const map = new Map(
-          encounter.chi_tiets.map(ct => [ct.id_dich_vu, ct.id_chi_tiet])
+          encounter.chi_tiets.map(ct => [String(ct.id_dich_vu), ct.id_chi_tiet])
         );
 
         const items = values.services.map((id) => {
-          const service = services.find((s) => s.id_dich_vu === id);
-
+          const service = services.find((s) => String(s.id_dich_vu) === String(id));
           return {
             loai_item: "PHI_KHAM",
-            id_item: map.get(id),
-            gia: service?.gia || 0,
+            id_item: map.get(String(id)),
+            gia: service ? Number(service.gia) : 0,
             so_luong: 1,
           };
         });
 
         await createPayment({
           id_phieu_kham: encounter.id_phieu_kham,
-
-          tong_tien: items.reduce(
-            (sum, i) => sum + i.gia * i.so_luong,
-            0
-          ),
-
+          tong_tien: items.reduce((sum, i) => sum + (i.gia * i.so_luong), 0),
           phuong_thuc: values.phuong_thuc,
-
           items,
         });
 
@@ -98,7 +103,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
         onSuccess();
     } catch (err) {
         console.error(err);
-        toast.error("Error during check-in/payment");
+        toast.error(err.message || "Error during check-in/payment");
     } finally {
         setLoading(false);
     }
@@ -109,15 +114,15 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
       <Divider>Patient Information</Divider>
 
       <Form.Item label="Name">
-        <Input value={booking?.name} disabled />
+        <Input value={booking?.name} disabled style={{ color: '#000' }} />
       </Form.Item>
 
       <Form.Item label="Phone">
-        <Input value={booking?.phone} disabled />
+        <Input value={booking?.phone} disabled style={{ color: '#000' }} />
       </Form.Item>
 
       <Form.Item label="Doctor">
-        <Input value={booking?.doctor} disabled />
+        <Input value={booking?.doctor} disabled style={{ color: '#000' }} />
       </Form.Item>
 
       <Divider>Initial Services</Divider>
@@ -125,11 +130,12 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
       <Form.Item
         name="services"
         label="Select Services"
-        rules={[{ required: true }]}
+        rules={[{ required: true, message: "Vui lòng chọn ít nhất 1 dịch vụ" }]}
       >
         <Select
           mode="multiple"
           placeholder="Select services"
+          allowClear
           options={services.map((s) => ({
             value: s.id_dich_vu,
             label: `${s.ten_dich_vu} - ${s.gia.toLocaleString()}đ`,
@@ -142,10 +148,14 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
       <Form.Item
         name="tam_ung"
         label="Total Payment"
-        >
+        initialValue={0}
+      >
         <InputNumber
             disabled
-            style={{ width: "100%" }}
+            style={{ width: "100%", color: '#d32f2f', fontWeight: 'bold' }}
+            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+            addonAfter="VND"
         />
       </Form.Item>
 
@@ -161,7 +171,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
         />
       </Form.Item>
 
-      <Button type="primary" htmlType="submit" block loading={loading}>
+      <Button type="primary" htmlType="submit" block loading={loading} style={{ marginTop: 10 }}>
         Confirm Check-in
       </Button>
     </Form>

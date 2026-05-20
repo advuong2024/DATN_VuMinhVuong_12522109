@@ -47,6 +47,10 @@ import {
 const { Content } = Layout;
 
 export default function Dashboard() {
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
   const [loading, setLoading] =
     useState(false);
 
@@ -88,27 +92,39 @@ export default function Dashboard() {
 
   const fetchRevenueChart = async () => {
     try {
-        const res =
-        await getRevenueChartData({
-            range,
-        });
+      const res = await getRevenueChartData({ range });
 
-        const mapped = res.data.data.map((item, index) => ({
-            name:
-            range === "30"
-                ? `Week ${index + 1}`
-                : dayjs(item.date).format(
-                    "DD/MM"
-                ),
+      const grouped = {};
 
-            revenue: Number(
-            item.revenue
-            ),
-        }));
+      res.data.data.forEach((item) => {
+        const date = dayjs(item.date);
 
-        setRevenueData(mapped);
+        let key;
+
+        if (range === "30") {
+          const week = Math.ceil(date.date() / 7);
+          key = `Week ${week}`;
+        } else {
+          key = date.format("DD/MM");
+        }
+
+        if (!grouped[key]) {
+          grouped[key] = 0;
+        }
+
+        grouped[key] += Number(item.revenue);
+      });
+
+      const mapped = Object.entries(grouped).map(
+        ([key, value]) => ({
+          name: key,
+          revenue: value,
+        })
+      );
+
+      setRevenueData(mapped);
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
   };
 
@@ -205,6 +221,56 @@ export default function Dashboard() {
       ) || []
     );
   }, [dashboard]);
+
+  if (user?.vai_tro !== "ADMIN") {
+    return (
+      <Layout
+        style={{
+          minHeight: "82vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#f5f7fb",
+        }}
+      >
+        <Card
+          bordered={false}
+          style={{
+            width: 500,
+            borderRadius: 20,
+            textAlign: "center",
+            padding: 20,
+            boxShadow:
+              "0 10px 30px rgba(0,0,0,0.08)",
+          }}
+        >
+          <h1
+            style={{
+              marginBottom: 10,
+              color: "#0f172a",
+            }}
+          >
+            Hello,{" "}
+            {
+              user?.nhan_vien
+                ?.ten_nhan_vien
+            }
+          </h1>
+
+          <p
+            style={{
+              fontSize: 16,
+              color: "#64748b",
+              margin: 0,
+            }}
+          >
+            Wishing you a wonderful and
+            productive day at work.
+          </p>
+        </Card>
+      </Layout>
+    );
+  }
 
   return (
     <Layout
@@ -442,11 +508,11 @@ export default function Dashboard() {
                   borderRadius: 16,
                 }}
                 title="Recent Medical Records"
-                extra={
-                  <Button type="primary">
-                    View All
-                  </Button>
-                }
+                // extra={
+                //   <Button type="primary">
+                //     View All
+                //   </Button>
+                // }
               >
                 <Table
                   columns={

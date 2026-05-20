@@ -14,6 +14,6 @@ export const createBill = (data) => {
 };
 
 export const payBill = (data) => {
-  const { id_phieu_kham, phuong_thuc, co_mua_thuoc } = data;
-  return axiosClient.put("/thanh-toan/pay", { id_phieu_kham, phuong_thuc, co_mua_thuoc });
+  const { id_phieu_kham, phuong_thuc, co_mua_thuoc, loai_dang_xu_ly } = data;
+  return axiosClient.put("/thanh-toan/pay", { id_phieu_kham, phuong_thuc, co_mua_thuoc, loai_dang_xu_ly });
 };

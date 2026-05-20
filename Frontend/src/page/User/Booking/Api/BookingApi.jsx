@@ -47,3 +47,12 @@ export const getFindPatient = async ({ phone, cccd }) => {
 
   return res.data;
 };
+
+export const getHistory = async ({id}) => {
+  const res = await axiosClient.get(`/benh-nhan/lich-su/${id}`)
+  return res.data
+}
+
+export const getCanBook = async (id) => {
+  return axiosClient.get(`/dat-lich/${id}/can-book`) 
+}

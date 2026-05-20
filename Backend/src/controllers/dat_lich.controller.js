@@ -30,7 +30,7 @@ exports.getAll = async (req, res) => {
 
 exports.getAllDaDen = async (req, res) => {
   try {
-    const rows = await LichHen.getAllDaDen(req.query);
+    const rows = await LichHen.getAllDaDen(req.query, req.user);
     res.json(rows);
   } catch (err) {
     console.error("🔥 ERROR:", err);
@@ -172,5 +172,18 @@ exports.delete = async (req, res) => {
   } catch (err) {
     console.error("🔥 ERROR:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.canBook = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const result = await LichHen.canBook(id);
+
+    return res.json(result);
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    return res.status(500).json({ message: "Error" });
   }
 };

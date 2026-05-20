@@ -18,6 +18,11 @@ function normalize(body = {}) {
     so_dien_thoai: trim(body.phone),
     dia_chi: trim(body.address),
     chuc_vu: trim(body.position),
+    bang_cap: trim(body.degree) || null,
+    mo_ta_ngan: trim(body.short_desc) || null,
+    hinh_anh: trim(body.hinh_anh) || null,
+    co_so: trim(body.location) || null,
+    nam_kinh_nghiem: body.experience ? Number(body.experience) : null,
 
     ...(specialtyId && {
       chuyen_khoa: {

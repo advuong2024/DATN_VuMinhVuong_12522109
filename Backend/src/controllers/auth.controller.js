@@ -26,7 +26,12 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: "Sai mật khẩu" });
     }
 
-    const accessToken = generateAccessToken(account);
+    const accessToken = generateAccessToken({
+      id_tai_khoan: account.id_tai_khoan,
+      vai_tro: account.vai_tro,
+      id_nhan_vien:
+        account.nhan_vien?.id_nhan_vien,
+    });
     const refreshToken = generateRefreshToken(account);
 
     await TaiKhoan.saveRefreshToken(

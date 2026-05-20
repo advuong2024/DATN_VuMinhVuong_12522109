@@ -111,7 +111,6 @@ const BillingPage = () => {
     }
   };
 
-
   const openModal = async (record, type) => {
     try {
       const res = await getBillDetails(record.key);
@@ -194,7 +193,13 @@ const BillingPage = () => {
           {record.status === "pending" && (
             <Button
               type="primary"
-              onClick={() => openModal(record, "process")}
+              onClick={() => 
+                openModal({
+                  ...record,
+                  loai_dang_xu_ly: record.loai_item,
+                }, 
+                "process"
+              )}
             >
               Process
             </Button>
@@ -227,9 +232,13 @@ const BillingPage = () => {
 
       <DataTable
         rowKey="key"
-        columns={columns.filter(
-          (c) => c.title !== "Actions"
-        )}
+        columns={
+          activeTab === "paid"
+            ? columns.filter(
+                (c) => c.title !== "Actions"
+              )
+            : columns
+        }
         data={data}
         expandable={{
           expandRowByClick: true,

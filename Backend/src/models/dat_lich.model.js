@@ -13,18 +13,18 @@ const getAll = (params = {}) => {
   if (search) {
     where.OR = [
         {
-            benh_nhan: {
+          benh_nhan: {
             ten_benh_nhan: {
-                contains: search,
+              contains: search,
             },
-            },
+          },
         },
         {
-            benh_nhan: {
+          benh_nhan: {
             so_dien_thoai: {
-                contains: search,
+              contains: search,
             },
-            },
+          },
         },
     ];
   }
@@ -44,7 +44,7 @@ const getAll = (params = {}) => {
       where.thoi_gian.lte = dayjs(endDate).endOf("day").toDate();
     }
   } else {
-    where.thoi_gian = getTodayRange();
+    //where.thoi_gian = getTodayRange();
   }
   return prisma.dat_lich.findMany({
     where,
@@ -78,13 +78,17 @@ const getAll = (params = {}) => {
   });
 };
 
-const getAllDaDen = (params = {}) => {
+const getAllDaDen = async (params = {}, user) => {
   const { search } = params;
 
   const where = {
     trang_thai: "DA_DEN",
     // thoi_gian: getTodayRange(),
   };
+
+  if (user.vai_tro === "BAC_SI") {
+    where.id_bac_si = user.id_nhan_vien;
+  }
 
   if (search) {
     where.OR = [
@@ -101,7 +105,7 @@ const getAllDaDen = (params = {}) => {
     ];
   }
 
-  return prisma.dat_lich.findMany({
+  const appointments = await prisma.dat_lich.findMany({
     where,
     include: {
       benh_nhan: {
@@ -124,22 +128,70 @@ const getAllDaDen = (params = {}) => {
         },
       },
       phieu_kham: {
-        select: {
-          id_phieu_kham: true,
-          trang_thai: true,
-        }
-      }
+        include: {
+          thanh_toan: {
+            where: {
+              trang_thai: "DA_THANH_TOAN",
+              loai_thanh_toan: "DICH_VU"
+            },
+            include: {
+              chi_tiets: true,
+            },
+          },
+
+          chi_tiets: {
+            where: {
+              loai_chi_tiet: "DICH_VU",
+            },
+          },
+
+          don_thuoc: {
+            include: {
+              chi_tiets: {
+                include: {
+                  thuoc: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: {
       id_dat_lich: "desc",
     },
+  });
+
+  return appointments.map((item) => {
+    const paidServiceIds =
+      item.phieu_kham?.thanh_toan?.flatMap((p) =>
+        p.chi_tiets
+          .filter((ct) => ct.loai_item === "DICH_VU")
+          .map((ct) => Number(ct.id_item))
+      ) || [];
+
+    return {
+      ...item,
+
+      phieu_kham: {
+        ...item.phieu_kham,
+
+        chi_tiets:
+          item.phieu_kham?.chi_tiets?.map((ct) => ({
+            ...ct,
+            is_paid: paidServiceIds.includes(
+              Number(ct.id_chi_tiet)
+            ),
+          })) || [],
+      },
+    };
   });
 };
 
 const getById = (id_dat_lich) => {
     return prisma.dat_lich.findFirst({
         where: { 
-            id_dat_lich,
+          id_dat_lich,
         },
     });
 };
@@ -242,18 +294,66 @@ const remove = (id_dat_lich) => {
 };
 
 const getByDoctorAndDate = (id_bac_si, date) => {
-  const start = new Date(`${date}T00:00:00.000Z`);
-  const end = new Date(`${date}T23:59:59.999Z`);
-
   return prisma.dat_lich.findMany({
     where: {
       id_bac_si: Number(id_bac_si),
-      thoi_gian: {
-        gte: start,
-        lte: end,
-      },
+      thoi_gian: getTodayRange(),
     },
   });
+};
+
+const canBook = async ( id_benh_nhan) => {
+  const activeBooking =
+    await prisma.dat_lich.findFirst({
+      where: {
+        id_benh_nhan,
+
+        trang_thai: {
+          in: [
+            "DA_DAT",
+          ],
+        },
+      },
+
+      orderBy: {
+        thoi_gian: "desc",
+      },
+    });
+
+  if (activeBooking) {
+    return {
+      canBook: false,
+      message:
+        "Patient already has active booking",
+    };
+  }
+
+  const activeEncounter =
+    await prisma.phieu_kham.findFirst({
+      where: {
+        id_benh_nhan,
+
+        trang_thai: {
+          in: ["CHO_KHAM","DANG_KHAM"]
+        },
+      },
+
+      orderBy: {
+        ngay_kham: "desc",
+      },
+    });
+
+  if (activeEncounter) {
+    return{
+      canBook: false,
+      message:
+        "Patient has unfinished encounter",
+    };
+  }
+
+  return {
+    canBook: true,
+  };
 };
 
 module.exports = {
@@ -266,4 +366,5 @@ module.exports = {
     updateStatus,
     remove,
     getByDoctorAndDate,
+    canBook,
 };

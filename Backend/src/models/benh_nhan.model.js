@@ -52,6 +52,45 @@ const remove = (id_benh_nhan) => {
     });
 };
 
+const getAppointmentHistoryByPatient = async (id_benh_nhan) => {
+  return await prisma.dat_lich.findMany({
+    where: {
+      id_benh_nhan: Number(id_benh_nhan),
+    },
+
+    orderBy: {
+      thoi_gian: "desc",
+    },
+
+    select: {
+      id_dat_lich: true,
+      thoi_gian: true,
+      ly_do: true,
+      trang_thai: true,
+
+      chuyen_khoa: {
+        select: {
+          ten_chuyen_khoa: true,
+        },
+      },
+
+      bac_si: {
+        select: {
+          ten_nhan_vien: true,
+        },
+      },
+
+      phieu_kham: {
+        select: {
+          id_phieu_kham: true,
+          trang_thai: true,
+        },
+      },
+    }
+  });
+};
+
+
 module.exports = {
     findByPhoneOrCCCD,
     getAll,
@@ -59,4 +98,5 @@ module.exports = {
     insert,
     update,
     remove,
+    getAppointmentHistoryByPatient
 };

@@ -14,41 +14,26 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
 import { EyeOutlined } from "@ant-design/icons";
-import BookingForm from "./EncounterForm";
 import { useNavigate } from "react-router-dom";
 import { encounterUrl } from "@/routes/urls";
 import { getBookings } from "../Api/BookingApi"
 import { updateEncounterStatus, createEncounter } from "../Api/EncounterApi"
-
-const STATUS_COLORS = {
-  Pending: "#faad14",
-  Confirmed: "#52c41a",
-  Done: "#1890ff",
-  Cancelled: "#ff4d4f",
-}
-
-const STATUS_OPTIONS = [
-  { label: "Pending", value: "CHO", color: "#faad14" },
-  { label: "Confirmed", value: "XAC_NHAN", color: "#52c41a" },
-  { label: "Done", value: "HOAN_THANH", color: "#1890ff" },
-  { label: "Cancelled", value: "HUY", color: "#ff4d4f" },
-]
 
 export default function BookingManagement() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [openCreate, setOpenCreate] = useState(false);
   const [viewRecord, setViewRecord] = useState(null);
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData({
+      search: debouncedSearch,
+    });
+  }, [debouncedSearch]);
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,17 +42,6 @@ export default function BookingManagement() {
 
     return () => clearTimeout(timer);
   }, [searchText]);
-
-  const filteredData = data.filter((item) => {
-    if (!searchText) return true;
-
-    const keyword = searchText.toLowerCase();
-
-    return (
-      item.name?.toLowerCase().includes(keyword) ||
-      item.phone?.toLowerCase().includes(keyword)
-    );
-  });
 
   const fetchData = async (filters = {}) => {
     try {
@@ -91,6 +65,8 @@ export default function BookingManagement() {
         doctorId: item.bac_si?.id_nhan_vien,
         phieu_kham: item.phieu_kham,
       }));
+
+      console.log("DATA:", formatted)
   
       setData(formatted);
     } catch (err) {
@@ -113,6 +89,10 @@ export default function BookingManagement() {
       render: (_, record) => {
         const pk = record.phieu_kham;
 
+        if (pk.trang_thai === "NHAP") {
+          return <Tag color="gold">Paused</Tag>
+        }
+
         if (pk.trang_thai === "CHO_KHAM") {
           return <Tag color="orange">Pending</Tag>;
         }
@@ -134,15 +114,26 @@ export default function BookingManagement() {
       width: 150,
       render: (_, record) => {
         const pk = record.phieu_kham;
-        const isDone = pk?.trang_thai === "HOAN_THANH";
+
+        const isDone =
+          pk?.trang_thai === "HOAN_THANH";
+
+        const isPaused =
+          pk?.trang_thai === "NHAP";
 
         return (
           <Button
-            type="primary"
+            type={isPaused ? "primary" : "primary"}
             disabled={isDone}
-            onClick={() => handleCreateEncounter(record)}
+            onClick={() =>
+              handleCreateEncounter(record)
+            }
           >
-            Examination
+            {
+              isPaused
+                ? "Continue"
+                : "Examination"
+            }
           </Button>
         );
       },
@@ -176,6 +167,7 @@ export default function BookingManagement() {
           bookingId: record.bookingId,
           doctorId: record.doctorId,
           encounterId,
+          phieu_kham: record.phieu_kham,
         },
       });
     } catch (err) {
@@ -188,62 +180,16 @@ export default function BookingManagement() {
         <h3 style={{ marginBottom: 16 }}>Encounter Management</h3>
 
         <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
-          <Col span={5}>
+          <Col span={6}>
             <Input
               placeholder="Search by name / phone"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
           </Col>
-
-          <Col span={2}>
-            <Button
-                block
-                style={{
-                    fontWeight: 600,
-                    backgroundColor: "#af050e",
-                    color: "#fff",
-                }}
-                onClick={() => setOpenCreate(true)}
-                >
-                ADD
-            </Button>
-          </Col>
         </Row>
 
-        <DataTable columns={columns} data={filteredData} loading={false} />
-
-        <Modal
-            centered
-            open={openCreate}
-            onCancel={() => setOpenCreate(false)}
-            footer={null}
-            style={{ textAlign: "center" }}
-            title="ADD ENCOUNTER"
-            width={800}
-        >
-            <BookingForm
-                services={[]}
-                doctors={[]}
-                staffs={[]}
-                onSubmit={(values) => {
-                console.log(values);
-
-                const newItem = {
-                  key: Date.now().toString(),
-                  name: values.patient?.name,
-                  phone: values.patient?.phone,
-                  specialty: values.booking?.service,
-                  date: values.booking?.date,
-                  time: values.booking?.time,
-                  doctor: values.booking?.doctor,
-                };
-
-                setData((prev) => [newItem, ...prev]);
-                setOpenCreate(false);
-                }}
-            />
-        </Modal>
+        <DataTable columns={columns} data={data} loading={false} />
     </div>
   );
 }

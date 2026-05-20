@@ -15,18 +15,30 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import axiosClient from "../../common/axiosClient";
 
 const { Header } = Layout;
 
 export default function AppHeader() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post("/auth/logout");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      localStorage.clear();
+      sessionStorage.clear();
 
-    navigate("/login");
+      navigate("/login");
+    }
   };
+
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
   const notifications = [
     {
       key: 1,
@@ -98,6 +110,13 @@ export default function AppHeader() {
         </div>
       ),
     })),
+  };
+
+  const roleMap = {
+    ADMIN: "ADMIN",
+    BAC_SI: "DOCTOR",
+    LE_TAN: "RECEPTIONIST",
+    THU_NGAN: "CASHIER",
   };
 
   return (
@@ -206,7 +225,7 @@ export default function AppHeader() {
                 fontWeight: 600,
               }}
             >
-              AD
+              {user.nhan_vien?.ten_nhan_vien?.charAt(0)}
             </Avatar>
 
             <div
@@ -223,7 +242,7 @@ export default function AppHeader() {
                   color: "#0f172a",
                 }}
               >
-                Admin
+                {user.nhan_vien?.ten_nhan_vien}
               </span>
 
               <span
@@ -232,7 +251,7 @@ export default function AppHeader() {
                   color: "#94a3b8",
                 }}
               >
-                Administrator
+                 {roleMap[user?.vai_tro]}
               </span>
             </div>
           </div>

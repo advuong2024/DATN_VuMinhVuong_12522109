@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Space } from "antd";
-import OldPatientForm from "./FormEncounter/OldPatientForm";
-import NewPatientForm from "./FormEncounter/NewPatientForm";
+import OldPatientForm from "../FromBooking/OldPatientForm";
+import NewPatientForm from "../FromBooking/NewPatientForm";
 
 export default function BookingPage() {
   const [mode, setMode] = useState("old");

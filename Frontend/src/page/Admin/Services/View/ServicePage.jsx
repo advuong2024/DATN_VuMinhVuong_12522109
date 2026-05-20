@@ -7,11 +7,12 @@ import {
   Modal,
   Descriptions,
   Form,
+  Image,
 } from "antd";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/common/DataTable";
 import ServiceForm from "./ServiceForm";
-import { EyeOutlined, EditOutlined, DeleteOutlined, } from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   getServices, createService,
   updateService, deleteService,
@@ -28,21 +29,19 @@ export default function ServiceManagement() {
   const [searchText, setSearchText] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
-  useEffect(() => {
-    fetchServices();
-  }, []);
-
   const fetchServices = async () => {
     try {
       const res = await getServices();
-
       const formatted = res.data.map((item) => ({
         key: item.id_dich_vu,
         name: item.ten_dich_vu,
         price: item.price || item.gia,
         category: item.danh_muc?.ten_danh_muc,
+        categoryId: item.id_danh_muc,
         specialty: item.chuyen_khoa?.ten_chuyen_khoa,
+        specialtyId: item.id_chuyen_khoa,
         description: item.mo_ta || null,
+        hinh_anh: item.hinh_anh || null,
       }));
 
       setData(formatted);
@@ -53,22 +52,23 @@ export default function ServiceManagement() {
   };
 
   useEffect(() => {
+    fetchServices();
+  }, []);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       let temp = [...data];
-
       if (searchText) {
         const keyword = searchText.toLowerCase();
-
-        temp = temp.filter((item) =>
-          item.name?.toLowerCase().includes(keyword) ||
-          item.category?.toLowerCase().includes(keyword) ||
-          item.specialty?.toLowerCase().includes(keyword)
+        temp = temp.filter(
+          (item) =>
+            item.name?.toLowerCase().includes(keyword) ||
+            item.category?.toLowerCase().includes(keyword) ||
+            item.specialty?.toLowerCase().includes(keyword)
         );
       }
-
       setFilteredData(temp);
     }, 300);
-
     return () => clearTimeout(timeout);
   }, [searchText, data]);
 
@@ -79,8 +79,9 @@ export default function ServiceManagement() {
   };
 
   const handleEdit = (record) => {
-    setEditingRecord(record);
-    form.setFieldsValue(record);
+    const formValues = { ...record, category: record.categoryId, specialty: record.specialtyId };
+    setEditingRecord(formValues);
+    form.setFieldsValue(formValues);
     setOpen(true);
   };
 
@@ -106,12 +107,11 @@ export default function ServiceManagement() {
     try {
       if (editingRecord) {
         await updateService(editingRecord.key, values);
-        toast.success("Update!")
+        toast.success("Update!");
       } else {
         await createService(values);
         toast.success("Created!");
       }
-
       fetchServices();
       setOpen(false);
     } catch (err) {
@@ -121,34 +121,32 @@ export default function ServiceManagement() {
   };
 
   const columns = [
-    { title: "Service Name", dataIndex: "name", width: 250 },
-
+    {
+      title: "Image",
+      dataIndex: "hinh_anh",
+      width: 90,
+      align: "center",
+      render: (url) =>
+        url ? (
+          <Image src={url} width={48} height={48} style={{ borderRadius: 8, objectFit: "cover" }} />
+        ) : (
+          <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f0f0f0" }} />
+        ),
+    },
+    { title: "Service Name", dataIndex: "name", width: 200 },
     {
       title: "Price",
       dataIndex: "price",
-      width: 200,
-      render: (p) =>
-        p ? `${Number(p).toLocaleString()} VND` : "0 VND",
+      width: 150,
+      render: (p) => (p ? `${Number(p).toLocaleString()} VND` : "0 VND"),
     },
-
-    {
-      title: "Category",
-      dataIndex: "category",
-      width: 200,
-    },
-
-    {
-      title: "Specialty",
-      dataIndex: "specialty",
-      width: 200,
-    },
-
+    { title: "Category", dataIndex: "category", width: 150 },
+    { title: "Specialty", dataIndex: "specialty", width: 150 },
     {
       title: "Description",
       dataIndex: "description",
       ellipsis: true,
     },
-
     {
       title: "Actions",
       align: "center",
@@ -184,9 +182,12 @@ export default function ServiceManagement() {
             onChange={(e) => setSearchText(e.target.value)}
           />
         </Col>
-
         <Col>
-          <Button style={{ marginLeft: 10, backgroundColor: "#af050e" }} onClick={handleAdd}>
+          <Button
+            type="primary"
+            style={{ marginLeft: 10, backgroundColor: "#af050e" }}
+            onClick={handleAdd}
+          >
             ADD
           </Button>
         </Col>
@@ -199,6 +200,7 @@ export default function ServiceManagement() {
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
+        width={700}
         title={
           <div style={{ textAlign: "center" }}>
             {editingRecord ? "UPDATE" : "ADD"} SERVICE
@@ -219,30 +221,40 @@ export default function ServiceManagement() {
         title={<div style={{ textAlign: "center" }}>SERVICE DETAILS</div>}
       >
         {viewRecord && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="Service Name">
-              {viewRecord.name}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Price">
-              {viewRecord.price
-                ? `${Number(viewRecord.price).toLocaleString()} VND`
-                : "—"
-              }
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Category">
-              { viewRecord.category}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Specialty">
-              { viewRecord.specialty}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Description">
-              {viewRecord.description}
-            </Descriptions.Item>
-          </Descriptions>
+          <>
+            {viewRecord.hinh_anh && (
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <Image
+                  src={viewRecord.hinh_anh}
+                  alt={viewRecord.name}
+                  width={300}
+                  style={{ borderRadius: 12, objectFit: "cover" }}
+                />
+              </div>
+            )}
+            <Descriptions column={1} bordered>
+              <Descriptions.Item label="Service Name">
+                {viewRecord.name}
+              </Descriptions.Item>
+              <Descriptions.Item label="Price">
+                {viewRecord.price
+                  ? `${Number(viewRecord.price).toLocaleString()} VND`
+                  : "—"
+                }
+              </Descriptions.Item>
+              <Descriptions.Item label="Category">
+                {viewRecord.category}
+              </Descriptions.Item>
+              <Descriptions.Item label="Specialty">
+                {viewRecord.specialty}
+              </Descriptions.Item>
+              <Descriptions.Item label="Description">
+                {viewRecord.description ? (
+                  <div className="tiptap-view" dangerouslySetInnerHTML={{ __html: viewRecord.description }} />
+                ) : "—"}
+              </Descriptions.Item>
+            </Descriptions>
+          </>
         )}
       </Modal>
     </div>

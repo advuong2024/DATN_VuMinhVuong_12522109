@@ -1,5 +1,6 @@
-import { Form, Input, Button, Space } from "antd";
+import { Form, Input, Button, Space, Row, Col } from "antd";
 import { useEffect } from "react";
+import ImageUpload from "@/components/common/ImageUpload";
 
 export default function CategoryForm({
   form,
@@ -28,20 +29,32 @@ export default function CategoryForm({
 
   return (
     <Form form={form} layout="vertical" onFinish={handleFinish}>
-      <Form.Item
-        label={activeTab === "specialty" ? "Specialty Name" : "Category Name"}
-        name="name"
-        rules={[{ required: true, message: "Please enter name" }]}
-      >
-        <Input placeholder="Enter name" />
-      </Form.Item>
+      <Row gutter={16}>
+        <Col span={activeTab === "specialty" ? 12 : 24}>
+          <Form.Item
+            label={activeTab === "specialty" ? "Specialty Name" : "Category Name"}
+            name="name"
+            rules={[{ required: true, message: "Please enter name" }]}
+          >
+            <Input placeholder="Enter name" />
+          </Form.Item>
+        </Col>
+
+        {activeTab === "specialty" && (
+          <Col span={12}>
+            <Form.Item label="Image" name="hinh_anh">
+              <ImageUpload />
+            </Form.Item>
+          </Col>
+        )}
+      </Row>
 
       <Form.Item
         label="Description"
         name="description"
         rules={[{ required: true, message: "Please enter description" }]}
       >
-        <Input.TextArea rows={3} />
+        <Input.TextArea rows={5} />
       </Form.Item>
 
       <Form.Item>

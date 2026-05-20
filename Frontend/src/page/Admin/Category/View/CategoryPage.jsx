@@ -8,6 +8,7 @@ import {
   Modal,
   Descriptions,
   Form,
+  Image,
 } from "antd";
 import { useState, useEffect  } from "react";
 import { EyeOutlined, EditOutlined, DeleteOutlined, } from "@ant-design/icons";
@@ -88,6 +89,7 @@ export default function CategoryManagement() {
         key: item.id_chuyen_khoa,
         name: item.ten_chuyen_khoa,
         description: item.mo_ta,
+        hinh_anh: item.hinh_anh || null,
       }));
 
       setDataSpecialty(data);
@@ -204,6 +206,18 @@ export default function CategoryManagement() {
   ];
 
   const columnsSpecialty = [
+    {
+      title: "Image",
+      dataIndex: "hinh_anh",
+      width: 90,
+      align: "center",
+      render: (url) =>
+        url ? (
+          <Image src={url} width={48} height={48} style={{ borderRadius: 8, objectFit: "cover" }} />
+        ) : (
+          <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f0f0f0" }} />
+        ),
+    },
     { title: "Specialty Name", dataIndex: "name", width: 350 },
     {
       title: "Description",
@@ -284,21 +298,33 @@ export default function CategoryManagement() {
         </div>}
       >
         {viewRecord && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="Name">
-              {viewRecord.name}
-            </Descriptions.Item>
-
-            <Descriptions.Item label="Description">
-              {viewRecord.description}
-            </Descriptions.Item>
-
-            {activeTab !== "specialty" && (
-              <Descriptions.Item label="Type">
-                {TYPE_OPTIONS.find(x => x.value === viewRecord.type)?.label}
-              </Descriptions.Item>
+          <>
+            {viewRecord.hinh_anh && (
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <Image
+                  src={viewRecord.hinh_anh}
+                  alt={viewRecord.name}
+                  width={300}
+                  style={{ borderRadius: 12, objectFit: "cover" }}
+                />
+              </div>
             )}
-          </Descriptions>
+            <Descriptions column={1} bordered>
+              <Descriptions.Item label="Name">
+                {viewRecord.name}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Description">
+                {viewRecord.description}
+              </Descriptions.Item>
+
+              {activeTab !== "specialty" && (
+                <Descriptions.Item label="Type">
+                  {TYPE_OPTIONS.find(x => x.value === viewRecord.type)?.label}
+                </Descriptions.Item>
+              )}
+            </Descriptions>
+          </>
         )}
       </Modal>
     </div>
@@ -317,6 +343,7 @@ function Header({ onAdd, onSearch }) {
 
       <Col>
         <Button
+          type="primary"
           style={{ marginLeft: 10, backgroundColor: "#af050e" }}
           onClick={onAdd}
         >

@@ -143,6 +143,7 @@ export default function AccountManagement() {
       render: (role, record) => (
         <Select
             value={role}
+            disabled={record?.role === 'ADMIN'}
             style={{ width: 130 }}
             onChange={(value) => handleChangeRole(value, record)}
             options={ROLE_OPTIONS.map((opt) => ({
@@ -167,7 +168,7 @@ export default function AccountManagement() {
         <Select
             value={status}
             style={{ width: 130 }}
-            // disabled={user?.role === "ADMIN"}
+            disabled={record?.role === "ADMIN"}
             onChange={(value) => handleChangeStatus(value, record)}
             options={STATUS_OPTIONS.map((opt) => ({
                 value: opt.value,

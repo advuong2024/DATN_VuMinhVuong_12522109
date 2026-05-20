@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/benh_nhan.controller");
 
+router.get("/lich-su/:id", controller.getAppointmentHistory);
 router.get("/tim-kiem", controller.findPatientByPhone);
 router.get("/", controller.getAll);
 router.get("/:id", controller.getById);

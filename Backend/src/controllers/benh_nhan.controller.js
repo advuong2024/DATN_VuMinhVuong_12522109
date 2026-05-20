@@ -121,3 +121,35 @@ exports.delete = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getAppointmentHistory = async (
+  req,
+  res
+) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Thiếu id bệnh nhân",
+      });
+    }
+
+    const appointments =
+      await BenhNhan.getAppointmentHistoryByPatient(
+        id
+      );
+
+    return res.status(200).json({
+      message:
+        "Lấy lịch sử đặt lịch thành công",
+      data: appointments,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Lỗi server",
+    });
+  }
+};

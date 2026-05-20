@@ -1,20 +1,28 @@
  const { PrismaClient } = require('@prisma/client');
  const prisma = new PrismaClient();
 
- const getAll = () => {
-  return prisma.nhan_vien.findMany({
-    where: { is_deleted: false },
-    orderBy: { id_nhan_vien: "desc" },
-    include: {
-      chuyen_khoa: {
-        select: {
-            ten_chuyen_khoa: true,
-            id_chuyen_khoa: true,
-        }
-      }
-    }
-  });
- };
+  const getAll = () => {
+   return prisma.nhan_vien.findMany({
+     where: { is_deleted: false },
+     orderBy: { id_nhan_vien: "desc" },
+     include: {
+       chuyen_khoa: {
+         select: {
+             ten_chuyen_khoa: true,
+             id_chuyen_khoa: true,
+         }
+       },
+       chung_chis: {
+         select: {
+           id_chung_chi: true,
+           ten_chung_chi: true,
+           noi_cap: true,
+           nam_cap: true,
+         }
+       }
+     }
+   });
+  };
 
  const get_bacsi_Chuyenkhoa = (id_chuyen_khoa) => {
     return prisma.nhan_vien.findMany({
@@ -24,7 +32,8 @@
         },
         select: {
             id_nhan_vien: true,
-            ten_nhan_vien: true
+            ten_nhan_vien: true,
+            hinh_anh: true
         }
     });
  };

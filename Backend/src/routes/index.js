@@ -16,5 +16,7 @@ router.use("/chi-tiet-dich-vu", require("./chi_tiet_dich_vu.router"));
 router.use("/chuyen-khoa", require("./chuyen_khoa.route"));
 router.use("/dich-vu", require("./dich_vu.router"));
 router.use("/thong-ke", require("./thong_ke.route"));
+router.use("/upload", require("./upload.router"));
+router.use("/chung-chi", require("./chung_chi.route"));
 
 module.exports = router;

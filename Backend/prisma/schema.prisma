@@ -7,9 +7,241 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//////////////////////////////////////////////////////
-// ENUM
-//////////////////////////////////////////////////////
+model chuyen_khoa {
+  mo_ta           String?            @db.Text
+  hinh_anh        String?
+  is_deleted      Boolean     @default(false)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  id_chuyen_khoa  Int         @id @default(autoincrement())
+  ten_chuyen_khoa String
+  dat_lichs       dat_lich[]
+  dich_vus        dich_vu[]
+  nhan_viens      nhan_vien[]
+}
+
+model nhan_vien {
+  ngay_sinh        DateTime?
+  gioi_tinh        GioiTinh?
+  so_dien_thoai    String?            @unique
+  dia_chi          String?
+  chuc_vu          String
+  bang_cap         String?
+  hinh_anh         String?
+  mo_ta_ngan       String?            @db.Text
+  co_so            String?
+  nam_kinh_nghiem  Int?
+  is_deleted       Boolean            @default(false)
+  created_at       DateTime           @default(now())
+  id_chuyen_khoa   Int?
+  updated_at       DateTime           @updatedAt
+  id_nhan_vien     Int                @id @default(autoincrement())
+  ten_nhan_vien    String
+  chi_tiets        chi_tiet_dich_vu[]
+  dat_lichs        dat_lich[]
+  chuyen_khoa      chuyen_khoa?       @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
+  phieu_khams      phieu_kham[]
+  tai_khoan        tai_khoan?
+  chung_chis       chung_chi[]
+
+  @@index([ten_nhan_vien])
+  @@index([id_chuyen_khoa], map: "nhan_vien_id_chuyen_khoa_fkey")
+}
+
+model chung_chi {
+  id_chung_chi  Int       @id @default(autoincrement())
+  id_nhan_vien  Int
+  ten_chung_chi String
+  noi_cap       String?
+  nam_cap       Int?
+  nhan_vien     nhan_vien @relation(fields: [id_nhan_vien], references: [id_nhan_vien], onDelete: Cascade)
+
+  @@index([id_nhan_vien])
+}
+
+model tai_khoan {
+  vai_tro       VaiTro
+  trang_thai    TrangThaiTaiKhoan @default(HOAT_DONG)
+  id_nhan_vien  Int               @unique
+  is_deleted    Boolean           @default(false)
+  created_at    DateTime          @default(now())
+  password      String
+  username      String            @unique
+  id_tai_khoan  Int               @id @default(autoincrement())
+  refresh_token String?           @db.Text
+  nhan_vien     nhan_vien         @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
+}
+
+model benh_nhan {
+  ngay_sinh     DateTime
+  gioi_tinh     GioiTinh
+  so_dien_thoai String?      @unique
+  dia_chi       String?
+  tien_su_benh  String?
+  is_deleted    Boolean      @default(false)
+  created_at    DateTime     @default(now())
+  id_benh_nhan  Int          @id @default(autoincrement())
+  CCCD          String
+  email         String?
+  ten_benh_nhan String
+  dat_lichs     dat_lich[]
+  phieu_khams   phieu_kham[]
+
+  @@index([ten_benh_nhan])
+}
+
+model danh_muc {
+  loai         String
+  is_deleted   Boolean   @default(false)
+  id_danh_muc  Int       @id @default(autoincrement())
+  mo_ta        String?   @db.Text
+  ten_danh_muc String
+  dich_vus     dich_vu[]
+  thuocs       thuoc[]
+}
+
+model dich_vu {
+  is_deleted     Boolean            @default(false)
+  id_danh_muc    Int
+  gia            Decimal            @db.Decimal(10, 2)
+  id_dich_vu     Int                @id @default(autoincrement())
+  id_chuyen_khoa Int
+  mo_ta          String?   @db.Text
+  hinh_anh       String?
+  ten_dich_vu    String
+  chi_tiets      chi_tiet_dich_vu[]
+  chuyen_khoa    chuyen_khoa        @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
+  danh_muc       danh_muc           @relation(fields: [id_danh_muc], references: [id_danh_muc])
+
+  @@index([id_chuyen_khoa], map: "dich_vu_id_chuyen_khoa_fkey")
+  @@index([id_danh_muc], map: "dich_vu_id_danh_muc_fkey")
+}
+
+model thuoc {
+  id_danh_muc Int
+  so_luong    Int
+  is_deleted  Boolean              @default(false)
+  gia         Decimal              @db.Decimal(10, 2)
+  id_thuoc    Int                  @id @default(autoincrement())
+  don_vi_tinh String?
+  han_su_dung DateTime
+  ten_thuoc   String
+  chi_tiets   chi_tiet_don_thuoc[]
+  danh_muc    danh_muc             @relation(fields: [id_danh_muc], references: [id_danh_muc])
+
+  @@index([id_danh_muc], map: "thuoc_id_danh_muc_fkey")
+}
+
+model dat_lich {
+  id_dat_lich    Int              @id @default(autoincrement())
+  thoi_gian      DateTime
+  ly_do          String?
+  trang_thai     TrangThaiLichHen @default(DA_DAT)
+  id_benh_nhan   Int
+  id_bac_si      Int
+  created_at     DateTime         @default(now())
+  id_chuyen_khoa Int
+  bac_si         nhan_vien        @relation(fields: [id_bac_si], references: [id_nhan_vien])
+  benh_nhan      benh_nhan        @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
+  chuyen_khoa    chuyen_khoa      @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
+  phieu_kham     phieu_kham?
+
+  @@unique([id_bac_si, thoi_gian])
+  @@index([id_benh_nhan], map: "dat_lich_id_benh_nhan_fkey")
+  @@index([id_chuyen_khoa], map: "dat_lich_id_chuyen_khoa_fkey")
+}
+
+model phieu_kham {
+  ngay_kham     DateTime           @default(now())
+  trieu_chung   String?
+  chan_doan     String?
+  id_benh_nhan  Int
+  trang_thai    TrangThaiPhieuKham @default(CHO_KHAM)
+  created_at    DateTime           @default(now())
+  id_bac_si     Int
+  id_dat_lich   Int?               @unique
+  id_phieu_kham Int                @id @default(autoincrement())
+  ghi_chu       String?
+  chi_tiets     chi_tiet_dich_vu[]
+  don_thuoc     don_thuoc?
+  bac_si        nhan_vien          @relation(fields: [id_bac_si], references: [id_nhan_vien])
+  benh_nhan     benh_nhan          @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
+  dat_lich      dat_lich?          @relation(fields: [id_dat_lich], references: [id_dat_lich])
+  thanh_toan    thanh_toan[]
+
+  @@index([id_bac_si], map: "phieu_kham_id_bac_si_fkey")
+  @@index([id_benh_nhan], map: "phieu_kham_id_benh_nhan_fkey")
+}
+
+model chi_tiet_dich_vu {
+  so_luong      Int
+  trang_thai    TrangThaiDichVu
+  id_phieu_kham Int
+  id_dich_vu    Int
+  gia           Decimal         @db.Decimal(10, 2)
+  id_chi_tiet   Int             @id @default(autoincrement())
+  id_bac_si     Int
+  loai_chi_tiet String?         @db.VarChar(50)
+  bac_si        nhan_vien       @relation(fields: [id_bac_si], references: [id_nhan_vien])
+  dich_vu       dich_vu         @relation(fields: [id_dich_vu], references: [id_dich_vu])
+  phieu_kham    phieu_kham      @relation(fields: [id_phieu_kham], references: [id_phieu_kham], onDelete: Cascade)
+
+  @@index([id_bac_si], map: "chi_tiet_dich_vu_id_bac_si_fkey")
+  @@index([id_dich_vu], map: "chi_tiet_dich_vu_id_dich_vu_fkey")
+  @@index([id_phieu_kham], map: "chi_tiet_dich_vu_id_phieu_kham_fkey")
+}
+
+model don_thuoc {
+  id_phieu_kham  Int                  @unique
+  id_don_thuoc   Int                  @id @default(autoincrement())
+  ngay_ke_don    DateTime             @default(now())
+  trang_thai_mua ThuocTrangThai       @default(CHUA_QUYET_DINH)
+  chi_tiets      chi_tiet_don_thuoc[]
+  phieu_kham     phieu_kham           @relation(fields: [id_phieu_kham], references: [id_phieu_kham], onDelete: Cascade)
+}
+
+model chi_tiet_don_thuoc {
+  so_luong     Int
+  lieu_dung    String?
+  id_don_thuoc Int
+  id_thuoc     Int
+  gia          Decimal   @db.Decimal(10, 2)
+  id_chi_tiet  Int       @id @default(autoincrement())
+  don_thuoc    don_thuoc @relation(fields: [id_don_thuoc], references: [id_don_thuoc], onDelete: Cascade)
+  thuoc        thuoc     @relation(fields: [id_thuoc], references: [id_thuoc])
+
+  @@index([id_don_thuoc], map: "chi_tiet_don_thuoc_id_don_thuoc_fkey")
+  @@index([id_thuoc], map: "fk_ctdt_thuoc_new")
+}
+
+model thanh_toan {
+  tong_tien       Decimal               @db.Decimal(10, 2)
+  phuong_thuc     PhuongThucThanhToan?
+  trang_thai      TrangThaiThanhToan
+  ngay_thanh_toan DateTime?
+  id_phieu_kham   Int
+  id_thanh_toan   Int                   @id @default(autoincrement())
+  created_at      DateTime              @default(now())
+  loai_thanh_toan LoaiThanhToan         @default(PHI_KHAM)
+  phieu_kham      phieu_kham            @relation(fields: [id_phieu_kham], references: [id_phieu_kham], onDelete: Cascade)
+  chi_tiets       thanh_toan_chi_tiet[]
+
+  @@unique([id_phieu_kham, loai_thanh_toan])
+}
+
+model thanh_toan_chi_tiet {
+  id            Int           @id @default(autoincrement())
+  id_thanh_toan Int
+  loai_item     LoaiThanhToan
+  id_item       Int
+  created_at    DateTime      @default(now())
+  gia           Decimal       @db.Decimal(10, 2)
+  so_luong      Int
+  thanh_toan    thanh_toan    @relation(fields: [id_thanh_toan], references: [id_thanh_toan], onDelete: Cascade)
+
+  @@unique([id_thanh_toan, loai_item, id_item])
+  @@index([id_thanh_toan])
+}
 
 enum VaiTro {
   ADMIN
@@ -40,6 +272,7 @@ enum TrangThaiPhieuKham {
   DANG_KHAM
   HOAN_THANH
   DA_HUY
+  NHAP
 }
 
 enum TrangThaiThanhToan {
@@ -69,250 +302,4 @@ enum ThuocTrangThai {
   CHUA_QUYET_DINH
   DA_MUA
   KHONG_MUA
-}
-
-//////////////////////////////////////////////////////
-// MASTER DATA
-//////////////////////////////////////////////////////
-
-model chuyen_khoa {
-  id_chuyen_khoa   Int    @id @default(autoincrement())
-  ten_chuyen_khoa  String
-  mo_ta String?
-
-  is_deleted Boolean @default(false)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  nhan_viens nhan_vien[]
-  dich_vus dich_vu[]
-  dat_lichs dat_lich[]
-}
-
-model nhan_vien {
-  id_nhan_vien   Int    @id @default(autoincrement())
-  ten_nhan_vien  String
-  so_dien_thoai String? @unique
-  gioi_tinh GioiTinh?
-  ngay_sinh DateTime?
-  dia_chi String?
-  chuc_vu String
-
-  id_chuyen_khoa Int?
-  chuyen_khoa chuyen_khoa? @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
-
-  is_deleted Boolean @default(false)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  tai_khoan tai_khoan?
-  dat_lichs dat_lich[]
-  phieu_khams phieu_kham[]
-  chi_tiets chi_tiet_dich_vu[]
-  @@index([ten_nhan_vien])
-}
-
-model tai_khoan {
-  id_tai_khoan Int @id @default(autoincrement())
-  username String @unique
-  password String
-  vai_tro VaiTro
-  trang_thai TrangThaiTaiKhoan @default(HOAT_DONG)
-
-  refresh_token String? @db.Text
-
-  id_nhan_vien Int @unique
-  nhan_vien nhan_vien @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
-
-  is_deleted Boolean @default(false)
-  created_at DateTime @default(now())
-}
-
-model benh_nhan {
-  id_benh_nhan Int @id @default(autoincrement())
-  ten_benh_nhan String
-  so_dien_thoai String? @unique
-  gioi_tinh GioiTinh
-  ngay_sinh DateTime
-  dia_chi String?
-  CCCD  String
-  email String?
-  tien_su_benh String?
-
-  is_deleted Boolean @default(false)
-  created_at DateTime @default(now())
-
-  dat_lichs dat_lich[]
-  phieu_khams phieu_kham[]
-  @@index([ten_benh_nhan])
-}
-
-model danh_muc {
-  id_danh_muc Int @id @default(autoincrement())
-  ten_danh_muc String
-  loai String
-  mo_ta String?
-
-  is_deleted Boolean @default(false)
-
-  dich_vus dich_vu[]
-  thuocs thuoc[]
-}
-
-model dich_vu {
-  id_dich_vu Int @id @default(autoincrement())
-  ten_dich_vu String
-  gia Decimal @db.Decimal(10,2)
-  mo_ta String?
-
-  id_chuyen_khoa Int
-  chuyen_khoa chuyen_khoa @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
-
-  id_danh_muc Int
-  danh_muc danh_muc @relation(fields: [id_danh_muc], references: [id_danh_muc])
-
-  is_deleted Boolean @default(false)
-
-  chi_tiets chi_tiet_dich_vu[]
-}
-
-model thuoc {
-  id_thuoc Int @id @default(autoincrement())
-  ten_thuoc String
-  gia Decimal @db.Decimal(10,2)
-  so_luong Int
-  don_vi_tinh String?
-  han_su_dung DateTime
-
-  id_danh_muc Int
-  danh_muc danh_muc @relation(fields: [id_danh_muc], references: [id_danh_muc])
-
-  is_deleted Boolean @default(false)
-
-  chi_tiets chi_tiet_don_thuoc[]
-}
-
-//////////////////////////////////////////////////////
-// OPERATIONAL
-//////////////////////////////////////////////////////
-
-model dat_lich {
-  id_dat_lich Int @id @default(autoincrement())
-  thoi_gian DateTime
-  ly_do String?
-  trang_thai TrangThaiLichHen @default(DA_DAT)
-
-  id_benh_nhan Int
-  benh_nhan benh_nhan @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
-
-  id_bac_si Int
-  bac_si nhan_vien @relation(fields: [id_bac_si], references: [id_nhan_vien])
-
-  id_chuyen_khoa Int
-  chuyen_khoa chuyen_khoa @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
-
-  phieu_kham phieu_kham?
-
-  created_at DateTime @default(now())
-
-  @@unique([id_bac_si, thoi_gian])
-}
-
-model phieu_kham {
-  id_phieu_kham Int @id @default(autoincrement())
-  ngay_kham DateTime @default(now())
-  trieu_chung String?
-  chan_doan String?
-  trang_thai TrangThaiPhieuKham @default(DANG_KHAM)
-  ghi_chu String?
-
-  id_benh_nhan Int
-  benh_nhan benh_nhan @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
-
-  id_bac_si Int
-  bac_si nhan_vien @relation(fields: [id_bac_si], references: [id_nhan_vien])
-
-  id_dat_lich Int? @unique
-  dat_lich dat_lich? @relation(fields: [id_dat_lich], references: [id_dat_lich])
-
-  chi_tiets chi_tiet_dich_vu[]
-  don_thuoc don_thuoc?
-  thanh_toan thanh_toan[]
-
-  created_at DateTime @default(now())
-}
-
-//////////////////////////////////////////////////////
-// TRANSACTION
-//////////////////////////////////////////////////////
-
-model chi_tiet_dich_vu {
-  id_chi_tiet Int @id @default(autoincrement())
-  so_luong Int
-  gia Decimal @db.Decimal(10,2)
-  trang_thai TrangThaiDichVu
-
-  id_phieu_kham Int
-  phieu_kham phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
-
-  id_dich_vu Int
-  dich_vu dich_vu @relation(fields: [id_dich_vu], references: [id_dich_vu])
-  
-  id_bac_si Int
-  bac_si  nhan_vien @relation(fields: [id_bac_si], references: [id_nhan_vien])
-}
-
-model don_thuoc {
-  id_don_thuoc Int @id @default(autoincrement())
-  ngay_ke_don DateTime @default(now())
-  id_phieu_kham Int @unique
-  phieu_kham phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
-  trang_thai_mua ThuocTrangThai @default(CHUA_QUYET_DINH)
-  chi_tiets chi_tiet_don_thuoc[]
-}
-
-model chi_tiet_don_thuoc {
-  id_chi_tiet Int @id @default(autoincrement())
-  so_luong Int
-  lieu_dung String?
-  gia Decimal @db.Decimal(10,2)
-
-  id_don_thuoc Int
-  don_thuoc don_thuoc @relation(fields: [id_don_thuoc], references: [id_don_thuoc])
-
-  id_thuoc Int
-  thuoc thuoc @relation(fields: [id_thuoc], references: [id_thuoc])
-}
-
-model thanh_toan {
-  id_thanh_toan Int @id @default(autoincrement())
-  tong_tien Decimal @db.Decimal(10,2)
-  trang_thai TrangThaiThanhToan
-  phuong_thuc PhuongThucThanhToan?
-  ngay_thanh_toan DateTime?
-  loai_thanh_toan LoaiThanhToan @default(PHI_KHAM)
-
-  id_phieu_kham Int
-  phieu_kham phieu_kham @relation(fields: [id_phieu_kham], references: [id_phieu_kham])
-  chi_tiets thanh_toan_chi_tiet[]
-  created_at DateTime @default(now())
-  @@unique([id_phieu_kham, loai_thanh_toan])
-}
-
-model thanh_toan_chi_tiet {
-  id Int @id @default(autoincrement())
-
-  id_thanh_toan Int
-  thanh_toan thanh_toan @relation(fields: [id_thanh_toan], references: [id_thanh_toan])
-
-  loai_item LoaiThanhToan
-  id_item Int
-
-  gia Decimal @db.Decimal(10,2)
-  so_luong Int
-
-  created_at DateTime @default(now())
-
-  @@index([id_thanh_toan])
-  @@unique([id_thanh_toan, loai_item, id_item])
 }

@@ -74,6 +74,7 @@ const insert = async (data) => {
               gia: i.gia,
               id_bac_si,
               trang_thai: "HOAN_THANH",
+              loai_chi_tiet: i.loai_chi_tiet || "DICH_VU",
             })),
           }
         : undefined,
@@ -85,16 +86,6 @@ const insert = async (data) => {
 };
 
 const upsertPayment = async (tx, id_phieu_kham, loai, items) => {
-  if (!items || items.length === 0) {
-    await tx.thanh_toan.deleteMany({
-      where: {
-        id_phieu_kham,
-        loai_thanh_toan: loai,
-      },
-    });
-    return null;
-  }
-
   const total = items.reduce(
     (sum, i) => sum + Number(i.gia || 0) * Number(i.so_luong || 0),
     0
@@ -107,42 +98,79 @@ const upsertPayment = async (tx, id_phieu_kham, loai, items) => {
         loai_thanh_toan: loai,
       },
     },
+    include: { chi_tiets: true },
   });
 
-  const mappedItems = items.map((i) => ({
-    loai_item: loai,
-    id_item: i.id_chi_tiet,
-    gia: i.gia,
-    so_luong: i.so_luong,
-  }));
+  const mappedItems = items
+    .filter((i) => i.id_chi_tiet)
+    .map((i) => ({
+      loai_item: loai,
+      id_item: Number(i.id_chi_tiet),
+      gia: i.gia,
+      so_luong: i.so_luong,
+    }));
 
   if (existed) {
-    return tx.thanh_toan.update({
+    const existingIds = existed.chi_tiets.map((d) => Number(d.id_item));
+    const incomingIds = mappedItems.map((m) => Number(m.id_item));
+
+    const toDelete = existingIds.filter((id) => !incomingIds.includes(id));
+
+    await tx.thanh_toan.update({
       where: { id_thanh_toan: existed.id_thanh_toan },
       data: {
         tong_tien: total,
-
-        chi_tiets: {
-          deleteMany: {},
-          create: mappedItems,
-        },
-      },
-      include: {
-        chi_tiets: true,
       },
     });
+
+    if (toDelete.length > 0) {
+      await tx.thanh_toan_chi_tiet.deleteMany({
+        where: {
+          id_thanh_toan: existed.id_thanh_toan,
+          loai_item: loai,
+          id_item: { in: toDelete },
+        },
+      });
+    }
+
+    for (const item of mappedItems) {
+      await tx.thanh_toan_chi_tiet.upsert({
+        where: {
+          id_thanh_toan_loai_item_id_item: {
+            id_thanh_toan: existed.id_thanh_toan,
+            loai_item: loai,
+            id_item: item.id_item,
+          },
+        },
+        create: {
+          ...item,
+          id_thanh_toan: existed.id_thanh_toan,
+        },
+        update: item,
+      });
+    }
+
+    return tx.thanh_toan.findUnique({
+      where: { id_thanh_toan: existed.id_thanh_toan },
+      include: { chi_tiets: true },
+    });
+
   }
+
+  if (mappedItems.length === 0) return null;
 
   return tx.thanh_toan.create({
     data: {
       id_phieu_kham,
       tong_tien: total,
+      loai_thanh_toan: loai,
       trang_thai: "CHUA_THANH_TOAN",
 
       chi_tiets: {
         create: mappedItems,
       },
     },
+    include: { chi_tiets: true },
   });
 };
 
@@ -150,44 +178,101 @@ const update = async (id_phieu_kham, data) => {
   const { id_benh_nhan, id_bac_si, chi_tiets, don_thuoc, ...rest } = data;
 
   return prisma.$transaction(async (tx) => {
-    const encounter = await tx.phieu_kham.update({
+    await tx.phieu_kham.update({
       where: { id_phieu_kham },
       data: {
         ...rest,
-
         ...(id_benh_nhan && {
           benh_nhan: { connect: { id_benh_nhan } },
         }),
-
         ...(id_bac_si && {
           bac_si: { connect: { id_nhan_vien: id_bac_si } },
         }),
-
-        ...(chi_tiets && {
-          chi_tiets: {
-            deleteMany: {},
-            create: chi_tiets.create || [],
-          },
-        }),
-
-        ...(don_thuoc && {
-          don_thuoc: {
-            upsert: {
-              create: {
-                chi_tiets: {
-                  create: don_thuoc.create.chi_tiets.create,
-                },
-              },
-              update: {
-                chi_tiets: {
-                  deleteMany: {},
-                  create: don_thuoc.create.chi_tiets.create,
-                },
-              },
-            },
-          },
-        }),
       },
+    });
+
+    if (Array.isArray(chi_tiets)) {
+      const existing = await tx.chi_tiet_dich_vu.findMany({
+        where: { id_phieu_kham, loai_chi_tiet: "DICH_VU" },
+      });
+      const existingIds = existing.map((e) => Number(e.id_chi_tiet));
+      const incomingIds = chi_tiets
+        .filter((i) => i.id_chi_tiet)
+        .map((i) => Number(i.id_chi_tiet));
+
+      const toDelete = existingIds.filter((id) => !incomingIds.includes(id));
+
+      if (toDelete.length > 0) {
+        await tx.chi_tiet_dich_vu.deleteMany({
+          where: { id_chi_tiet: { in: toDelete } },
+        });
+      }
+
+      for (const item of chi_tiets) {
+        const { id_chi_tiet, ...itemData } = item;
+        if (id_chi_tiet) {
+          await tx.chi_tiet_dich_vu.update({
+            where: { id_chi_tiet: Number(id_chi_tiet) },
+            data: itemData,
+          });
+        } else {
+          await tx.chi_tiet_dich_vu.create({
+            data: { ...itemData, id_phieu_kham },
+          });
+        }
+      }
+    }
+
+    if (don_thuoc) {
+      let dt = await tx.don_thuoc.findUnique({
+        where: { id_phieu_kham },
+      });
+
+      if (!dt) {
+        dt = await tx.don_thuoc.create({
+          data: { id_phieu_kham },
+        });
+      }
+
+      const incomingMedicines = Array.isArray(don_thuoc)
+        ? don_thuoc
+        : don_thuoc.chi_tiets || [];
+
+      const existingMed = await tx.chi_tiet_don_thuoc.findMany({
+        where: { id_don_thuoc: dt.id_don_thuoc },
+      });
+      const existingMedIds = existingMed.map((e) => Number(e.id_chi_tiet));
+      const incomingMedIds = incomingMedicines
+        .filter((i) => i.id_chi_tiet)
+        .map((i) => Number(i.id_chi_tiet));
+
+      const toDeleteMed = existingMedIds.filter(
+        (id) => !incomingMedIds.includes(id)
+      );
+
+      if (toDeleteMed.length > 0) {
+        await tx.chi_tiet_don_thuoc.deleteMany({
+          where: { id_chi_tiet: { in: toDeleteMed } },
+        });
+      }
+
+      for (const item of incomingMedicines) {
+        const { id_chi_tiet, ...itemData } = item;
+        if (id_chi_tiet) {
+          await tx.chi_tiet_don_thuoc.update({
+            where: { id_chi_tiet: Number(id_chi_tiet) },
+            data: itemData,
+          });
+        } else {
+          await tx.chi_tiet_don_thuoc.create({
+            data: { ...itemData, id_don_thuoc: dt.id_don_thuoc },
+          });
+        }
+      }
+    }
+
+    const encounter = await tx.phieu_kham.findUnique({
+      where: { id_phieu_kham },
       include: {
         chi_tiets: true,
         don_thuoc: {
@@ -196,19 +281,31 @@ const update = async (id_phieu_kham, data) => {
       },
     });
 
-    const servicePayment = await upsertPayment(
-      tx,
-      id_phieu_kham,
-      "DICH_VU",
-      encounter.chi_tiets
-    );
+    let servicePayment = null;
+    let medicinePayment = null;
 
-    const medicinePayment = await upsertPayment(
-      tx,
-      id_phieu_kham,
-      "THUOC",
-      encounter.don_thuoc?.chi_tiets || []
-    );
+    if (encounter.chi_tiets && encounter.chi_tiets.length > 0) {
+      const onlyDichVu = encounter.chi_tiets.filter(
+        (ct) => ct.loai_chi_tiet === "DICH_VU"
+      );
+      if (onlyDichVu.length > 0) {
+        servicePayment = await upsertPayment(
+          tx,
+          id_phieu_kham,
+          "DICH_VU",
+          onlyDichVu
+        );
+      }
+    }
+
+    if (encounter.trang_thai === "HOAN_THANH") {
+      medicinePayment = await upsertPayment(
+        tx,
+        id_phieu_kham,
+        "THUOC",
+        encounter.don_thuoc?.chi_tiets || []
+      );
+    }
 
     return {
       encounter,
