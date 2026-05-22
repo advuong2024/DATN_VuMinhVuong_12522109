@@ -102,10 +102,10 @@ export default function MedicineManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Xóa thuốc?",
-      content: "Bạn có chắc muốn xóa không?",
-      okText: "Xóa",
-      cancelText: "Hủy",
+      title: "Delete medicine?",
+      content: "Are you sure?",
+      okText: "Delete",
+      cancelText: "Cancel",
       onOk: async () => {
         await deleteMedicine(record.key);
         fetchData();

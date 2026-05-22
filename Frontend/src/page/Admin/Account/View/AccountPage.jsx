@@ -100,14 +100,14 @@ export default function AccountManagement() {
 
   const handleResetPassword = (record) => {
     Modal.confirm({
-      title: "Xác nhận reset mật khẩu?",
-      content: "Mật khẩu sẽ được đặt lại về 123456",
+      title: "Confirm password reset?",
+      content: "Password will be reset to 123456",
       onOk: async () => {
         try {
           await resetPassword(record.id, "123456");
-          toast.success("Đã reset");
+          toast.success("Reset done");
         } catch {
-          toast.error("Lỗi");
+          toast.error("Error");
         }
       },
     });
@@ -339,7 +339,7 @@ export default function AccountManagement() {
                 {viewRecord.username}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Mật khẩu">
+            <Descriptions.Item label="Password">
                 <Space>
                     <span>
                     {showPassword ? viewRecord.password : "••••••••"}

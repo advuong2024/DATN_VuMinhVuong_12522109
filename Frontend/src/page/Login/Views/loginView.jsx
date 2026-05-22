@@ -7,7 +7,7 @@ import { login } from "../Api/loginApi";
 import { saveAuth } from "../utils/auth";
 import { useAuth } from "../context/AuthContext";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -21,10 +21,7 @@ const LoginForm = () => {
     try {
       setLoading(true);
 
-      const res = await login({
-        username,
-        password,
-      });
+      const res = await login({ username, password });
 
       const { accessToken, refreshToken, user } = res;
 
@@ -36,7 +33,7 @@ const LoginForm = () => {
       navigate("/admin");
     } catch (err) {
       console.log("ERROR:", err.response?.data);
-      toast.error(err.response?.data?.message  || err.response?.data?.error || "Login failed");
+      toast.error("Login failed");
     } finally {
       setLoading(false);
     }
@@ -49,50 +46,74 @@ const LoginForm = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#f5f7fa",
+        background: "linear-gradient(135deg, #e8f0fe 0%, #d4e4f7 50%, #f0f4ff 100%)",
       }}
     >
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .login-card {
+          animation: fadeSlideUp 0.6s ease;
+        }
+        .login-input input::placeholder {
+          color: #a0a0a0 !important;
+        }
+      `}</style>
+
       <div
+        className="login-card"
         style={{
-          width: 560,
+          width: 500,
           background: "#fff",
-          padding: "38px 34px",
-          borderRadius: 14,
-          boxShadow: "0 12px 40px rgba(0,0,0,0.10)",
+          padding: "44px 40px",
+          borderRadius: 20,
+          borderTop: "4px solid #1677ff",
+          boxShadow: "0 20px 60px rgba(0, 21, 64, 0.12)",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 22 }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
           <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            style={{ width: 110 }}
+            src="/logo.svg"
+            style={{ width: 80, height: 80 }}
             alt="logo"
           />
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#034ea5", marginTop: 8, letterSpacing: 1 }}>
+            POLYCLINIC
+          </div>
         </div>
 
-        <Title level={3} style={{ textAlign: "center", marginBottom: 28 }}>
+        <Title level={3} style={{ textAlign: "center", marginBottom: 4, color: "#1f1f1f" }}>
           Welcome back
         </Title>
+
+        <Text style={{ display: "block", textAlign: "center", color: "#8c8c8c", marginBottom: 32, fontSize: 14 }}>
+          Clinic Management System
+        </Text>
 
         <Input
           size="large"
           placeholder="Username"
-          prefix={<UserOutlined />}
+          prefix={<UserOutlined style={{ color: "#1677ff" }} />}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          style={{ height: 54, fontSize: 16 }}
+          className="login-input"
+          style={{ height: 54, fontSize: 16, borderRadius: 12 }}
         />
 
         <Input.Password
           size="large"
           placeholder="Password"
-          prefix={<LockOutlined />}
+          prefix={<LockOutlined style={{ color: "#1677ff" }} />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ height: 54, fontSize: 16, marginTop: 16 }}
+          className="login-input"
+          style={{ height: 54, fontSize: 16, marginTop: 16, borderRadius: 12 }}
         />
 
-        <div style={{ marginTop: 14 }}>
-          <Checkbox>Remember me</Checkbox>
+        <div style={{ marginTop: 16 }}>
+          <Checkbox style={{ color: "#595959" }}>Remember me</Checkbox>
         </div>
 
         <Button
@@ -101,15 +122,20 @@ const LoginForm = () => {
           loading={loading}
           onClick={handleLogin}
           style={{
-            marginTop: 22,
+            marginTop: 24,
             height: 50,
-            borderRadius: 10,
-            fontWeight: 600,
+            borderRadius: 12,
+            fontWeight: 700,
             fontSize: 16,
+            boxShadow: "0 4px 16px rgba(22, 119, 255, 0.3)",
           }}
         >
           Login
         </Button>
+
+        <Text style={{ display: "block", textAlign: "center", color: "#bfbfbf", fontSize: 12, marginTop: 24 }}>
+          POLYCLINIC © 2026
+        </Text>
       </div>
     </div>
   );

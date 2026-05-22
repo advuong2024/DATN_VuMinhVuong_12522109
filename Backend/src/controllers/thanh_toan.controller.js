@@ -1,4 +1,6 @@
 const ThanhToan = require("../models/thanh_toan.model");
+const prisma = require("../prisma/client");
+const { taoThongBao, taoThongBaoNhieuNguoi } = require("../utils/thong_bao.helper");
 
 function normalize(body = {}) {
   const data = { ...body };
@@ -169,6 +171,33 @@ exports.pay = async (req, res) => {
       co_mua_thuoc,
       loai_dang_xu_ly,
     });
+
+    const thuNgan = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "THU_NGAN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    const admins = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "ADMIN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    const dsNhan = [
+      ...new Set([
+        ...thuNgan.map((u) => u.id_nhan_vien),
+        ...admins.map((u) => u.id_nhan_vien),
+      ]),
+    ];
+
+    if (dsNhan.length > 0) {
+      taoThongBaoNhieuNguoi(
+        dsNhan,
+        "PAYMENT",
+        "Thanh toán thành công",
+        `Phiếu khám #${id_phieu_kham} đã được thanh toán`,
+        `/admin/bill`
+      );
+    }
 
     return res.status(200).json({
       message: "Payment success",

@@ -97,6 +97,12 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
         </Col>
 
         <Col span={24}>
+          <Form.Item label="Short Description" name="shortDescription">
+            <Input.TextArea rows={2} placeholder="Short description for homepage..." />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
           <Form.Item label="Description" name="description">
             <RichTextEditor />
           </Form.Item>

@@ -56,6 +56,22 @@
             id_nhan_vien,
             is_deleted: false
         },
+        include: {
+            chuyen_khoa: {
+                select: {
+                    ten_chuyen_khoa: true,
+                    id_chuyen_khoa: true,
+                }
+            },
+            chung_chis: {
+                select: {
+                    id_chung_chi: true,
+                    ten_chung_chi: true,
+                    noi_cap: true,
+                    nam_cap: true,
+                }
+            }
+        }
     });
  };
 

@@ -22,6 +22,7 @@ function normalize(body = {}) {
     ten_dich_vu: body.name?.trim(),
     gia: body.price ? Number(body.price) : null,
     mo_ta: body.description?.trim(),
+    mo_ta_ngan: body.shortDescription?.trim() || null,
     hinh_anh: body.hinh_anh?.trim() || null,
 
     ...(categoryId && !isNaN(categoryId) && {

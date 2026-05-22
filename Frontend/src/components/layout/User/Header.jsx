@@ -62,6 +62,9 @@ export default function AppHeader() {
         color: #1677ff !important;
         border-bottom-color: #1677ff !important;
       }
+      .header-specialty-dropdown .ant-dropdown-menu-item:hover {
+        background-color: #e6f4ff !important;
+      }
     `}</style>
     <Header
       style={{
@@ -162,6 +165,7 @@ export default function AppHeader() {
               ? chuyenKhoaItems
               : [{ key: "-", label: "Đang tải..." }],
             onClick: (info) => navigate(info.key),
+            className: "header-specialty-dropdown",
           }}
           trigger={["hover"]}
         >

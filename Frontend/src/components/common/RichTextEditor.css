@@ -179,6 +179,10 @@
   margin-bottom: 4px;
 }
 
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
 /* Table */
 .ProseMirror table {
   width: 100%;
@@ -282,6 +286,10 @@
 
 .tiptap-view li {
   margin-bottom: 4px;
+}
+
+.tiptap-view ol {
+  list-style-type: decimal;
 }
 
 .tiptap-view table {

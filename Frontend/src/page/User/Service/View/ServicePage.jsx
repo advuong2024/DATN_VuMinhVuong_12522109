@@ -228,20 +228,26 @@ const ServicePage = () => {
                           {svc.ten_dich_vu}
                         </Title>
 
-                        <List
-                          size="small"
-                          dataSource={data.highlights.slice(0, 3)}
-                          split={false}
-                          renderItem={(item) => (
-                            <List.Item style={{ padding: "3px 0", border: "none" }}>
-                              <Space size={8}>
-                                <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 12 }} />
-                                <Text style={{ fontSize: 12, color: "#595959" }}>{item}</Text>
-                              </Space>
-                            </List.Item>
-                          )}
-                          style={{ marginBottom: 16 }}
-                        />
+                        {svc.mo_ta_ngan ? (
+                          <Paragraph style={{ fontSize: 13, color: "#595959", lineHeight: 1.6, marginBottom: 16 }}>
+                            {svc.mo_ta_ngan}
+                          </Paragraph>
+                        ) : (
+                          <List
+                            size="small"
+                            dataSource={data.highlights.slice(0, 3)}
+                            split={false}
+                            renderItem={(item) => (
+                              <List.Item style={{ padding: "3px 0", border: "none" }}>
+                                <Space size={8}>
+                                  <CheckCircleOutlined style={{ color: "#52c41a", fontSize: 12 }} />
+                                  <Text style={{ fontSize: 12, color: "#595959" }}>{item}</Text>
+                                </Space>
+                              </List.Item>
+                            )}
+                            style={{ marginBottom: 16 }}
+                          />
+                        )}
 
                         <Space style={{ justifyContent: "space-between", alignItems: "center", width: "100%", marginTop: "auto" }}>
                           <Button
@@ -262,45 +268,6 @@ const ServicePage = () => {
             </Row>
           )}
         </section>
-
-        {/* <section style={{
-          background: "#f0f5ff", padding: "48px 24px",
-          borderTop: "3px solid #034ea5",
-        }}>
-          <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <Row gutter={[32, 24]} align="middle">
-              <Col xs={24} md={10}>
-                <div style={{
-                  background: "#034ea5", borderRadius: 16,
-                  padding: 32, textAlign: "center", color: "#fff",
-                }}>
-                  <SafetyCertificateOutlined style={{ fontSize: 48, marginBottom: 12 }} />
-                  <Title level={3} style={{ color: "#fff", margin: 0, fontSize: 20 }}>
-                    Thông tin Bảo hiểm Y tế
-                  </Title>
-                </div>
-              </Col>
-              <Col xs={24} md={14}>
-                <Title level={4} style={{ color: "#034ea5", fontSize: 17, fontWeight: 700, marginBottom: 12 }}>
-                  Thông tuyến Bảo hiểm Y tế (BHYT)
-                </Title>
-                <Paragraph style={{ color: "#595959", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
-                  Phòng khám Đa khoa An Tâm áp dụng thanh toán BHYT đúng tuyến cho tất cả các thẻ bảo hiểm trên toàn quốc khi đến khám chữa bệnh nội trú và ngoại trú, giúp tối ưu hóa chi phí cho người bệnh.
-                </Paragraph>
-                <Space size={8} wrap>
-                  {BHYT_CARDS.map((c) => (
-                    <Tag key={c} icon={<SafetyCertificateOutlined />} style={{
-                      borderRadius: 6, padding: "4px 12px", fontSize: 12,
-                      background: "#fff", border: "1px solid #d9d9d9",
-                    }}>
-                      {c}
-                    </Tag>
-                  ))}
-                </Space>
-              </Col>
-            </Row>
-          </div>
-        </section> */}
 
         <section style={{
           position: "relative",

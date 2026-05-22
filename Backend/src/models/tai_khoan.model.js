@@ -83,6 +83,7 @@ const findByUsername = (username) => {
           ten_nhan_vien: true,
           chuc_vu: true,
           id_chuyen_khoa: true,
+          hinh_anh: true
         },
       },
     },

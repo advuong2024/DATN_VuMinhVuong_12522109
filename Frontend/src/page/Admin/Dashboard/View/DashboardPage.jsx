@@ -35,6 +35,10 @@ import {
   Tooltip,
   Area,
   AreaChart,
+  BarChart,
+  Bar,
+  Legend,
+  Cell,
 } from "recharts";
 
 import dayjs from "dayjs";
@@ -42,6 +46,7 @@ import dayjs from "dayjs";
 import {
   getDashboardData,
   getRevenueChartData,
+  getSpecialtyStats,
 } from "../API/DashboardApi";
 
 const { Content } = Layout;
@@ -67,9 +72,20 @@ export default function Dashboard() {
   const [revenueData, setRevenueData] =
     useState([]);
 
+  const [specialtyStats, setSpecialtyStats] =
+    useState([]);
+
+  const now = new Date();
+  const [specialtyMonth, setSpecialtyMonth] = useState(now.getMonth() + 1);
+  const [specialtyYear, setSpecialtyYear] = useState(now.getFullYear());
+
   useEffect(() => {
     fetchDashboard();
   }, []);
+
+  useEffect(() => {
+    fetchSpecialtyStats();
+  }, [specialtyMonth, specialtyYear]);
 
   useEffect(() => {
     fetchRevenueChart();
@@ -87,6 +103,15 @@ export default function Dashboard() {
       console.log(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSpecialtyStats = async () => {
+    try {
+      const res = await getSpecialtyStats({ month: specialtyMonth, year: specialtyYear });
+      setSpecialtyStats(res.data.data || []);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -234,7 +259,7 @@ export default function Dashboard() {
         }}
       >
         <Card
-          bordered={false}
+          variant ={false}
           style={{
             width: 500,
             borderRadius: 20,
@@ -288,7 +313,7 @@ export default function Dashboard() {
               lg={6}
             >
               <Card
-                bordered={false}
+                variant ={false}
                 style={{
                   borderRadius: 16,
                 }}
@@ -489,6 +514,118 @@ export default function Dashboard() {
                         fill="url(#colorRevenue)"
                       />
                     </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[20, 20]} style={{ marginTop: 20 }}>
+            <Col span={24}>
+              <Card
+                bordered={false}
+                style={{ borderRadius: 16 }}
+                title={
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontWeight: 600, fontSize: 16 }}>
+                      Statistics by specialty
+                    </span>
+                    <Select
+                      value={`${specialtyYear}-${String(specialtyMonth).padStart(2, "0")}`}
+                      onChange={(val) => {
+                        const [y, m] = val.split("-").map(Number);
+                        setSpecialtyYear(y);
+                        setSpecialtyMonth(m);
+                      }}
+                      style={{ width: 150 }}
+                      options={(() => {
+                        const opts = [];
+                        const d = new Date();
+                        for (let i = 0; i < 12; i++) {
+                          const y = d.getFullYear();
+                          const m = d.getMonth() + 1;
+                          opts.push({
+                            label: `Month ${m}/${y}`,
+                            value: `${y}-${String(m).padStart(2, "0")}`,
+                          });
+                          d.setMonth(d.getMonth() - 1);
+                        }
+                        return opts;
+                      })()}
+                    />
+                  </div>
+                }
+              >
+                <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                  {specialtyStats.map((khoa, idx) => {
+                    const colors = [
+                      "#1677ff", "#52c41a", "#faad14", "#ff4d4f",
+                      "#722ed1", "#13c2c2", "#eb2f96", "#fa8c16",
+                      "#2f54eb", "#a0d911",
+                    ];
+                    const c = colors[idx % colors.length];
+                    return (
+                      <Col xs={12} sm={8} md={6} lg={4} key={khoa.id_chuyen_khoa}>
+                        <div style={{
+                          background: `${c}08`,
+                          borderRadius: 12,
+                          border: `1px solid ${c}20`,
+                          padding: "14px 12px",
+                          textAlign: "center",
+                        }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#1f1f1f", marginBottom: 8 }}>
+                            {khoa.ten_chuyen_khoa}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#8c8c8c", marginBottom: 4 }}>
+                            {khoa.so_bac_si} Doctor · {khoa.so_luot_kham} Visits
+                          </div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: c }}>
+                            {Number(khoa.doanh_thu).toLocaleString()} VND
+                          </div>
+                        </div>
+                      </Col>
+                    );
+                  })}
+                </Row>
+
+                <div style={{ width: "100%", height: 280 }}>
+                  <ResponsiveContainer>
+                    <BarChart data={specialtyStats}>
+                      <CartesianGrid stroke="#e0e0e0" strokeDasharray="4 4" vertical={true} />
+                      <XAxis 
+                        dataKey="ten_chuyen_khoa" 
+                        interval={0}
+                        height={60}
+                        tick={(props) => {
+                          const { x, y, payload } = props;
+                          const words = payload.value.split(" ");
+                          if (words.length <= 2) {
+                            return (
+                              <text x={x} y={y + 16} textAnchor="middle" fill="#666" fontSize={12}>
+                                {payload.value}
+                              </text>
+                            );
+                          }
+                          return (
+                            <text x={x} y={y + 10} textAnchor="middle" fill="#666" fontSize={11}>
+                              <tspan x={x} dy={0}>{words.slice(0, 2).join(" ")}</tspan>
+                              <tspan x={x} dy={14}>{words.slice(2).join(" ")}</tspan>
+                            </text>
+                          );
+                        }}
+                      />
+                      <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        formatter={(value, name) => {
+                          if (name === "doanh_thu") return [Number(value).toLocaleString() + " VND", "Revenue"];
+                          return [value, "Number of visits"];
+                        }}
+                      />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="so_luot_kham" name="Number of visits" fill="#1677ff" radius={[4, 4, 0, 0]} />
+                      <Bar yAxisId="right" dataKey="doanh_thu" name="Revenue" fill="#52c41a" radius={[4, 4, 0, 0]} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               </Card>

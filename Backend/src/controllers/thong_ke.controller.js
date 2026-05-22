@@ -28,6 +28,20 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
+exports.getSpecialtyStats = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    const data = await ThongKe.getSpecialtyStats(
+      month ? Number(month) : undefined,
+      year ? Number(year) : undefined
+    );
+    res.json({ data });
+  } catch (error) {
+    console.error("🔥 ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.getRevenueChart = async (
   req,
   res

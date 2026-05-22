@@ -88,10 +88,10 @@ export default function PatientManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Xóa bác sĩ?",
-      content: "Bạn có chắc muốn xóa không?",
-      okText: "Xóa",
-      cancelText: "Hủy",
+      title: "Delete doctor?",
+      content: "Are you sure?",
+      okText: "Delete",
+      cancelText: "Cancel",
       onOk: async () => {
         await deleteDoctor(record.key);
         fetchDoctors();
@@ -144,14 +144,14 @@ export default function PatientManagement() {
       dataIndex: "specialty",
       width: 130,
       render: (value) =>
-        value ? <Tag color="blue">{value}</Tag> : <Tag>Chưa có</Tag>,
+        value ? <Tag color="blue">{value}</Tag> : <Tag>None</Tag>,
     },
     {
       title: "Experience",
       dataIndex: "experience",
       width: 120,
       align: "center",
-      render: (v) => (v ? `${v} năm` : "-"),
+      render: (v) => (v ? `${v} years` : "-"),
     },
     {
       title: "Actions",
@@ -244,7 +244,7 @@ export default function PatientManagement() {
               <Descriptions.Item label="Position">{viewRecord.position}</Descriptions.Item>
               <Descriptions.Item label="Specialty">{viewRecord.specialty || "-"}</Descriptions.Item>
               <Descriptions.Item label="Degree">{viewRecord.degree || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Experience">{viewRecord.experience ? `${viewRecord.experience} năm` : "-"}</Descriptions.Item>
+              <Descriptions.Item label="Experience">{viewRecord.experience ? `${viewRecord.experience} Year` : "-"}</Descriptions.Item>
               <Descriptions.Item label="Location">{viewRecord.location || "-"}</Descriptions.Item>
               <Descriptions.Item label="Address" span={2}>{viewRecord.address || "-"}</Descriptions.Item>
               <Descriptions.Item label="Short desc" span={2}>{viewRecord.short_desc || "-"}</Descriptions.Item>
@@ -252,7 +252,7 @@ export default function PatientManagement() {
 
             {(viewCerts.length > 0) && (
               <div style={{ marginTop: 20 }}>
-                <h4>Chứng chỉ</h4>
+                <h4>Certificates</h4>
                 <List
                   size="small"
                   dataSource={viewCerts}

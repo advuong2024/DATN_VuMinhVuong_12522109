@@ -1,4 +1,6 @@
 const PhieuKham = require("../models/phieu_kham.model");
+const prisma = require("../prisma/client");
+const { taoThongBao, taoThongBaoNhieuNguoi } = require("../utils/thong_bao.helper");
 
 function normalize(body = {}) {
   const data = { ...body };
@@ -65,6 +67,31 @@ exports.insert = async (req, res) => {
     }
 
     const created = await PhieuKham.insert(payload);
+
+    if (id_bac_si) {
+      taoThongBao(
+        id_bac_si,
+        "ENCOUNTER",
+        "Phiếu khám mới",
+        "Bạn có phiếu khám mới cần xử lý",
+        "/admin/encounter"
+      );
+    }
+
+    const admins = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "ADMIN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    if (admins.length > 0) {
+      taoThongBaoNhieuNguoi(
+        admins.map((u) => u.id_nhan_vien),
+        "ENCOUNTER",
+        "Phiếu khám mới được tạo",
+        null,
+        "/admin/encounter"
+      );
+    }
 
     res.status(201).json(created);
   } catch (err) {
@@ -144,6 +171,21 @@ exports.startEncounter = async (req, res) => {
     const { id } = req.params;
 
     const result = await PhieuKham.startEncounter(id);
+
+    const admins = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "ADMIN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    if (admins.length > 0) {
+      taoThongBaoNhieuNguoi(
+        admins.map((u) => u.id_nhan_vien),
+        "ENCOUNTER",
+        "Phiếu khám đang được khám",
+        null,
+        "/admin/encounter"
+      );
+    }
 
     return res.json({
       message: "Bắt đầu khám thành công",

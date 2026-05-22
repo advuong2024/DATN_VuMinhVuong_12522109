@@ -107,7 +107,7 @@ export default function AccountForm({ initialValues, onSubmit }) {
       <Form.Item>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button htmlType="submit" type="primary">
-            {initialValues ? "Update" : "Add"}
+            {initialValues ? "Update" : "Create"}
           </Button>
         </Space>
       </Form.Item>

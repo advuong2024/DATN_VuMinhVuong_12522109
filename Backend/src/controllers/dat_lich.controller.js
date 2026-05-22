@@ -1,4 +1,6 @@
 const LichHen = require("../models/dat_lich.model");
+const prisma = require("../prisma/client");
+const { taoThongBao, taoThongBaoNhieuNguoi } = require("../utils/thong_bao.helper");
 
 function normalize(body = {}) {
   const data = { ...body };
@@ -77,6 +79,28 @@ exports.insert = async (req, res) => {
 
     const created = await LichHen.insert(payload);
 
+    const leTans = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "LE_TAN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    const dsNhan = [
+      ...new Set([
+        payload.id_bac_si,
+        ...leTans.map((u) => u.id_nhan_vien),
+      ]),
+    ];
+
+    if (dsNhan.length > 0) {
+      taoThongBaoNhieuNguoi(
+        dsNhan,
+        "BOOKING",
+        "Lịch hẹn mới",
+        `Bệnh nhân đã được đặt lịch khám`,
+        "/admin/booking"
+      );
+    }
+
     res.status(201).json(created);
   } catch (err) {
     console.error("🔥 ERROR BOOKING:", err);
@@ -113,6 +137,29 @@ exports.createBooking = async (req, res) => {
     }
 
     const result = await LichHen.insertBooking(data);
+
+    const doctorId = Number(booking.doctor?.value || booking.doctor);
+    const leTans = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "LE_TAN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    const dsNhan = [
+      ...new Set([
+        doctorId,
+        ...leTans.map((u) => u.id_nhan_vien),
+      ]),
+    ];
+
+    if (dsNhan.length > 0) {
+      taoThongBaoNhieuNguoi(
+        dsNhan,
+        "BOOKING",
+        "Lịch hẹn mới",
+        `${patient.name} đã đặt lịch khám`,
+        "/admin/booking"
+      );
+    }
 
     return res.status(201).json({
       message: "Đặt lịch thành công",

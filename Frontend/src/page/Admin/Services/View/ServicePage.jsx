@@ -40,6 +40,7 @@ export default function ServiceManagement() {
         categoryId: item.id_danh_muc,
         specialty: item.chuyen_khoa?.ten_chuyen_khoa,
         specialtyId: item.id_chuyen_khoa,
+        shortDescription: item.mo_ta_ngan || null,
         description: item.mo_ta || null,
         hinh_anh: item.hinh_anh || null,
       }));
@@ -92,10 +93,10 @@ export default function ServiceManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Xóa dịch vụ?",
-      content: "Bạn có chắc muốn xóa không?",
-      okText: "Xóa",
-      cancelText: "Hủy",
+      title: "Delete service?",
+      content: "Are you sure?",
+      okText: "Delete",
+      cancelText: "Cancel",
       onOk: async () => {
         await deleteService(record.key);
         fetchServices();
@@ -124,7 +125,7 @@ export default function ServiceManagement() {
     {
       title: "Image",
       dataIndex: "hinh_anh",
-      width: 90,
+      width: 100,
       align: "center",
       render: (url) =>
         url ? (
@@ -133,15 +134,21 @@ export default function ServiceManagement() {
           <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f0f0f0" }} />
         ),
     },
-    { title: "Service Name", dataIndex: "name", width: 200 },
+    { title: "Service Name", dataIndex: "name", width: 230 },
     {
       title: "Price",
       dataIndex: "price",
-      width: 150,
+      width: 180,
       render: (p) => (p ? `${Number(p).toLocaleString()} VND` : "0 VND"),
     },
-    { title: "Category", dataIndex: "category", width: 150 },
-    { title: "Specialty", dataIndex: "specialty", width: 150 },
+    { title: "Category", dataIndex: "category", width: 180, },
+    { title: "Specialty", dataIndex: "specialty", width: 180 },
+    {
+      title: "Short Desc",
+      dataIndex: "shortDescription",
+      ellipsis: true,
+      width: 150,
+    },
     {
       title: "Description",
       dataIndex: "description",
@@ -160,10 +167,6 @@ export default function ServiceManagement() {
           <EditOutlined
             style={{ color: "#faad14", cursor: "pointer", marginRight: 8 }}
             onClick={() => handleEdit(record)}
-          />
-          <DeleteOutlined
-            style={{ color: "#ff4d4f", cursor: "pointer" }}
-            onClick={() => handleDelete(record)}
           />
         </Space>
       ),
@@ -247,6 +250,9 @@ export default function ServiceManagement() {
               </Descriptions.Item>
               <Descriptions.Item label="Specialty">
                 {viewRecord.specialty}
+              </Descriptions.Item>
+              <Descriptions.Item label="Short Description">
+                {viewRecord.shortDescription || "—"}
               </Descriptions.Item>
               <Descriptions.Item label="Description">
                 {viewRecord.description ? (

@@ -43,10 +43,10 @@ const milestones = [
 ];
 
 const facilities = [
-  { title: "Phòng Khám Tổng Quát", img: "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400&h=280&fit=crop", icon: <MedicineBoxOutlined /> },
-  { title: "Hệ Thống Xét Nghiệm", img: "https://images.unsplash.com/photo-1579154204601-01588f351e67?w=400&h=280&fit=crop", icon: <ExperimentOutlined /> },
-  { title: "Khu Nội Soi & Thủ Thuật", img: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&h=280&fit=crop", icon: <SafetyCertificateOutlined /> },
-  { title: "Khu Hồi Sức Cấp Cứu", img: "https://images.unsplash.com/photo-1587351021759-3772687fe598?w=400&h=280&fit=crop", icon: <HeartOutlined /> },
+  { title: "Phòng Khám Tổng Quát", img: "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400&h=280&fit=crop",},
+  { title: "Hệ Thống Xét Nghiệm", img: "https://images.unsplash.com/photo-1579154204601-01588f351e67?w=400&h=280&fit=crop", },
+  { title: "Khu Nội Soi & Thủ Thuật", img: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=400&h=280&fit=crop",},
+  { title: "Khu Hồi Sức Cấp Cứu", img: "https://images.pexels.com/photos/8942262/pexels-photo-8942262.jpeg?auto=compress&cs=tinysrgb&w=400&h=280&fit=crop",},
 ];
 
 const contactInfo = [
@@ -74,7 +74,7 @@ const MyselfPage = () => {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
           }
-          .fv-section { padding: 60px 5%; }
+          .fv-section { padding: 50px 5%; }
           .fv-title {
             position: relative;
             display: inline-block;
@@ -241,6 +241,9 @@ const MyselfPage = () => {
                       borderRadius: 16, height: "100%",
                       border: `1px solid ${v.color}15`,
                       transition: "all 0.3s ease",
+                      textAlign: 'center', display: 'flex',
+                      alignContent: 'center', flexDirection: 'column',
+                      justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = v.color;
@@ -253,9 +256,9 @@ const MyselfPage = () => {
                   >
                     <div style={{
                       width: 56, height: 56, borderRadius: 14,
-                      background: v.bg, color: v.color,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 28, marginBottom: 20,
+                      color: v.color,display: "flex", alignItems: "center", 
+                      justifyContent: "center", fontSize: 48, margin: '0px auto 20px', 
+                      textAlign: 'center', 
                     }}>
                       {v.icon}
                     </div>
@@ -368,10 +371,9 @@ const MyselfPage = () => {
                       </div>
                     }
                   >
-                    <Space>
-                      <span style={{ color: "#034ea5", fontSize: 18 }}>{f.icon}</span>
-                      <Text strong style={{ fontSize: 14 }}>{f.title}</Text>
-                    </Space>
+                    <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                      <Text strong style={{ fontSize: 14, display: 'block' }}>{f.title}</Text>
+                    </div>
                   </Card>
                 </Col>
               ))}

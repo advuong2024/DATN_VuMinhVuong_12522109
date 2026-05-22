@@ -16,10 +16,11 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { useSearchParams } from "react-router-dom";
 import { getCK, getDoctorCK, getCustomer, 
   postBook, postCustomer, updateCustomer, 
   getBookedSlots, getFindPatient, getHistory,
-  getCanBook,
+  getCanBook, getNhanVienById,
 } from "../Api/BookingApi"
 import { toast } from "react-toastify";
 import HistoryFrom from "./BookingFrom";
@@ -49,9 +50,49 @@ export default function BookingPage() {
   const [historyData, setHistoryData] = useState([]);
   const [openHistory, setOpenHistory] = useState(false);
   const [canBook, setCanBook] = useState(true);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    fetchCK();
+    const init = async () => {
+      await fetchCK();
+
+      const doctorId = searchParams.get("doctorId");
+      const specialtyId = searchParams.get("specialtyId");
+
+      if (!doctorId && !specialtyId) return;
+
+      let targetSpecialtyId = specialtyId ? Number(specialtyId) : null;
+      let targetDoctorId = doctorId ? Number(doctorId) : null;
+
+      if (!targetSpecialtyId && targetDoctorId) {
+        try {
+          const doctorData = await getNhanVienById(targetDoctorId);
+          targetSpecialtyId = doctorData.id_chuyen_khoa;
+        } catch (err) {
+          console.error("Lỗi lấy thông tin bác sĩ:", err);
+          return;
+        }
+      }
+
+      if (targetSpecialtyId) {
+        form.setFieldsValue({ specialty: targetSpecialtyId });
+
+        const doctorList = await getDoctorCK(targetSpecialtyId);
+        setDoctors(
+          doctorList.map((item) => ({
+            label: item.ten_nhan_vien,
+            value: item.id_nhan_vien,
+          }))
+        );
+
+        if (targetDoctorId) {
+          form.setFieldsValue({ doctor: targetDoctorId });
+          setSelectedDoctor(targetDoctorId);
+        }
+      }
+    };
+
+    init();
   }, []);
 
   useEffect(() => {

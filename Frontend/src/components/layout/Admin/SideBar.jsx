@@ -11,6 +11,7 @@ import { RiAccountCircleLine, RiServiceLine } from "react-icons/ri";
 import { GiMedicines } from "react-icons/gi";
 import { BsClipboardCheck } from "react-icons/bs";
 import { MdOutlineCategory } from "react-icons/md";
+import { CgProfile } from "react-icons/cg";
 import { useNavigate, useLocation } from "react-router-dom";
 import { icons } from "antd/es/image/PreviewGroup";
 import { getUser } from "../../common/utils/auth"

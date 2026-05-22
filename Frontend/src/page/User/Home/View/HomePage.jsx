@@ -11,52 +11,42 @@ import {
   Divider,
   Spin
 } from 'antd';
-import { 
-  PhoneOutlined, 
-  UserOutlined, 
-  CalendarOutlined,
-  TeamOutlined, 
-  SafetyCertificateOutlined, 
-  DollarOutlined, 
-  CustomerServiceOutlined,
-  TrophyOutlined,
-  RobotOutlined,
-  LikeOutlined,
-  MedicineBoxOutlined,
-  ExperimentOutlined,
-  SmileOutlined,
-  EyeOutlined,
-  SoundOutlined,
-  HeartOutlined,
-  ArrowRightOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined
-} from '@ant-design/icons';
+import { FaStethoscope, FaBaby, FaPersonPregnant, FaTooth, FaEarListen, FaHandSparkles, 
+  FaEye, FaBone, FaHeartPulse, FaCalendarCheck, FaUserDoctor, FaPhone, FaMicroscope, 
+  FaFileInvoiceDollar, FaHandHoldingHeart, FaCircleCheck, FaArrowRight 
+} from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
 import { getHomeData } from '../Api/HomeApi';
+import AnimatedCounter from '../../../../components/common/AnimatedCounter';
 
 const { Title, Text, Paragraph } = Typography;
 
 const SPECIALTY_META = {
-  "Nội Tổng Quát": { icon: <MedicineBoxOutlined />, color: "#1677ff", bg: "#e6f4ff" },
-  "Nhi Khoa": { icon: <SmileOutlined />, color: "#52c41a", bg: "#f6ffed" },
-  "Sản Phụ Khoa": { icon: <HeartOutlined />, color: "#eb2f96", bg: "#fff0f6" },
-  "Răng Hàm Mặt": { icon: <ExperimentOutlined />, color: "#faad14", bg: "#fffbe6" },
-  "Tai Mũi Họng": { icon: <SoundOutlined />, color: "#13c2c2", bg: "#e6fffb" },
-  "Da Liễu": { icon: <ExperimentOutlined />, color: "#722ed1", bg: "#f9f0ff" },
-  "Mắt": { icon: <EyeOutlined />, color: "#1677ff", bg: "#e6f4ff" },
-  "Cơ Xương Khớp": { icon: <SafetyCertificateOutlined />, color: "#52c41a", bg: "#f6ffed" },
-  "Tim Mạch": { icon: <HeartOutlined />, color: "#eb2f96", bg: "#fff0f6" },
+  "Nội Tổng Quát": { icon: <FaStethoscope />, color: "#1677ff", bg: "#e6f4ff" },
+  "Nhi Khoa": { icon: <FaBaby />, color: "#52c41a", bg: "#f6ffed" },
+  "Sản Phụ Khoa": { icon: <FaPersonPregnant />, color: "#eb2f96", bg: "#fff0f6" },
+  "Răng Hàm Mặt": { icon: <FaTooth />, color: "#faad14", bg: "#fffbe6" },
+  "Tai Mũi Họng": { icon: <FaEarListen />, color: "#13c2c2", bg: "#e6fffb" },
+  "Da Liễu": { icon: <FaHandSparkles />, color: "#722ed1", bg: "#f9f0ff" },
+  "Mắt": { icon: <FaEye />, color: "#1677ff", bg: "#e6f4ff" },
+  "Cơ Xương Khớp": { icon: <FaBone />, color: "#52c41a", bg: "#f6ffed" },
+  "Tim Mạch": { icon: <FaHeartPulse />, color: "#eb2f96", bg: "#fff0f6" },
 };
 
 const getMeta = (name) => {
-  if (!name) return { icon: <MedicineBoxOutlined />, color: "#1677ff", bg: "#e6f4ff" };
+  if (!name) return { icon: <FaStethoscope />, color: "#1677ff", bg: "#e6f4ff" };
   const exact = SPECIALTY_META[name];
   if (exact) return exact;
   for (const [key, val] of Object.entries(SPECIALTY_META)) {
     if (name.toLowerCase().includes(key.toLowerCase())) return val;
   }
-  return { icon: <MedicineBoxOutlined />, color: "#1677ff", bg: "#e6f4ff" };
+  return { icon: <FaStethoscope />, color: "#1677ff", bg: "#e6f4ff" };
+};
+
+const stripHtml = (html) => {
+  if (!html) return "";
+  const text = html.replace(/<[^>]+>/g, "").trim();
+  return text.length > 90 ? text.slice(0, 90) + "..." : text;
 };
 
 const doctorKeywords = ["trưởng khoa", "phó khoa", "bác sĩ", "thạc sĩ", "tiến sĩ", "cki", "ckii"];
@@ -64,41 +54,49 @@ const doctorKeywords = ["trưởng khoa", "phó khoa", "bác sĩ", "thạc sĩ",
 const reasons = [
   {
     title: 'Chuyên gia đầu ngành',
-    desc: 'Đội ngũ bác sĩ từ các bệnh viện trung ương, giàu kinh nghiệm.',
-    icon: <TrophyOutlined />,
+    desc: 'Đội ngũ bác sĩ có trình độ chuyên môn cao, dày dặn kinh nghiệm trong khám và điều trị, luôn đặt sức khỏe người bệnh lên hàng đầu.',
+    icon: <FaUserDoctor />,
     color: '#1677ff',
   },
   {
     title: 'Thiết bị hiện đại',
-    desc: 'Hệ thống máy móc nội soi, siêu âm 4D, xét nghiệm tự động.',
-    icon: <RobotOutlined />,
+    desc: 'Phòng khám được đầu tư hệ thống máy móc, trang thiết bị y tế tiên tiến, hỗ trợ chẩn đoán chính xác và nâng cao hiệu quả điều trị.',
+    icon: <FaMicroscope />,
     color: '#52c41a',
   },
   {
     title: 'Chi phí minh bạch',
-    desc: 'Giá niêm yết công khai, hỗ trợ BHYT linh hoạt.',
-    icon: <DollarOutlined />,
+    desc: 'Bảng giá dịch vụ được niêm yết công khai, minh bạch tại quầy và trên website, cam kết không phát sinh chi phí ngoài thỏa thuận.',
+    icon: <FaFileInvoiceDollar />,
     color: '#faad14',
   },
   {
     title: 'Dịch vụ chu đáo',
-    desc: 'Quy trình khép kín, đặt lịch online giảm thời gian chờ.',
-    icon: <LikeOutlined />,
+    desc: 'Quy trình khám tối ưu từ đặt lịch đến thanh toán, nhân viên hướng dẫn tận tình từng bước, giúp bạn tiết kiệm thời gian và an tâm khi khám chữa bệnh.',
+    icon: <FaHandHoldingHeart />,
     color: '#722ed1',
   }
 ];
 
+const statsData = [
+  { value: "10+", label: "Năm Kinh Nghiệm", desc: "Hành trình chăm sóc sức khỏe toàn diện" },
+  { value: "50+", label: "Chuyên Gia Đầu Ngành", desc: "Đội ngũ bác sĩ tận tâm, giàu kinh nghiệm" },
+  { value: "99%", label: "Khách Hàng Hài Lòng", desc: "Đánh giá tích cực về chất lượng dịch vụ" },
+  { value: "100k+", label: "Bệnh Nhân Tin Tưởng", desc: "Đã và đang điều trị thành công tại phòng khám" },
+];
+
 const HomePage = () => {
   const navigate = useNavigate();
-  const [specialties, setSpecialties] = useState([]);
+  const [services, setServices] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentDoctorIndex, setCurrentDoctorIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getHomeData();
-        setSpecialties(data.specialties || []);
+        setServices(data.services || []);
         setDoctors(data.doctors || []);
       } catch (err) {
         console.error("Lỗi tải dữ liệu trang chủ:", err);
@@ -128,11 +126,20 @@ const HomePage = () => {
     return doctorKeywords.some((kw) => title.includes(kw));
   });
 
-  const displayedSpecialties = specialties.slice(0, 6);
+  useEffect(() => {
+    if (bacSiOnly.length <= 3) return;
+    const maxIndex = bacSiOnly.length - 3;
+    const interval = setInterval(() => {
+      setCurrentDoctorIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [bacSiOnly.length]);
+
+  const displayedServices = services.slice(0, 6);
 
   const quickServices = [
     {
-      icon: <CalendarOutlined />,
+      icon: <FaCalendarCheck />,
       title: 'Đặt lịch khám',
       benefits: ['Không mất thời gian chờ đợi', 'Tiết kiệm thời gian', 'Thao tác dễ dàng'],
       action: () => navigate('/Booking'),
@@ -140,7 +147,7 @@ const HomePage = () => {
       color: '#1677ff',
     },
     {
-      icon: <UserOutlined />,
+      icon: <FaUserDoctor />,
       title: 'Tìm bác sĩ',
       benefits: ['Chọn theo tên', 'Chọn theo chuyên môn', 'Xem lịch làm việc'],
       action: () => navigate('/doctor'),
@@ -148,7 +155,7 @@ const HomePage = () => {
       color: '#52c41a',
     },
     {
-      icon: <PhoneOutlined />,
+      icon: <FaPhone />,
       title: 'Hỗ trợ giải đáp',
       benefits: ['Tư vấn mọi thông tin', 'Giải đáp dịch vụ y tế', 'Hỗ trợ 24/7'],
       action: () => navigate('/booking'),
@@ -253,7 +260,7 @@ const HomePage = () => {
           }
           .qs-card-wrapper {
             background: #fff;
-            padding: 32px 28px;
+            padding: 32px 50px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border: 1px solid #f0f0f0;
@@ -287,6 +294,11 @@ const HomePage = () => {
             align-items: center;
             gap: 8px;
           }
+          .qs-benefits li svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+          }
 
           .floating-card {
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
@@ -299,28 +311,6 @@ const HomePage = () => {
           }
 
           .section-padding { padding: 60px 5%; }
-
-          .specialty-card {
-            height: 100%;
-            border-radius: 16px;
-            transition: all 0.4s ease;
-            overflow: hidden;
-            border: 1px solid #f0f0f0;
-          }
-          .specialty-card:hover {
-            border-color: #1677ff;
-            background: #f0f7ff;
-            transform: scale(1.03);
-            box-shadow: 0 12px 40px rgba(22, 119, 255, 0.12);
-          }
-          .specialty-icon {
-            font-size: 32px;
-            margin-bottom: 20px;
-            display: inline-block;
-            padding: 12px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-          }
 
           .doctor-card {
             border-radius: 20px;
@@ -389,12 +379,141 @@ const HomePage = () => {
             animation: glow 2s ease-in-out infinite;
           }
 
+          .service-image-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            height: 280px;
+            cursor: pointer;
+            background: #f5f5f5;
+            transition: all 0.4s ease;
+          }
+          .service-image-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+          }
+          .service-image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+          }
+          .service-image-card:hover img {
+            transform: scale(1.08);
+          }
+          .service-name-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            z-index: 2;
+            pointer-events: none;
+          }
+          .service-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 35, 75, 0.88);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: 3;
+          }
+          .service-image-card:hover .service-overlay {
+            opacity: 1;
+          }
+          .service-overlay p {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: center;
+            margin: 0 0 20px;
+            max-width: 280px;
+          }
+          .service-overlay .overlay-btn {
+            background: #fff;
+            color: #034ea5;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .service-overlay .overlay-btn:hover {
+            background: #1677ff;
+            color: #fff;
+            transform: scale(1.05);
+          }
+          .service-icon-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 56px;
+            color: #bfbfbf;
+          }
+
           @keyframes slideDown {
             from { transform: translateY(-100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
           }
           .top-bar {
             animation: slideDown 0.5s ease;
+          }
+
+          .doctor-slider-container {
+            width: 100%;
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+          }
+          .doctor-slider-track {
+            display: flex;
+            transition: transform 0.8s ease;
+          }
+          .doctor-slide-card {
+            flex: 0 0 33.33%;
+            padding: 0 12px;
+            box-sizing: border-box;
+          }
+
+          .doctor-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+          }
+          .doctor-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            background: #d9d9d9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+          }
+          .doctor-dot.active {
+            width: 28px;
+            border-radius: 6px;
+            background: #1677ff;
+          }
+          .doctor-dot:hover {
+            background: #91caff;
           }
         `}} />
 
@@ -414,7 +533,7 @@ const HomePage = () => {
             <Col xs={24} lg={12} className="hero-image-container">
               <div className="hero-image-blob"></div>
               <img 
-                src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=600&h=500&fit=crop&auto=format" 
+                src="https://plus.unsplash.com/premium_photo-1681843126728-04eab730febe?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fG1lZGljYWwlMjBjbGluaWN8ZW58MHx8MHx8fDA%3D" 
                 alt="Doctor" 
                 className="hero-img"
                 style={{ width: '100%', maxWidth: '500px', borderRadius: '24px', zIndex: 1, filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))' }}
@@ -428,28 +547,27 @@ const HomePage = () => {
             {quickServices.map((svc, i) => (
               <Col xs={24} md={8} key={i}>
                 <div className={`qs-card-wrapper stagger-${i + 1}`}>
-                  <div className="qs-icon" style={{ background: `${svc.color}15`, color: svc.color }}>
-                    {svc.icon}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                    <div className="qs-icon" 
+                      style={{ background: `${svc.color}15`, color: svc.color, 
+                        marginBottom: 0, flexShrink: 0, width: 58, height: 58, 
+                        fontSize: 30 
+                      }}
+                    >
+                      {svc.icon}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <Title level={4} style={{ marginBottom: 12, fontSize: 25 }}>{svc.title}</Title>
+                      <ul className="qs-benefits" style={{ marginBottom: 0 }}>
+                        {svc.benefits.map((b, j) => (
+                          <li key={j}>
+                            <FaCircleCheck style={{ color: svc.color, fontSize: 16 }} />
+                            <span style={{ fontSize: 18 }}>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <Title level={4} style={{ marginBottom: 16 }}>{svc.title}</Title>
-                  <ul className="qs-benefits">
-                    {svc.benefits.map((b, j) => (
-                      <li key={j}>
-                        <CheckCircleOutlined style={{ color: svc.color, fontSize: 14 }} />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    type="primary"
-                    ghost
-                    block
-                    icon={<ArrowRightOutlined />}
-                    style={{ borderRadius: 8, fontWeight: 600, height: 40 }}
-                    onClick={svc.action}
-                  >
-                    {svc.actionText}
-                  </Button>
                 </div>
               </Col>
             ))}
@@ -458,34 +576,47 @@ const HomePage = () => {
 
         <div className="section-padding fade-in-section">
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <Title level={2} className="custom-title">Chuyên Khoa Mũi Nhọn</Title>
+            <Title level={2} className="custom-title">Dịch Vụ Nổi Bật</Title>
             <Paragraph style={{ fontSize: '16px', color: '#8c8c8c' }}>
-              Chúng tôi cung cấp đa dạng các dịch vụ y tế chuyên sâu, đáp ứng mọi nhu cầu chăm sóc sức khỏe.
+              Đa dạng dịch vụ y tế chuyên sâu, đáp ứng mọi nhu cầu chăm sóc sức khỏe của bạn.
             </Paragraph>
           </div>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 0' }}>
               <Spin size="large" />
-              <Paragraph style={{ marginTop: 16, color: '#8c8c8c' }}>Đang tải chuyên khoa...</Paragraph>
+              <Paragraph style={{ marginTop: 16, color: '#8c8c8c' }}>Đang tải dịch vụ...</Paragraph>
             </div>
           ) : (
             <Row gutter={[24, 24]}>
-              {displayedSpecialties.map((item, idx) => {
-                const meta = getMeta(item.ten_chuyen_khoa);
+              {displayedServices.map((item, idx) => {
+                const khoaName = item.chuyen_khoa?.ten_chuyen_khoa || "";
+                const meta = getMeta(khoaName);
                 return (
-                  <Col xs={24} sm={12} md={8} key={item.id_chuyen_khoa}>
-                    <Card className="specialty-card" bordered={false}
-                      style={{ animationDelay: `${idx * 0.1}s` }}
+                  <Col xs={24} sm={12} md={8} key={item.id_dich_vu}>
+                    <div className="service-image-card"
+                      onClick={() => navigate(`/dich-vu/${item.id_dich_vu}`)}
                     >
-                      <div className="specialty-icon" style={{ backgroundColor: `${meta.color}15`, color: meta.color }}>
-                        {meta.icon}
+                      {item.hinh_anh ? (
+                        <img src={item.hinh_anh} alt={item.ten_dich_vu} />
+                      ) : (
+                        <div className="service-icon-fallback" style={{ color: meta.color }}>
+                          {meta.icon}
+                        </div>
+                      )}
+                      <div className="service-name-bar">
+                        {item.ten_dich_vu}
                       </div>
-                      <Title level={4} style={{ marginBottom: '12px' }}>{item.ten_chuyen_khoa}</Title>
-                      <Button type="link" icon={<ArrowRightOutlined />} style={{ padding: 0 }} onClick={() => navigate(`/chuyen-khoa/${item.id_chuyen_khoa}`)}>
-                        Xem chi tiết
-                      </Button>
-                    </Card>
+                      <div className="service-overlay">
+                        <p>{item.mo_ta_ngan || stripHtml(item.mo_ta)}</p>
+                        <button className="overlay-btn" onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/dich-vu/${item.id_dich_vu}`);
+                        }}>
+                          Xem chi tiết <FaArrowRight />
+                        </button>
+                      </div>
+                    </div>
                   </Col>
                 );
               })}
@@ -495,9 +626,8 @@ const HomePage = () => {
 
         <div className="section-padding fade-in-section" style={{ backgroundColor: '#f8fbff' }}>
           <Row gutter={[48, 48]} align="middle">
-            <Col xs={24} lg={10}>
-              <Text strong style={{ color: '#1677ff', display: 'block', marginBottom: '16px' }}>Ưu điểm vượt trội</Text>
-              <Title level={2} style={{ marginBottom: '24px', fontSize: '32px' }}>Tại Sao Nên Chọn <br /> Phòng Khám An Tâm?</Title>
+            <Col xs={24} lg={10} >
+              <Title level={2} style={{ marginBottom: '24px', fontSize: '35px', color: '#1677ff' }}>Tại Sao Nên Chọn <br /> Phòng Khám An Tâm?</Title>
               <Paragraph style={{ fontSize: '16px', color: '#595959', marginBottom: '32px' }}>
                 Với phương châm "Lấy bệnh nhân làm trung tâm", chúng tôi không ngừng nỗ lực để mang lại trải nghiệm y tế tốt nhất.
               </Paragraph>
@@ -509,17 +639,70 @@ const HomePage = () => {
               <Row gutter={[24, 24]}>
                 {reasons.map((reason, index) => (
                   <Col xs={24} sm={12} key={index}>
-                    <Card className="floating-card" style={{ height: '100%', borderRadius: '20px' }}>
-                      <div className="reason-icon-wrapper" style={{ backgroundColor: `${reason.color}15`, color: reason.color }}>
-                        {reason.icon}
+                    <Card className="floating-card" style={{ height: "100%", borderRadius: "20px", textAlign: "center", }}>
+                      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", textAlign: "center",}}>
+                        <div className="reason-icon-wrapper" style={{ color: reason.color, fontSize: 60}} >
+                          {reason.icon}
+                        </div>
+                        <Title level={4} style={{ marginTop: 16, marginBottom: 8 }}>
+                          {reason.title}
+                        </Title>
+                        <Text type="secondary">{reason.desc}</Text>
                       </div>
-                      <Title level={4}>{reason.title}</Title>
-                      <Text type="secondary">{reason.desc}</Text>
                     </Card>
                   </Col>
                 ))}
               </Row>
             </Col>
+          </Row>
+        </div>
+
+        <div style={{ 
+          padding: '40px 24px', 
+          backgroundColor: '#d3e9ff',
+          borderRadius: 20,
+        }}>
+          <Row gutter={[32, 32]} justify="center" align="middle">
+            {statsData.map((item, index) => (
+              <Col xs={24} sm={12} md={6} key={index} style={{ textAlign: 'center' }}>
+                <Title 
+                  level={1} 
+                  style={{ 
+                    margin: 0, 
+                    fontSize: 42, 
+                    fontWeight: 800, 
+                    color: '#1677ff',
+                    lineHeight: 1.2
+                  }}
+                >
+                  <AnimatedCounter value={item.value} />
+                </Title>
+                
+                <Text 
+                  strong 
+                  style={{ 
+                    display: 'block', 
+                    fontSize: 16, 
+                    color: '#1f1f1f', 
+                    marginTop: 8,
+                    marginBottom: 4
+                  }}
+                >
+                  {item.label}
+                </Text>
+                
+                <Text 
+                  style={{ 
+                    fontSize: 13, 
+                    color: '#8c8c8c', 
+                    display: 'block',
+                    lineHeight: 1.4 
+                  }}
+                >
+                  {item.desc}
+                </Text>
+              </Col>
+            ))}
           </Row>
         </div>
 
@@ -541,35 +724,54 @@ const HomePage = () => {
               <Text type="secondary">Chưa có thông tin bác sĩ</Text>
             </div>
           ) : (
-            <Row gutter={[32, 32]}>
-              {bacSiOnly.slice(0, 3).map((doc, idx) => (
-                <Col xs={24} sm={12} md={8} key={doc.id_nhan_vien}>
-                  <Card className="doctor-card"
-                    style={{ animationDelay: `${idx * 0.15}s` }}
-                  >
-                    <div style={{ textAlign: 'center', padding: '20px 0 0' }}>
-                      <Avatar size={100} icon={<UserOutlined />} style={{ backgroundColor: '#1677ff' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div className="doctor-slider-container">
+                <div
+                  className="doctor-slider-track"
+                  style={{ transform: `translateX(-${currentDoctorIndex * (100 / 3)}%)` }}
+                >
+                  {bacSiOnly.map((doc) => (
+                    <div className="doctor-slide-card" key={doc.id_nhan_vien}>
+                      <Card className="doctor-card" style={{ border: '1px solid #1677ff', height: '100%' }}>
+                        <div style={{ textAlign: 'center', padding: '20px 0 0' }}>
+                          <Avatar size={100} src={doc.hinh_anh}
+                            icon={!doc.hinh_anh ? <FaUserDoctor /> : undefined}
+                            style={{ backgroundColor: '#1677ff' }}
+                          />
+                        </div>
+                        <Card.Meta
+                          style={{ textAlign: 'center', marginTop: 16 }}
+                          title={<Title level={4} style={{ margin: 0 }}>{doc.ten_nhan_vien}</Title>}
+                          description={
+                            <Space orientation="vertical" size={4} style={{ width: '100%', marginTop: '8px' }}>
+                              <Text strong style={{ color: '#1677ff' }}>{doc.chuc_vu || 'Bác sĩ'}</Text>
+                              {doc.chuyen_khoa && (
+                                <Text type="secondary">{doc.chuyen_khoa.ten_chuyen_khoa}</Text>
+                              )}
+                              <Divider style={{ margin: '12px 0' }} />
+                              <Button block type="primary" ghost icon={<FaCalendarCheck />}
+                                onClick={() => navigate(`/booking?doctorId=${doc.id_nhan_vien}`)}
+                              >
+                                Đặt lịch hẹn
+                              </Button>
+                            </Space>
+                          }
+                        />
+                      </Card>
                     </div>
-                    <Card.Meta
-                      style={{ textAlign: 'center', marginTop: 16 }}
-                      title={<Title level={4} style={{ margin: 0 }}>{doc.ten_nhan_vien}</Title>}
-                      description={
-                        <Space direction="vertical" size={4} style={{ width: '100%', marginTop: '8px' }}>
-                          <Text strong style={{ color: '#1677ff' }}>{doc.chuc_vu || 'Bác sĩ'}</Text>
-                          {doc.chuyen_khoa && (
-                            <Text type="secondary">{doc.chuyen_khoa.ten_chuyen_khoa}</Text>
-                          )}
-                          <Divider style={{ margin: '12px 0' }} />
-                          <Button block type="primary" ghost icon={<CalendarOutlined />} onClick={() => navigate('/Booking')}>
-                            Đặt lịch hẹn
-                          </Button>
-                        </Space>
-                      }
+                  ))}
+                </div>
+                <div className="doctor-dots">
+                  {bacSiOnly.map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`doctor-dot${idx === currentDoctorIndex ? ' active' : ''}`}
+                      onClick={() => setCurrentDoctorIndex(Math.min(idx, Math.max(0, bacSiOnly.length - 3)))}
                     />
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </div>
 

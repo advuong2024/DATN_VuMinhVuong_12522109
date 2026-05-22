@@ -11,5 +11,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <App />
       <ToastContainer position="top-right" autoClose={2000} />
     </AuthProvider>
+    <style>{`
+      .ant-select-item-option-active { background-color: #e6f4ff !important; }
+      .ant-select-item-option:hover { background-color: #e6f4ff !important; }
+    `}</style>
   </React.StrictMode>
 );

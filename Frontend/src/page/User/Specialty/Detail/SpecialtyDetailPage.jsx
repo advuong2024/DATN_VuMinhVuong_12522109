@@ -95,17 +95,6 @@ const SpecialtyDetailPage = () => {
               { title: <span style={{ color: "rgba(255,255,255,0.85)" }}>{specialty.ten_chuyen_khoa}</span> },
             ]} style={{ marginBottom: 24, fontSize: 14 }} />
             <Row align="middle" gutter={[48, 32]}>
-              {/* <Col xs={24} sm={8} md={4} style={{ textAlign: "center" }}>
-                <div style={{
-                  width: 100, height: 100, borderRadius: "50%",
-                  background: meta.bg, color: meta.color,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 48, margin: "0 auto",
-                  boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-                }}>
-                  {meta.icon}
-                </div>
-              </Col> */}
               <Col xs={24} sm={16} md={20}>
                 <Title level={1} style={{
                   color: "#fff", fontSize: "clamp(28px, 3.5vw, 40px)",
@@ -120,7 +109,7 @@ const SpecialtyDetailPage = () => {
 
         <section style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 24px" }}>
           <Row gutter={[48, 32]}>
-            <Col xs={24} lg={17}>
+            <Col xs={24} lg={12}>
               {specialty.mo_ta && (
                 <div style={{ marginBottom: 48 }}>
                   <div style={{ marginBottom: 24 }}>
@@ -134,61 +123,60 @@ const SpecialtyDetailPage = () => {
                   </Paragraph>
                 </div>
               )}
-
-              <div style={{ marginBottom: 32 }}>
-                <div style={{ marginBottom: 24 }}>
-                  <Title level={2} style={{ fontSize: 25, fontWeight: 700, color: "#1f1f1f", marginBottom: 8 }}>
-                    Đội Ngũ Bác Sĩ
-                  </Title>
-                  <div style={{ width: 50, height: 4, background: "#034ea5", borderRadius: 2 }} />
-                </div>
-
-                {doctors.length === 0 ? (
-                  <></>
-                ) : (
-                  <Row gutter={[24, 24]}>
-                    {doctors.map((doc) => (
-                      <Col xs={24} sm={12} md={8} key={doc.id_nhan_vien}>
-                        <Card hoverable bordered={false} style={{ borderRadius: 16, height: "100%", border: "1px solid #f0f0f0", textAlign: "center", padding: "32px 20px" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#034ea5"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(3,78,165,0.1)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#f0f0f0"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}>
-                          <Avatar
-                            size={80}
-                            src={doc.hinh_anh}
-                            icon={!doc.hinh_anh ? <UserOutlined /> : undefined}
-                            style={{ backgroundColor: "#034ea5", marginBottom: 16 }}
-                          />
-                          <Title level={4} style={{ fontSize: 16, marginBottom: 4 }}>{doc.ten_nhan_vien}</Title>
-                          <Text type="secondary">{doc.chuc_vu || "Bác sĩ"}</Text>
-                          <Divider style={{ margin: "16px 0" }} />
-                          <Button block type="primary" ghost icon={<CalendarOutlined />} style={{ borderRadius: 8, fontWeight: 600 }}
-                            onClick={() => navigate("/booking")}>
-                            Đặt lịch khám
-                          </Button>
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                )}
-              </div>
             </Col>
 
-            <Col xs={24} lg={7}>
+            <Col xs={24} lg={12}>
               {specialty.hinh_anh && (
                 <div style={{
-                  position: "sticky", top: 100,
                   borderRadius: 16, overflow: "hidden",
                   boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
                 }}>
                   <img
                     src={specialty.hinh_anh}
                     alt={specialty.ten_chuyen_khoa}
-                    style={{ width: "100%", display: "block", borderRadius: 16 }}
+                    style={{ width: "100%", minHeight: 400, objectFit: "cover", display: "block", borderRadius: 16 }}
                   />
                 </div>
               )}
             </Col>
           </Row>
+
+          <div style={{ marginTop: 48, marginBottom: 32 }}>
+            <div style={{ marginBottom: 24 }}>
+              <Title level={2} style={{ fontSize: 25, fontWeight: 700, color: "#1f1f1f", marginBottom: 8 }}>
+                Đội Ngũ Bác Sĩ
+              </Title>
+              <div style={{ width: 50, height: 4, background: "#034ea5", borderRadius: 2 }} />
+            </div>
+
+            {doctors.length === 0 ? (
+              <></>
+            ) : (
+              <Row gutter={[24, 24]}>
+                {doctors.map((doc) => (
+                  <Col xs={24} sm={12} md={8} key={doc.id_nhan_vien}>
+                    <Card hoverable bordered={false} style={{ borderRadius: 16, height: "100%", border: "1px solid #f0f0f0", textAlign: "center", padding: "32px 20px" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#034ea5"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(3,78,165,0.1)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#f0f0f0"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}>
+                      <Avatar
+                        size={80}
+                        src={doc.hinh_anh}
+                        icon={!doc.hinh_anh ? <UserOutlined /> : undefined}
+                        style={{ backgroundColor: "#034ea5", marginBottom: 16 }}
+                      />
+                      <Title level={4} style={{ fontSize: 16, marginBottom: 4 }}>{doc.ten_nhan_vien}</Title>
+                      <Text type="secondary">{doc.chuc_vu || "Bác sĩ"}</Text>
+                      <Divider style={{ margin: "16px 0" }} />
+                      <Button block type="primary" ghost icon={<CalendarOutlined />} style={{ borderRadius: 8, fontWeight: 600 }}
+                        onClick={() => navigate(`/booking?specialtyId=${id}&doctorId=${doc.id_nhan_vien}`)}>
+                        Đặt lịch khám
+                      </Button>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            )}
+          </div>
         </section>
       </main>
     </ConfigProvider>

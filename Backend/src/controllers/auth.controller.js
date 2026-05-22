@@ -45,6 +45,7 @@ exports.login = async (req, res) => {
 
       nhan_vien: {
         ten_nhan_vien: account.nhan_vien?.ten_nhan_vien,
+        hinh_anh: account.nhan_vien?.hinh_anh,
         id_chuyen_khoa: account.nhan_vien?.id_chuyen_khoa,
         chuc_vu: account.nhan_vien?.chuc_vu,
       },
@@ -80,7 +81,11 @@ exports.refresh = async (req, res) => {
       return res.status(401).json({ error: "Invalid refresh token" });
     }
 
-    const newAccessToken = generateAccessToken(account);
+    const newAccessToken = generateAccessToken({
+      id_tai_khoan: account.id_tai_khoan,
+      vai_tro: account.vai_tro,
+      id_nhan_vien: account.nhan_vien?.id_nhan_vien,
+    });
     const newRefreshToken = generateRefreshToken(account);
 
     await TaiKhoan.saveRefreshToken(

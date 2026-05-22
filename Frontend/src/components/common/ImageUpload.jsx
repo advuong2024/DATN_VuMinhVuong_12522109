@@ -10,14 +10,14 @@ const ImageUpload = ({ value, onChange }) => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("file", file);
       const res = await axiosClient.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       onChange?.(res.data.url);
-      message.success("Tải ảnh lên thành công");
+      message.success("Image uploaded successfully");
     } catch {
-      message.error("Tải ảnh thất bại");
+      message.error("Image uploaded failed");
     } finally {
       setLoading(false);
     }

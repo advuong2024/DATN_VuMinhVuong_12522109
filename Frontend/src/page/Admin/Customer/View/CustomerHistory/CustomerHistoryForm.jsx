@@ -171,8 +171,8 @@ export default function MedicalHistory() {
 
         <Col span={8}>
           <Space>
-            <Button type="primary" onClick={() => setStatus("DA_KHAM")}>Đã khám</Button>
-            <Button type="primary" onClick={() => setStatus("DANG_KHAM")}>Đang khám</Button>
+            <Button type="primary" onClick={() => setStatus("DA_KHAM")}>Examined</Button>
+            <Button type="primary" onClick={() => setStatus("DANG_KHAM")}>Examining</Button>
             <Button type="primary" onClick={() => setStatus(null)}>All</Button>
           </Space>
         </Col>

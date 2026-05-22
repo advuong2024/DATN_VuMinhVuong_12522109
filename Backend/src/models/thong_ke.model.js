@@ -30,7 +30,7 @@ const getSummary = async () => {
 
     prisma.nhan_vien.count({
       where: {
-        chuc_vu: "BAC_SI",
+        id_chuyen_khoa: { not: null }
       },
     }),
 
@@ -198,9 +198,62 @@ const getRevenueChart = async (range) => {
   }));
 };
 
+const getSpecialtyStats = async (month, year) => {
+  const now = new Date();
+  const m = month ?? now.getMonth() + 1;
+  const y = year ?? now.getFullYear();
+  const startDate = new Date(y, m - 1, 1);
+  const endDate = new Date(y, m, 0, 23, 59, 59, 999);
+
+  const specialties = await prisma.chuyen_khoa.findMany({
+    where: { is_deleted: false },
+    include: {
+      nhan_viens: {
+        where: { is_deleted: false },
+        include: {
+          phieu_khams: {
+            where: {
+              ngay_kham: { gte: startDate, lte: endDate },
+            },
+            include: {
+              thanh_toan: {
+                where: { trang_thai: "DA_THANH_TOAN" },
+                select: { tong_tien: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return specialties
+    .map((khoa) => {
+      const allPhieuKham = khoa.nhan_viens.flatMap((nv) => nv.phieu_khams);
+      const tongDoanhThu = allPhieuKham.reduce((sum, pk) => {
+        return (
+          sum +
+          (pk.thanh_toan?.[0]?.tong_tien
+            ? Number(pk.thanh_toan[0].tong_tien)
+            : 0)
+        );
+      }, 0);
+
+      return {
+        id_chuyen_khoa: khoa.id_chuyen_khoa,
+        ten_chuyen_khoa: khoa.ten_chuyen_khoa,
+        so_bac_si: khoa.nhan_viens.length,
+        so_luot_kham: allPhieuKham.length,
+        doanh_thu: tongDoanhThu,
+      };
+    })
+    .sort((a, b) => b.doanh_thu - a.doanh_thu);
+};
+
 module.exports = {
   getSummary,
   getRecentPatients,
   getPerformance,
   getRevenueChart,
+  getSpecialtyStats,
 };

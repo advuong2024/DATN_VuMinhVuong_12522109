@@ -1,4 +1,6 @@
 const Thuoc = require("../models/thuoc.model");
+const prisma = require("../prisma/client");
+const { taoThongBaoNhieuNguoi } = require("../utils/thong_bao.helper");
 
 function normalize(body = {}) {
   const name =
@@ -94,7 +96,24 @@ exports.update = async (req, res) => {
 
     const payload = normalize(req.body);
 
-    await Thuoc.update(id, payload);
+    const updated = await Thuoc.update(id, payload);
+
+    if (updated && updated.so_luong !== undefined && updated.so_luong <= 5) {
+      const admins = await prisma.tai_khoan.findMany({
+        where: { vai_tro: "ADMIN", trang_thai: "HOAT_DONG" },
+        select: { id_nhan_vien: true },
+      });
+
+      if (admins.length > 0) {
+        taoThongBaoNhieuNguoi(
+          admins.map((u) => u.id_nhan_vien),
+          "MEDICINE",
+          `Thuốc ${updated.ten_thuoc} sắp hết`,
+          `Chỉ còn ${updated.so_luong} trong kho`,
+          "/admin/medicine"
+        );
+      }
+    }
 
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {

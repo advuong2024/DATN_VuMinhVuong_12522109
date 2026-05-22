@@ -43,6 +43,7 @@ model nhan_vien {
   phieu_khams      phieu_kham[]
   tai_khoan        tai_khoan?
   chung_chis       chung_chi[]
+  thong_baos       thong_bao[]
 
   @@index([ten_nhan_vien])
   @@index([id_chuyen_khoa], map: "nhan_vien_id_chuyen_khoa_fkey")
@@ -107,6 +108,7 @@ model dich_vu {
   id_dich_vu     Int                @id @default(autoincrement())
   id_chuyen_khoa Int
   mo_ta          String?   @db.Text
+  mo_ta_ngan     String?
   hinh_anh       String?
   ten_dich_vu    String
   chi_tiets      chi_tiet_dich_vu[]
@@ -227,6 +229,21 @@ model thanh_toan {
   chi_tiets       thanh_toan_chi_tiet[]
 
   @@unique([id_phieu_kham, loai_thanh_toan])
+}
+
+model thong_bao {
+  id_thong_bao  Int      @id @default(autoincrement())
+  id_nguoi_nhan Int
+  tieu_de       String
+  noi_dung      String?  @db.Text
+  loai          String   // BOOKING | PAYMENT | ENCOUNTER | MEDICINE | SYSTEM
+  duong_dan     String?
+  da_doc        Boolean  @default(false)
+  created_at    DateTime @default(now())
+
+  nguoi_nhan    nhan_vien @relation(fields: [id_nguoi_nhan], references: [id_nhan_vien])
+
+  @@index([id_nguoi_nhan, da_doc])
 }
 
 model thanh_toan_chi_tiet {

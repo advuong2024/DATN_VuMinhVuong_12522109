@@ -73,7 +73,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
         const encounter = res.data;
 
         if (!encounter || !encounter.chi_tiets) {
-          throw new Error("Không nhận được phản hồi chi tiết từ hệ thống tạo phiếu khám.");
+          throw new Error("No detailed response received from the encounter creation system.");
         }
 
         const map = new Map(
@@ -130,7 +130,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
       <Form.Item
         name="services"
         label="Select Services"
-        rules={[{ required: true, message: "Vui lòng chọn ít nhất 1 dịch vụ" }]}
+        rules={[{ required: true, message: "Please select at least 1 service" }]}
       >
         <Select
           mode="multiple"
@@ -138,7 +138,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
           allowClear
           options={services.map((s) => ({
             value: s.id_dich_vu,
-            label: `${s.ten_dich_vu} - ${s.gia.toLocaleString()}đ`,
+            label: `${s.ten_dich_vu} - ${s.gia.toLocaleString()} VND`,
           }))}
         />
       </Form.Item>

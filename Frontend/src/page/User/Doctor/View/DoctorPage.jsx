@@ -349,7 +349,7 @@ const DoctorPage = () => {
                             size="small"
                             icon={<CalendarOutlined />}
                             style={{ borderRadius: 8, fontWeight: 600, height: 32, fontSize: 13 }}
-                            onClick={() => navigate("/booking")}
+                            onClick={() => navigate(`/booking?doctorId=${doc.id_nhan_vien}`)}
                           >
                             Đặt lịch
                           </Button>
@@ -450,7 +450,7 @@ const DoctorPage = () => {
               block
               icon={<CalendarOutlined />}
               style={{ height: 42, borderRadius: 8, fontWeight: 600 }}
-              onClick={() => { setModalDoctor(null); navigate("/booking"); }}
+              onClick={() => { setModalDoctor(null); navigate(`/booking?doctorId=${modalDoctor.id_nhan_vien}`); }}
             >
               Đặt lịch khám với {modalDoctor.ten_nhan_vien}
             </Button>

@@ -1,37 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col, Typography, Spin, Empty, Button, Space, Tag, ConfigProvider, Breadcrumb } from "antd";
 import {
-  MedicineBoxOutlined, HeartOutlined, SmileOutlined, ExperimentOutlined,
-  EyeOutlined, SoundOutlined, SkinOutlined, ScanOutlined,
-  SafetyCertificateOutlined, CalendarOutlined, ArrowRightOutlined, PhoneOutlined,
+  SafetyCertificateOutlined, CalendarOutlined, ArrowRightOutlined,
   RocketOutlined, CheckCircleOutlined,
 } from "@ant-design/icons";
+import { FaStethoscope, FaBaby, FaPersonPregnant, FaTooth, FaEarListen, FaHandSparkles, FaEye, FaBone, FaHeartPulse, FaFlask } from "react-icons/fa6";
 import { useNavigate, Link } from "react-router-dom";
 import { getAllSpecialties } from "../Api/SpecialtyApi";
 
 const { Title, Text, Paragraph } = Typography;
 
 const SPECIALTY_META = {
-  "Nội Tổng Quát": { icon: <MedicineBoxOutlined />, color: "#1677ff", bg: "#e6f4ff" },
-  "Nhi Khoa": { icon: <SmileOutlined />, color: "#52c41a", bg: "#f6ffed" },
-  "Sản Phụ Khoa": { icon: <HeartOutlined />, color: "#eb2f96", bg: "#fff0f6" },
-  "Răng Hàm Mặt": { icon: <ExperimentOutlined />, color: "#faad14", bg: "#fffbe6" },
-  "Tai Mũi Họng": { icon: <SoundOutlined />, color: "#13c2c2", bg: "#e6fffb" },
-  "Da Liễu": { icon: <SkinOutlined />, color: "#722ed1", bg: "#f9f0ff" },
-  "Mắt": { icon: <EyeOutlined />, color: "#1677ff", bg: "#e6f4ff" },
-  "Cơ Xương Khớp": { icon: <SafetyCertificateOutlined />, color: "#52c41a", bg: "#f6ffed" },
-  "Tim Mạch": { icon: <HeartOutlined />, color: "#eb2f96", bg: "#fff0f6" },
-  "Xét Nghiệm": { icon: <ScanOutlined />, color: "#8c8c8c", bg: "#fafafa" },
+  "Nội Tổng Quát": { icon: <FaStethoscope />, color: "#1677ff" },
+  "Nhi Khoa": { icon: <FaBaby />, color: "#52c41a" },
+  "Sản Phụ Khoa": { icon: <FaPersonPregnant />, color: "#eb2f96" },
+  "Răng Hàm Mặt": { icon: <FaTooth />, color: "#faad14" },
+  "Tai Mũi Họng": { icon: <FaEarListen />, color: "#13c2c2" },
+  "Da Liễu": { icon: <FaHandSparkles />, color: "#722ed1" },
+  "Mắt": { icon: <FaEye />, color: "#1677ff" },
+  "Cơ Xương Khớp": { icon: <FaBone />, color: "#52c41a" },
+  "Tim Mạch": { icon: <FaHeartPulse />, color: "#eb2f96" },
+  "Xét Nghiệm": { icon: <FaFlask />, color: "#8c8c8c" },
 };
 
 const getMeta = (name) => {
-  if (!name) return { icon: <MedicineBoxOutlined />, color: "#1677ff", bg: "#e6f4ff" };
+  if (!name) return { icon: <FaStethoscope />, color: "#1677ff", bg: "#e6f4ff" };
   const exact = SPECIALTY_META[name];
   if (exact) return exact;
   for (const [key, val] of Object.entries(SPECIALTY_META)) {
     if (name.toLowerCase().includes(key.toLowerCase())) return val;
   }
-  return { icon: <MedicineBoxOutlined />, color: "#1677ff", bg: "#e6f4ff" };
+  return { icon: <FaStethoscope />, color: "#1677ff", bg: "#e6f4ff" };
 };
 
 const SpecialtyPage = () => {
@@ -150,15 +149,16 @@ const SpecialtyPage = () => {
               {specialties.map((khoa) => {
                 const meta = getMeta(khoa.ten_chuyen_khoa);
                 return (
-                  <Col xs={24} sm={12} lg={8} key={khoa.id_chuyen_khoa}>
+                  <Col xs={24} sm={12} lg={6} key={khoa.id_chuyen_khoa}>
                     <Card
                       hoverable
                       bordered={false}
                       style={{
-                        borderRadius: 16, height: "100%",
+                        borderRadius: 16, height: "280px",
                         border: "1px solid #f0f0f0",
                         transition: "all 0.3s ease",
                       }}
+                      styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' } }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = "#034ea5";
                         e.currentTarget.style.boxShadow = "0 12px 40px rgba(3,78,165,0.1)";
@@ -171,33 +171,29 @@ const SpecialtyPage = () => {
                       }}
                     >
                       <div style={{
-                        width: 56, height: 56, borderRadius: 14,
-                        background: meta.bg, color: meta.color,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 28, marginBottom: 20,
+                        width: 76, height: 126, borderRadius: 14,
+                        color: meta.color,display: "flex", 
+                        alignItems: "center", justifyContent: "center",
+                        fontSize: 88, marginBottom: 20,
                       }}>
-                        {meta.icon}
+                        {meta.icon || ""}
                       </div>
 
                       <Title level={3} style={{
                         fontSize: 18, fontWeight: 700, color: "#1f1f1f",
-                        marginBottom: 12,
+                        flex: 1, marginBottom: 12, textAlign: 'center',
                       }}>
                         {khoa.ten_chuyen_khoa}
                       </Title>
 
-                      <Space direction="vertical" size={12} style={{ width: "100%" }}>
-                        <Button
-                          type="primary"
-                          ghost
-                          block
-                          icon={<ArrowRightOutlined />}
-                          style={{ borderRadius: 8, fontWeight: 600, height: 38, fontSize: 13 }}
-                          onClick={() => navigate(`/chuyen-khoa/${khoa.id_chuyen_khoa}`)}
-                        >
-                          Tìm hiểu ngay
-                        </Button>
-                      </Space>
+                      <Button
+                        type="primary" ghost block
+                        icon={<ArrowRightOutlined />}
+                        style={{ borderRadius: 8, fontWeight: 600, height: 38, fontSize: 13 }}
+                        onClick={() => navigate(`/chuyen-khoa/${khoa.id_chuyen_khoa}`)}
+                      >
+                        Tìm hiểu ngay
+                      </Button>
                     </Card>
                   </Col>
                 );

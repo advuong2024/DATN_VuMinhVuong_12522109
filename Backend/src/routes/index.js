@@ -18,5 +18,6 @@ router.use("/dich-vu", require("./dich_vu.router"));
 router.use("/thong-ke", require("./thong_ke.route"));
 router.use("/upload", require("./upload.router"));
 router.use("/chung-chi", require("./chung_chi.route"));
+router.use("/thong-bao", require("./thong_bao.route"));
 
 module.exports = router;
