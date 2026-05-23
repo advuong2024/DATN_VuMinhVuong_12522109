@@ -118,7 +118,7 @@ export default function PatientManagement() {
       align: "center",
       render: (url) => (
         url
-          ? <Image src={url} width={36} height={36} style={{ borderRadius: "50%", objectFit: "cover" }} />
+          ? <Image src={url} width={45} height={45} style={{ borderRadius: "50%", objectFit: "cover" }} />
           : <UserOutlined style={{ fontSize: 24, color: "#8c8c8c" }} />
       ),
     },

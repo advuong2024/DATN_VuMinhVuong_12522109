@@ -178,7 +178,7 @@ export default function PatientManagement() {
       },
     },
 
-    { title: "Email", dataIndex: "email", width: 170 },
+    { title: "Email", dataIndex: "email", width: 170, ellipsis: true, },
 
     {
       title: "Address",

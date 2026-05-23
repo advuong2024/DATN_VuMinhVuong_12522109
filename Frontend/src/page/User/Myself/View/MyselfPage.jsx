@@ -53,7 +53,7 @@ const contactInfo = [
   { icon: <EnvironmentOutlined />, title: "Địa Chỉ", content: "Đường Nguyễn Thiện Thuật, Phường Nhân Hoà, Tỉnh Hưng Yên" },
   { icon: <PhoneOutlined />, title: "Hotline", content: "1900 1234", highlight: true },
   { icon: <ClockCircleOutlined />, title: "Giờ Làm Việc", content: "Sáng: 7h - 12h | Chiều: 13h - 17h\nCấp cứu: 24/24" },
-  { icon: <MailOutlined />, title: "Email", content: "info@antamclinic.vn" },
+  { icon: <MailOutlined />, title: "Email", content: "contact@antamclinic.vn" },
 ];
 
 const MyselfPage = () => {

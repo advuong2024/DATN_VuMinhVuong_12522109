@@ -3,6 +3,7 @@ import { Layout, theme } from "antd";
 import Sidebar from "./SideBar";
 import Header from "./Header";
 import { Outlet } from "react-router-dom";
+import ScrollToTop from "@/components/common/ScrollToTop";
 
 const { Content } = Layout;
 
@@ -12,6 +13,7 @@ export default function MainLayout() {
 
   return (
     <Layout style={{ minHeight: "100vh", background: "#f5f7fa" }}>
+      <ScrollToTop />
       <Header />
 
       <Layout>

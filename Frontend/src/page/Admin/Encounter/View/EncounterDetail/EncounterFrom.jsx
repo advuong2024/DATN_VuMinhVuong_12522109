@@ -1,5 +1,10 @@
 import { Card, Form, Input, Button, Tabs, Table, InputNumber, Select, Space } from "antd";
 import { useState, useEffect } from "react";
+import dayjs from "dayjs";
+import PrintPreviewModal from "@/components/print/PrintPreviewModal";
+import PrintServiceRequest from "@/components/print/PrintServiceRequest";
+import PrintEncounter from "@/components/print/PrintEncounter";
+import PrintPrescription from "@/components/print/PrintPrescription";
 
 const { TextArea } = Input;
 
@@ -8,6 +13,9 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
   const [services, setServices] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [hiddenServices, setHiddenServices] = useState([]);
+  const [showServiceRequest, setShowServiceRequest] = useState(false);
+  const [showEncounter, setShowEncounter] = useState(false);
+  const [showPrescription, setShowPrescription] = useState(false);
 
   const calcTotal = (gia = 0, so_luong = 0) => gia * so_luong;
 
@@ -285,13 +293,19 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
               label: "Services",
               children: (
                 <>
-                  <Button
-                    type="primary"
-                    onClick={() => setServices([...services, {}])}
-                    style={{ marginBottom: 10 }}
-                  >
-                    + Add Service
-                  </Button>
+                  <Space style={{ marginBottom: 10 }}>
+                    <Button
+                      type="primary"
+                      onClick={() => setServices([...services, {}])}
+                    >
+                      + Add Service
+                    </Button>
+                    <Button onClick={() => {
+                      setShowServiceRequest(true);
+                    }}>
+                      In phiếu yêu cầu
+                    </Button>
+                  </Space>
                   <Table
                     dataSource={services}
                     columns={serviceColumns}
@@ -306,13 +320,20 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
               label: "Medicines",
               children: (
                 <>
-                  <Button
-                    type="primary"
-                    onClick={() => setMedicines([...medicines, {}])}
-                    style={{ marginBottom: 10 }}
-                  >
-                    + Add Medicine
-                  </Button>
+                  <Space style={{ marginBottom: 10 }}>
+                    <Button
+                      type="primary"
+                      onClick={() => setMedicines([...medicines, {}])}
+                    >
+                      + Add Medicine
+                    </Button>
+                    <Button
+                      disabled={medicines.length === 0}
+                      onClick={() => setShowPrescription(true)}
+                    >
+                      In đơn thuốc
+                    </Button>
+                  </Space>
                   <Table
                     dataSource={medicines}
                     columns={medicineColumns}
@@ -332,8 +353,80 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           <Button type="primary" onClick={handleCompleteExamination}>
             Complete Examination
           </Button>
+          <Button onClick={() => setShowEncounter(true)}>
+            In phiếu khám
+          </Button>
         </Space>
       </Form>
+
+      <PrintPreviewModal
+        open={showServiceRequest}
+        onClose={() => setShowServiceRequest(false)}
+        title="Phiếu yêu cầu dịch vụ"
+        filename={`yeu_cau_dich_vu_${bookingData?.encounterId || ""}.pdf`}
+      >
+        <PrintServiceRequest
+          patientName={bookingData?.name}
+          patientPhone={bookingData?.phone}
+          doctorName={bookingData?.doctor}
+          encounterCode={bookingData?.encounterId ? `PK${String(bookingData.encounterId).padStart(3, "0")}` : ""}
+          date={dayjs().format("DD/MM/YYYY")}
+          services={services.filter(s => s.id_dich_vu).map(s => ({
+            name: servicesOptions.find(o => o.value === s.id_dich_vu)?.label || "",
+            quantity: s.so_luong || 1,
+            price: s.gia || 0,
+          }))}
+          total={services.filter(s => s.id_dich_vu).reduce((sum, s) => sum + (s.gia || 0) * (s.so_luong || 1), 0)}
+        />
+      </PrintPreviewModal>
+
+      <PrintPreviewModal
+        open={showEncounter}
+        onClose={() => setShowEncounter(false)}
+        title="Phiếu khám bệnh"
+        filename={`phieu_kham_${bookingData?.encounterId || ""}.pdf`}
+      >
+        <PrintEncounter
+          patientName={bookingData?.name}
+          patientPhone={bookingData?.phone}
+          doctorName={bookingData?.doctor}
+          encounterCode={bookingData?.encounterId ? `PK${String(bookingData.encounterId).padStart(3, "0")}` : ""}
+          date={dayjs().format("DD/MM/YYYY")}
+          symptoms={form.getFieldValue("trieu_chung")}
+          diagnosis={form.getFieldValue("chan_doan")}
+          note={form.getFieldValue("ghi_chu")}
+          services={[...hiddenServices, ...services].filter(s => s.id_dich_vu).map(s => ({
+            name: servicesOptions.find(o => o.value === s.id_dich_vu)?.label || "",
+            quantity: s.so_luong || 1,
+            price: s.gia || 0,
+          }))}
+          status={bookingData?.trang_thai || "CHO_KHAM"}
+        />
+      </PrintPreviewModal>
+
+      <PrintPreviewModal
+        open={showPrescription}
+        onClose={() => setShowPrescription(false)}
+        title="Đơn thuốc"
+        filename={`don_thuoc_${bookingData?.encounterId || ""}.pdf`}
+      >
+        <PrintPrescription
+          patientName={bookingData?.name}
+          patientPhone={bookingData?.phone}
+          doctorName={bookingData?.doctor}
+          encounterCode={bookingData?.encounterId ? `PK${String(bookingData.encounterId).padStart(3, "0")}` : ""}
+          date={dayjs().format("DD/MM/YYYY")}
+          diagnosis={form.getFieldValue("chan_doan")}
+          note={form.getFieldValue("ghi_chu")}
+          medicines={medicines.filter(m => m.id_thuoc).map(m => ({
+            name: medicinesOptions.find(o => o.value === m.id_thuoc)?.label || "",
+            quantity: m.so_luong || 1,
+            price: m.gia || 0,
+            unit: "",
+            dosage: m.lieu_dung || "",
+          }))}
+        />
+      </PrintPreviewModal>
     </Card>
   );
 }

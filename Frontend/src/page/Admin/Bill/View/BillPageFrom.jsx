@@ -7,16 +7,21 @@ import {
   message,
   Descriptions,
   Select,
+  Space,
 } from "antd";
 import { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import { payBill } from "../Api/BillApi";
 import { toast } from "react-toastify";
+import PrintPreviewModal from "@/components/print/PrintPreviewModal";
+import PrintMedicineInvoice from "@/components/print/PrintMedicineInvoice";
 
 export default function PaymentForm({ record, mode, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [hasMedicine, setHasMedicine] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("TIEN_MAT");
   const [processType, setProcessType] = useState("");
+  const [showInvoice, setShowInvoice] = useState(false);
   const [service, setService] = useState({
     items: [],
     total: 0,
@@ -229,16 +234,44 @@ export default function PaymentForm({ record, mode, onSuccess }) {
 
         {mode === "process" && (
           <div style={{ textAlign: "right", marginTop: 16 }}>
-            <Button
-              type="primary"
-              loading={loading}
-              onClick={handlePay}
-            >
-              Payment Bill
-            </Button>
+            <Space>
+              {hasMedicine && (
+                <Button onClick={() => setShowInvoice(true)}>
+                  In hóa đơn
+                </Button>
+              )}
+              <Button
+                type="primary"
+                loading={loading}
+                onClick={handlePay}
+              >
+                Payment Bill
+              </Button>
+            </Space>
           </div>
         )}
       </Card>
+
+      <PrintPreviewModal
+        open={showInvoice}
+        onClose={() => setShowInvoice(false)}
+        title="Hóa đơn mua thuốc"
+        filename={`hoa_don_${record?.invoiceId || ""}.pdf`}
+      >
+        <PrintMedicineInvoice
+          patientName={record?.name}
+          patientPhone={record?.phone}
+          date={dayjs().format("DD/MM/YYYY")}
+          invoiceCode={record?.invoiceId || ""}
+          medicines={(medicine.items || []).map(m => ({
+            name: m.name,
+            quantity: m.quantity,
+            price: m.price,
+          }))}
+          total={medicine.total || 0}
+          paymentMethod={paymentMethod}
+        />
+      </PrintPreviewModal>
     </div>
   );
 }

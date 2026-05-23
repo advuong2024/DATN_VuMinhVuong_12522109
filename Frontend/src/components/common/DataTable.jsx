@@ -55,7 +55,7 @@ export default function DataTable({
       dataSource={data}
       loading={loading}
       rowKey={(record) => record.id || record.key}
-      scroll={{ y: "calc(100vh - 403px)" }}
+      scroll={{ y: "calc(100vh - 400px)" }}
 
       bordered
       size="middle"
@@ -68,9 +68,9 @@ export default function DataTable({
                 <th
                     {...props}
                     style={{
-                        fontWeight: 700,
-                        textAlign: "center",
-                        border: "1px solid #f0f0f0",
+                      fontWeight: 700,
+                      textAlign: "center",
+                      border: "1px solid #f0f0f0",
                     }}
                 />
             ),
