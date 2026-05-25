@@ -1,94 +1,19 @@
-const pageStyle = {
-  width: "210mm",
-  minHeight: "297mm",
-  padding: "20mm 15mm",
-  fontFamily: "Times New Roman, serif",
-  color: "#000",
-  fontSize: 13,
-  boxSizing: "border-box",
-  border: "1px solid #000",
-};
-
-const headerStyle = {
-  textAlign: "center",
-  marginBottom: 20,
-};
-
-const clinicNameStyle = {
-  fontSize: 20,
-  fontWeight: "bold",
-  textTransform: "uppercase",
-  margin: 0,
-};
-
-const clinicInfoStyle = {
-  fontSize: 12,
-  margin: "2px 0",
-};
-
-const titleStyle = {
-  textAlign: "center",
-  fontSize: 18,
-  fontWeight: "bold",
-  margin: "20px 0",
-  textTransform: "uppercase",
-};
-
-const hrStyle = {
-  border: "none",
-  borderTop: "2px solid #000",
-  margin: "8px 0",
-};
-
-const infoRow = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: 4,
-  fontSize: 13,
-};
-
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse",
-  marginTop: 16,
-  fontSize: 13,
-  border: "1px solid #000",
-};
-
-const thStyle = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "center",
-  fontWeight: "bold",
-};
-
-const tdStyle = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "center",
-};
-
-const tdLeft = {
-  ...tdStyle,
-  textAlign: "left",
-};
-
-const totalRowStyle = {
-  ...tdStyle,
-  textAlign: "right",
-  fontWeight: "bold",
-};
-
-const signatureArea = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginTop: 50,
-};
-
-const signatureBox = {
-  textAlign: "center",
-  width: "40%",
-};
+import {
+  pageStyle,
+  headerStyle,
+  clinicNameStyle,
+  clinicInfoStyle,
+  titleStyle,
+  hrStyle,
+  infoRow,
+  tableStyle,
+  thStyle,
+  tdStyle,
+  tdLeft,
+  totalRowStyle,
+  signatureArea,
+  signatureBox,
+} from "./printStyles";
 
 export default function PrintServiceRequest({
   patientName,

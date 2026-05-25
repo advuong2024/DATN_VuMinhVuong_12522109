@@ -193,8 +193,8 @@ exports.pay = async (req, res) => {
       taoThongBaoNhieuNguoi(
         dsNhan,
         "PAYMENT",
-        "Thanh toán thành công",
-        `Phiếu khám #${id_phieu_kham} đã được thanh toán`,
+        "Payment successful",
+        `Encounter #${id_phieu_kham} has been paid`,
         `/admin/bill`
       );
     }

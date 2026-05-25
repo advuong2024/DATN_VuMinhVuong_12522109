@@ -5,7 +5,6 @@ import useExportPDF from "./useExportPDF";
 export default function PrintPreviewModal({
   open,
   onClose,
-  title,
   filename,
   children,
 }) {
@@ -23,10 +22,21 @@ export default function PrintPreviewModal({
       open={open}
       onCancel={onClose}
       footer={null}
-      width={800}
+      width={850}
       centered
+      title="Xem trước"
     >
-      <div style={{ textAlign: "right", marginBottom: 12 }}>
+      <div
+        ref={contentRef}
+        style={{
+          background: "#fff",
+          marginBottom: 12
+        }}
+      >
+        {children}
+      </div>
+
+      <div style={{ textAlign: "right"}}>
         <Button
           type="primary"
           onClick={handleDownload}
@@ -34,19 +44,6 @@ export default function PrintPreviewModal({
         >
           Tải PDF
         </Button>
-      </div>
-
-      <div
-        ref={contentRef}
-        style={{
-          width: "210mm",
-          minHeight: "297mm",
-          margin: "0 auto",
-          padding: 0,
-          background: "#fff",
-        }}
-      >
-        {children}
       </div>
     </Modal>
   );

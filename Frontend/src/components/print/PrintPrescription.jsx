@@ -1,103 +1,19 @@
-const pageStyle = {
-  width: "210mm",
-  minHeight: "297mm",
-  padding: "20mm 15mm",
-  fontFamily: "Times New Roman, serif",
-  color: "#000",
-  fontSize: 13,
-  boxSizing: "border-box",
-  border: "1px solid #000",
-};
-
-const headerStyle = {
-  textAlign: "center",
-  marginBottom: 20,
-};
-
-const clinicNameStyle = {
-  fontSize: 20,
-  fontWeight: "bold",
-  textTransform: "uppercase",
-  margin: 0,
-};
-
-const clinicInfoStyle = {
-  fontSize: 12,
-  margin: "2px 0",
-};
-
-const titleStyle = {
-  textAlign: "center",
-  fontSize: 18,
-  fontWeight: "bold",
-  margin: "20px 0",
-  textTransform: "uppercase",
-};
-
-const hrStyle = {
-  border: "none",
-  borderTop: "2px solid #000",
-  margin: "8px 0",
-};
-
-const infoRow = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: 4,
-  fontSize: 13,
-};
-
-const sectionLabel = {
-  fontWeight: "bold",
-  marginTop: 16,
-  marginBottom: 4,
-  fontSize: 13,
-};
-
-const contentBox = {
-  border: "1px solid #000",
-  padding: "8px 10px",
-  minHeight: 36,
-  fontSize: 13,
-  marginBottom: 4,
-};
-
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse",
-  marginTop: 16,
-  fontSize: 13,
-  border: "1px solid #000",
-};
-
-const thStyle = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "center",
-  fontWeight: "bold",
-};
-
-const tdStyle = {
-  border: "1px solid #000",
-  padding: "6px 8px",
-  textAlign: "center",
-};
-
-const tdLeft = {
-  ...tdStyle,
-  textAlign: "left",
-};
-
-const signatureArea = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginTop: 50,
-};
-
-const signatureBox = {
-  textAlign: "center",
-  width: "100%",
-};
+import {
+  pageStyle,
+  headerStyle,
+  clinicNameStyle,
+  clinicInfoStyle,
+  titleStyle,
+  hrStyle,
+  infoRow,
+  sectionLabel,
+  contentBox,
+  tableStyle,
+  thStyle,
+  tdStyle,
+  tdLeft,
+  signatureArea,
+} from "./printStyles";
 
 export default function PrintPrescription({
   patientName,
@@ -179,8 +95,8 @@ export default function PrintPrescription({
         * Hãy tham khảo ý kiến bác sĩ trước khi sử dụng thuốc
       </div>
 
-      <div style={signatureArea}>
-        <div style={signatureBox}>
+      <div style={{ ...signatureArea, justifyContent: "center" }}>
+        <div style={{ textAlign: "center", width: "100%" }}>
           <p style={{ margin: 0, fontWeight: "bold" }}>Bác sĩ kê đơn</p>
           <p style={{ margin: 0, fontSize: 11 }}>(Ký, ghi rõ họ tên)</p>
           <div style={{ height: 50 }} />

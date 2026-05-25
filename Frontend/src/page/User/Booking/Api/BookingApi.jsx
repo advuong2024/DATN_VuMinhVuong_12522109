@@ -53,8 +53,10 @@ export const getHistory = async ({id}) => {
   return res.data
 }
 
-export const getCanBook = async (id) => {
-  return axiosClient.get(`/dat-lich/${id}/can-book`) 
+export const getCanBook = async (id, date) => {
+  return axiosClient.get(`/dat-lich/${id}/can-book`, {
+    params: { date },
+  });
 }
 
 export const getNhanVienById = async (id) => {

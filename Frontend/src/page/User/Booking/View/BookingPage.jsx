@@ -118,7 +118,8 @@ export default function BookingPage() {
 
   const checkCanBook = async (patientId) => {
     try {
-      const res = await getCanBook(patientId);
+      const date = form.getFieldValue("date");
+      const res = await getCanBook(patientId, date);
 
       setCanBook(res.data.canBook);
     } catch (err) {
@@ -273,8 +274,9 @@ export default function BookingPage() {
 
       if (patientType === "old") {
         const patientIdCheck = form.getFieldValue("patient_code");
+        const date = form.getFieldValue("date");
 
-        const res = await getCanBook(patientIdCheck);
+        const res = await getCanBook(patientIdCheck, date);
 
         if (!res.data.canBook) {
           toast.error("Bạn hôm nay đã đặt lịch không thể đặt thêm khi chưa hoàn thành khám");

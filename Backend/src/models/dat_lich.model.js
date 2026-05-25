@@ -297,22 +297,26 @@ const getByDoctorAndDate = (id_bac_si, date) => {
   return prisma.dat_lich.findMany({
     where: {
       id_bac_si: Number(id_bac_si),
-      thoi_gian: getTodayRange(),
+      thoi_gian: {
+        gte: dayjs(date).startOf("day").toDate(),
+        lte: dayjs(date).endOf("day").toDate(),
+      },
     },
   });
 };
 
-const canBook = async ( id_benh_nhan) => {
+const canBook = async (id_benh_nhan, date) => {
+  const dateRange = date ? {
+    gte: dayjs(date).startOf("day").toDate(),
+    lte: dayjs(date).endOf("day").toDate(),
+  } : undefined;
+
   const activeBooking =
     await prisma.dat_lich.findFirst({
       where: {
         id_benh_nhan,
-
-        trang_thai: {
-          in: [
-            "DA_DAT",
-          ],
-        },
+        thoi_gian: dateRange,
+        trang_thai: "DA_DAT",
       },
 
       orderBy: {
@@ -332,7 +336,7 @@ const canBook = async ( id_benh_nhan) => {
     await prisma.phieu_kham.findFirst({
       where: {
         id_benh_nhan,
-
+        ngay_kham: dateRange,
         trang_thai: {
           in: ["CHO_KHAM","DANG_KHAM"]
         },

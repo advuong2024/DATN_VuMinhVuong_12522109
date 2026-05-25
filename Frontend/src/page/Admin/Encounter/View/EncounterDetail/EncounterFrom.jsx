@@ -10,6 +10,8 @@ const { TextArea } = Input;
 
 export default function EncounterForm({ bookingData, servicesOptions, medicinesOptions, onSubmit }) {
   const [form] = Form.useForm();
+  const symptoms = Form.useWatch("trieu_chung", form);
+  const diagnosis = Form.useWatch("chan_doan", form);
   const [services, setServices] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [hiddenServices, setHiddenServices] = useState([]);
@@ -300,10 +302,12 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
                     >
                       + Add Service
                     </Button>
-                    <Button onClick={() => {
-                      setShowServiceRequest(true);
-                    }}>
-                      In phiếu yêu cầu
+                    <Button
+                      type="primary"
+                      disabled={services.length === 0}
+                      onClick={() => setShowServiceRequest(true)}
+                    >
+                      Print request form
                     </Button>
                   </Space>
                   <Table
@@ -328,10 +332,11 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
                       + Add Medicine
                     </Button>
                     <Button
+                      type="primary"
                       disabled={medicines.length === 0}
                       onClick={() => setShowPrescription(true)}
                     >
-                      In đơn thuốc
+                      Print prescriptions
                     </Button>
                   </Space>
                   <Table
@@ -350,11 +355,19 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           <Button type="primary" onClick={handlePauseExamination}>
             Pause Examination
           </Button>
-          <Button type="primary" onClick={handleCompleteExamination}>
+          <Button
+            type="primary"
+            disabled={!symptoms?.trim() || !diagnosis?.trim()}
+            onClick={handleCompleteExamination}
+          >
             Complete Examination
           </Button>
-          <Button onClick={() => setShowEncounter(true)}>
-            In phiếu khám
+          <Button
+            type="primary"
+            disabled={!symptoms?.trim() || !diagnosis?.trim()}
+            onClick={() => setShowEncounter(true)}
+          >
+            Print examination form
           </Button>
         </Space>
       </Form>
@@ -362,7 +375,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       <PrintPreviewModal
         open={showServiceRequest}
         onClose={() => setShowServiceRequest(false)}
-        title="Phiếu yêu cầu dịch vụ"
+        title="Service Request Form"
         filename={`yeu_cau_dich_vu_${bookingData?.encounterId || ""}.pdf`}
       >
         <PrintServiceRequest
@@ -383,7 +396,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       <PrintPreviewModal
         open={showEncounter}
         onClose={() => setShowEncounter(false)}
-        title="Phiếu khám bệnh"
+        title="Medical examination card"
         filename={`phieu_kham_${bookingData?.encounterId || ""}.pdf`}
       >
         <PrintEncounter
@@ -407,7 +420,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       <PrintPreviewModal
         open={showPrescription}
         onClose={() => setShowPrescription(false)}
-        title="Đơn thuốc"
+        title="Prescription"
         filename={`don_thuoc_${bookingData?.encounterId || ""}.pdf`}
       >
         <PrintPrescription

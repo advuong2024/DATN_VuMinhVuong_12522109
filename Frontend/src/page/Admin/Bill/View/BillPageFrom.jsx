@@ -237,7 +237,7 @@ export default function PaymentForm({ record, mode, onSuccess }) {
             <Space>
               {hasMedicine && (
                 <Button onClick={() => setShowInvoice(true)}>
-                  In hóa đơn
+                  Print invoice
                 </Button>
               )}
               <Button

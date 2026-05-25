@@ -179,7 +179,7 @@ const ServicePage = () => {
             <Row gutter={[24, 32]}>
               {filtered.map((svc) => {
                 const data = getHighlights(svc.ten_dich_vu);
-                                const catName = svc.danh_muc?.ten_danh_muc || "";
+                const catName = svc.danh_muc?.ten_danh_muc || "";
 
                 return (
                   <Col xs={24} sm={12} lg={8} key={svc.id_dich_vu}>

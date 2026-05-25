@@ -95,8 +95,8 @@ exports.insert = async (req, res) => {
       taoThongBaoNhieuNguoi(
         dsNhan,
         "BOOKING",
-        "Lịch hẹn mới",
-        `Bệnh nhân đã được đặt lịch khám`,
+        "New appointment",
+        "Patient has booked an appointment",
         "/admin/booking"
       );
     }
@@ -155,8 +155,8 @@ exports.createBooking = async (req, res) => {
       taoThongBaoNhieuNguoi(
         dsNhan,
         "BOOKING",
-        "Lịch hẹn mới",
-        `${patient.name} đã đặt lịch khám`,
+        "New appointment",
+        `${patient.name} has booked an appointment`,
         "/admin/booking"
       );
     }
@@ -225,8 +225,9 @@ exports.delete = async (req, res) => {
 exports.canBook = async (req, res) => {
   try {
     const id = Number(req.params.id);
+    const { date } = req.query;
 
-    const result = await LichHen.canBook(id);
+    const result = await LichHen.canBook(id, date);
 
     return res.json(result);
   } catch (err) {

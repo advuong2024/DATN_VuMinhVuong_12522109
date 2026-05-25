@@ -194,33 +194,10 @@ export default function AppHeader() {
     };
   });
 
-  if (notifItems.length > 0) {
-    notifItems.push({
-      type: "divider",
-      key: "divider-actions",
-    });
-    notifItems.push({
-      key: "mark-all-read",
-      onClick: handleMarkAllRead,
-      label: (
-        <Button type="link" size="small" style={{ width: "100%" }}>
-          Mark all as read
-        </Button>
-      ),
-    });
-  } else {
-    notifItems.push({
-      key: "empty",
-      disabled: true,
-      label: (
-        <div style={{ textAlign: "center", padding: "16px 0", color: "#94a3b8", fontSize: 13 }}>
-          No notifications
-        </div>
-      ),
-    });
-  }
-
-  const notifMenu = { items: notifItems };
+  const notifMenu = {
+    items: notifItems,
+    style: { maxHeight: 140, overflowY: "auto" },
+  };
 
   const roleMap = {
     ADMIN: "ADMIN",
@@ -283,6 +260,26 @@ export default function AppHeader() {
           menu={notifMenu}
           trigger={["click"]}
           placement="bottomRight"
+          dropdownRender={(menu) => {
+            if (notifications.length === 0) {
+              return (
+                <div style={{ textAlign: "center", padding: "16px 0", color: "#94a3b8", fontSize: 13, background: "#fff", borderRadius: 8 }}>
+                  No notifications
+                </div>
+              );
+            }
+            return (
+              <div style={{ background: "#fff", borderRadius: 8, boxShadow: "0 6px 16px rgba(0,0,0,0.08)" }}>
+                <div style={{ maxHeight: 350, overflowY: "auto" }}>{menu}</div>
+                <Divider style={{ margin: 0 }} />
+                <div style={{ padding: "4px 8px", textAlign: "center" }}>
+                  <Button type="link" size="small" style={{ width: "100%" }} onClick={handleMarkAllRead}>
+                    Mark all as read
+                  </Button>
+                </div>
+              </div>
+            );
+          }}
         >
           <Badge count={unreadCount} size="small">
             <div

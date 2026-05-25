@@ -108,8 +108,8 @@ exports.update = async (req, res) => {
         taoThongBaoNhieuNguoi(
           admins.map((u) => u.id_nhan_vien),
           "MEDICINE",
-          `Thuốc ${updated.ten_thuoc} sắp hết`,
-          `Chỉ còn ${updated.so_luong} trong kho`,
+          `Medicine ${updated.ten_thuoc} is running low`,
+          `Only ${updated.so_luong} left in stock`,
           "/admin/medicine"
         );
       }

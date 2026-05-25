@@ -2,8 +2,8 @@ import React from "react";
 import { Card, Row, Col, Typography, Button, Space, Divider, ConfigProvider } from "antd";
 import {
   EnvironmentOutlined, PhoneOutlined, ClockCircleOutlined, MailOutlined,
-  CalendarOutlined, RightOutlined, MedicineBoxOutlined, SafetyCertificateOutlined,
-  ExperimentOutlined, HeartOutlined, TeamOutlined, BulbOutlined,
+  CalendarOutlined, RightOutlined, MedicineBoxOutlined, CrownOutlined,
+  ExperimentOutlined, HeartOutlined, TeamOutlined, CompassOutlined,
   ArrowRightOutlined, CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -12,21 +12,21 @@ const { Title, Text, Paragraph } = Typography;
 
 const values = [
   {
-    icon: <BulbOutlined />,
+    icon: <CompassOutlined />,
     title: "Tầm Nhìn",
     desc: "Trở thành hệ thống y tế tư nhân hàng đầu, mang đến dịch vụ chăm sóc sức khỏe đạt chuẩn quốc tế cho mọi gia đình Việt.",
     color: "#034ea5",
     bg: "#e6f4ff",
   },
   {
-    icon: <HeartOutlined />,
+    icon: <MedicineBoxOutlined />,
     title: "Sứ Mệnh",
     desc: "Cung cấp dịch vụ y tế toàn diện, chất lượng cao với chi phí hợp lý, đặt sức khỏe và sự hài lòng của bệnh nhân lên hàng đầu.",
     color: "#eb2f96",
     bg: "#fff0f6",
   },
   {
-    icon: <SafetyCertificateOutlined />,
+    icon: <CrownOutlined />,
     title: "Giá Trị Cốt Lõi",
     desc: "Tận tâm - Chuyên nghiệp - Minh bạch - Đổi mới. Cam kết mang đến trải nghiệm y tế an toàn và nhân văn nhất.",
     color: "#722ed1",
@@ -115,7 +115,7 @@ const MyselfPage = () => {
         }}>
           <div style={{
             position: "absolute", inset: 0,
-            background: "url(https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920&q=80) center/cover no-repeat",
+            background: "url(https://plus.unsplash.com/premium_photo-1681843126728-04eab730febe?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fG1lZGljYWwlMjBjbGluaWN8ZW58MHx8MHx8fDA%3D) center/cover no-repeat",
           }} />
           <div style={{
             position: "absolute", inset: 0,
@@ -211,7 +211,7 @@ const MyselfPage = () => {
                   boxShadow: "0 20px 60px rgba(3, 78, 165, 0.1)",
                 }}>
                   <img
-                    src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&h=450&fit=crop"
+                    src="https://images.unsplash.com/photo-1758691462123-8a17ae95d203?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Njd8fG1lZGljYWwlMjBjbGluaWN8ZW58MHx8MHx8fDA%3D"
                     alt="Phòng khám"
                     style={{ width: "100%", height: "auto", display: "block" }}
                   />
