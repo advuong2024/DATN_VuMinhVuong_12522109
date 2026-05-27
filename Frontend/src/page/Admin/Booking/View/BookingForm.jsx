@@ -13,14 +13,14 @@ export default function BookingPage() {
           type={mode === "old" ? "primary" : "primary"}
           onClick={() => setMode("old")}
         >
-          Existing Patient
+          Bệnh nhân cũ
         </Button>
 
         <Button
           type={mode === "new" ? "primary" : "primary"}
           onClick={() => setMode("new")}
         >
-          New Patient
+          Bệnh nhân mới
         </Button>
       </Space>
 

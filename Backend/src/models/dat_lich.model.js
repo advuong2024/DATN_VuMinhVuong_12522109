@@ -44,7 +44,7 @@ const getAll = (params = {}) => {
       where.thoi_gian.lte = dayjs(endDate).endOf("day").toDate();
     }
   } else {
-    //where.thoi_gian = getTodayRange();
+    where.thoi_gian = getTodayRange();
   }
   return prisma.dat_lich.findMany({
     where,
@@ -83,7 +83,7 @@ const getAllDaDen = async (params = {}, user) => {
 
   const where = {
     trang_thai: "DA_DEN",
-    // thoi_gian: getTodayRange(),
+    thoi_gian: getTodayRange(),
   };
 
   if (user.vai_tro === "BAC_SI") {
@@ -221,9 +221,9 @@ const insert = (data) => {
 const insertBooking = async (data) => {
   const { patient, booking } = data;
 
-  if (!booking.doctor) throw new Error("Doctor is required");
-  if (!booking.service) throw new Error("Service is required");
-  if (!booking.date || !booking.time) throw new Error("Date/time missing");
+  if (!booking.doctor) throw new Error("Vui lòng chọn bác sĩ");
+  if (!booking.service) throw new Error("Vui lòng chọn dịch vụ");
+  if (!booking.date || !booking.time) throw new Error("Thiếu ngày hoặc giờ khám");
 
   let benhNhan = await prisma.benh_nhan.findFirst({
     where: {
@@ -328,7 +328,7 @@ const canBook = async (id_benh_nhan, date) => {
     return {
       canBook: false,
       message:
-        "Patient already has active booking",
+        "Bệnh nhân đã có lịch hẹn đang hoạt động",
     };
   }
 
@@ -351,7 +351,7 @@ const canBook = async (id_benh_nhan, date) => {
     return{
       canBook: false,
       message:
-        "Patient has unfinished encounter",
+        "Bệnh nhân có phiếu khám chưa hoàn tất",
     };
   }
 

@@ -63,7 +63,7 @@ export default function PatientManagement() {
       setData(formatted);
     } catch (err) {
       console.error(err);
-      toast.error("Load doctors failed");
+      toast.error("Tải danh sách bác sĩ thất bại");
     }
   };
 
@@ -88,10 +88,10 @@ export default function PatientManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Delete doctor?",
-      content: "Are you sure?",
-      okText: "Delete",
-      cancelText: "Cancel",
+      title: "Xóa bác sĩ?",
+      content: "Bạn có chắc chắn?",
+      okText: "Xóa",
+      cancelText: "Hủy",
       onOk: async () => {
         await deleteDoctor(record.key);
         fetchDoctors();
@@ -112,7 +112,7 @@ export default function PatientManagement() {
 
   const columns = [
     {
-      title: "Avatar",
+      title: "Ảnh",
       dataIndex: "hinh_anh",
       width: 80,
       align: "center",
@@ -122,39 +122,39 @@ export default function PatientManagement() {
           : <UserOutlined style={{ fontSize: 24, color: "#8c8c8c" }} />
       ),
     },
-    { title: "Full Name", dataIndex: "name", width: 155 },
+    { title: "Họ và tên", dataIndex: "name", width: 155 },
     {
-      title: "Date of Birth",
+      title: "Ngày sinh",
       dataIndex: "dob",
       align: "center",
       width: 130,
       render: (d) => (d ? dayjs(d).format("DD/MM/YYYY") : "-"),
     },
     {
-      title: "Gender",
+      title: "Giới tính",
       dataIndex: "gender",
       align: "center",
       width: 85,
       render: (g) => (g === "NAM" ? "Nam" : "Nữ"),
     },
-    { title: "Phone", dataIndex: "phone", width: 120 },
-    { title: "Position", dataIndex: "position", width: 130, ellipsis: true },
+    { title: "SĐT", dataIndex: "phone", width: 120 },
+    { title: "Chức vụ", dataIndex: "position", width: 130, ellipsis: true },
     {
-      title: "Specialty",
+      title: "Chuyên khoa",
       dataIndex: "specialty",
       width: 130,
       render: (value) =>
-        value ? <Tag color="blue">{value}</Tag> : <Tag>None</Tag>,
+        value ? <Tag color="blue">{value}</Tag> : <Tag>Không</Tag>,
     },
     {
-      title: "Experience",
+      title: "Kinh nghiệm",
       dataIndex: "experience",
       width: 120,
       align: "center",
-      render: (v) => (v ? `${v} years` : "-"),
+      render: (v) => (v ? `${v} năm` : "-"),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 120,
       render: (_, record) => (
@@ -178,11 +178,11 @@ export default function PatientManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-      <h3>Doctor Management</h3>
+      <h3>Quản lý bác sĩ</h3>
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={5}>
-          <Input placeholder="Search by name / phone" />
+          <Input placeholder="Tìm theo tên / SĐT" />
         </Col>
         <Col>
           <Button
@@ -190,7 +190,7 @@ export default function PatientManagement() {
             style={{ marginLeft: 10, backgroundColor: "#af050e" }}
             onClick={handleAdd}
           >
-            ADD
+            THÊM
           </Button>
         </Col>
       </Row>
@@ -205,7 +205,7 @@ export default function PatientManagement() {
         width={800}
         title={
           <div style={{ textAlign: "center" }}>
-            {editingRecord ? "UPDATE" : "ADD"} DOCTOR
+            {editingRecord ? "CẬP NHẬT" : "THÊM"} BÁC SĨ
           </div>
         }
       >
@@ -224,7 +224,7 @@ export default function PatientManagement() {
         onCancel={() => setOpenView(false)}
         footer={null}
         width={700}
-        title={<div style={{ textAlign: "center" }}>DOCTOR DETAILS</div>}
+        title={<div style={{ textAlign: "center" }}>CHI TIẾT BÁC SĨ</div>}
         centered
       >
         {viewRecord && (
@@ -237,22 +237,22 @@ export default function PatientManagement() {
               )}
             </div>
             <Descriptions column={2} bordered size="small">
-              <Descriptions.Item label="Full Name" span={2}>{viewRecord.name}</Descriptions.Item>
-              <Descriptions.Item label="Date of Birth">{viewRecord.dob ? dayjs(viewRecord.dob).format("DD/MM/YYYY") : "-"}</Descriptions.Item>
-              <Descriptions.Item label="Gender">{viewRecord.gender === "NAM" ? "Nam" : "Nữ"}</Descriptions.Item>
-              <Descriptions.Item label="Phone">{viewRecord.phone}</Descriptions.Item>
-              <Descriptions.Item label="Position">{viewRecord.position}</Descriptions.Item>
-              <Descriptions.Item label="Specialty">{viewRecord.specialty || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Degree">{viewRecord.degree || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Experience">{viewRecord.experience ? `${viewRecord.experience} Year` : "-"}</Descriptions.Item>
-              <Descriptions.Item label="Location">{viewRecord.location || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Address" span={2}>{viewRecord.address || "-"}</Descriptions.Item>
-              <Descriptions.Item label="Short desc" span={2}>{viewRecord.short_desc || "-"}</Descriptions.Item>
+              <Descriptions.Item label="Họ và tên" span={2}>{viewRecord.name}</Descriptions.Item>
+              <Descriptions.Item label="Ngày sinh">{viewRecord.dob ? dayjs(viewRecord.dob).format("DD/MM/YYYY") : "-"}</Descriptions.Item>
+              <Descriptions.Item label="Giới tính">{viewRecord.gender === "NAM" ? "Nam" : "Nữ"}</Descriptions.Item>
+              <Descriptions.Item label="SĐT">{viewRecord.phone}</Descriptions.Item>
+              <Descriptions.Item label="Chức vụ">{viewRecord.position}</Descriptions.Item>
+              <Descriptions.Item label="Chuyên khoa">{viewRecord.specialty || "-"}</Descriptions.Item>
+              <Descriptions.Item label="Bằng cấp">{viewRecord.degree || "-"}</Descriptions.Item>
+              <Descriptions.Item label="Kinh nghiệm">{viewRecord.experience ? `${viewRecord.experience} năm` : "-"}</Descriptions.Item>
+              <Descriptions.Item label="Cơ sở">{viewRecord.location || "-"}</Descriptions.Item>
+              <Descriptions.Item label="Địa chỉ" span={2}>{viewRecord.address || "-"}</Descriptions.Item>
+              <Descriptions.Item label="Mô tả ngắn" span={2}>{viewRecord.short_desc || "-"}</Descriptions.Item>
             </Descriptions>
 
             {(viewCerts.length > 0) && (
               <div style={{ marginTop: 20 }}>
-                <h4>Certificates</h4>
+                <h4>Chứng chỉ</h4>
                 <List
                   size="small"
                   dataSource={viewCerts}

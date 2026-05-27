@@ -86,7 +86,7 @@ export default function DataTable({
             pageSize: size,
           });
         },
-        showTotal: (total) => `Total Pages: ${Math.ceil(total / pagination.pageSize)}`,
+        showTotal: (total) => `Tổng số trang: ${Math.ceil(total / pagination.pageSize)}`,
       }}
 
       locale={{
@@ -95,7 +95,7 @@ export default function DataTable({
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
               <span style={{ color: "#888", fontWeight: 500 }}>
-                No data
+                Không có dữ liệu
               </span>
             }
           />

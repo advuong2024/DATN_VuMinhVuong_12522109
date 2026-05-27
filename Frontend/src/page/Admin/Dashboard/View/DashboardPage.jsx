@@ -155,7 +155,7 @@ export default function Dashboard() {
 
   const patientColumns = [
     {
-      title: "Patient",
+      title: "Bệnh nhân",
       dataIndex: "name",
       key: "name",
 
@@ -174,19 +174,19 @@ export default function Dashboard() {
     },
 
     {
-      title: "Doctor",
+      title: "Bác sĩ",
       dataIndex: "doctor",
       key: "doctor",
     },
 
     {
-      title: "Appointment Date",
+      title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
     },
 
     {
-        title: "Status",
+        title: "Trạng thái",
         dataIndex: "status",
         key: "status",
 
@@ -196,22 +196,22 @@ export default function Dashboard() {
 
             if (status === "CHO_KHAM") {
             color = "orange";
-            text = "Waiting";
+            text = "Chờ khám";
             }
 
             if (status === "DANG_KHAM") {
             color = "blue";
-            text = "Examining";
+            text = "Đang khám";
             }
 
             if (status === "HOAN_THANH") {
             color = "green";
-            text = "Completed";
+            text = "Hoàn thành";
             }
 
             if (status === "DA_HUY") {
             color = "red";
-            text = "Cancelled";
+            text = "Đã hủy";
             }
 
             return (
@@ -275,7 +275,7 @@ export default function Dashboard() {
               color: "#0f172a",
             }}
           >
-            Hello,{" "}
+            Xin chào,{" "}
             {
               user?.nhan_vien
                 ?.ten_nhan_vien
@@ -289,8 +289,8 @@ export default function Dashboard() {
               margin: 0,
             }}
           >
-            Wishing you a wonderful and
-            productive day at work.
+            Chúc bạn một ngày làm việc
+            hiệu quả và tràn đầy năng lượng.
           </p>
         </Card>
       </Layout>
@@ -319,7 +319,7 @@ export default function Dashboard() {
                 }}
               >
                 <Statistic
-                  title="Total Patients"
+                  title="Tổng bệnh nhân"
                   value={
                     dashboard.summary
                       ?.totalPatients || 0
@@ -343,7 +343,7 @@ export default function Dashboard() {
                 }}
               >
                 <Statistic
-                  title="Doctors"
+                  title="Bác sĩ"
                   value={
                     dashboard.summary
                       ?.totalDoctors || 0
@@ -367,7 +367,7 @@ export default function Dashboard() {
                 }}
               >
                 <Statistic
-                  title="Today's Appointments"
+                  title="Lịch hẹn hôm nay"
                   value={
                     dashboard.summary
                       ?.todayAppointments ||
@@ -392,7 +392,7 @@ export default function Dashboard() {
                 }}
               >
                 <Statistic
-                  title="Revenue"
+                  title="Doanh thu"
                   value={
                     Number(
                       dashboard.summary
@@ -402,7 +402,7 @@ export default function Dashboard() {
                   prefix={
                     <DollarOutlined />
                   }
-                  suffix="VND"
+                  suffix="VNĐ"
                 />
               </Card>
             </Col>
@@ -430,7 +430,7 @@ export default function Dashboard() {
                     }}
                   >
                     <RiseOutlined />
-                    Revenue Analytics
+                    Phân tích doanh thu
                   </div>
                 }
                 extra={
@@ -443,19 +443,19 @@ export default function Dashboard() {
                     options={[
                       {
                         label:
-                          "Last 7 Days",
+                          "7 ngày qua",
                         value: "7",
                       },
 
                       {
                         label:
-                          "Last 15 Days",
+                          "15 ngày qua",
                         value: "15",
                       },
 
                       {
                         label:
-                          "Last 1 Month",
+                          "1 tháng qua",
                         value: "30",
                       },
                     ]}
@@ -528,7 +528,7 @@ export default function Dashboard() {
                 title={
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <span style={{ fontWeight: 600, fontSize: 16 }}>
-                      Statistics by specialty
+                      Thống kê theo chuyên khoa
                     </span>
                     <Select
                       value={`${specialtyYear}-${String(specialtyMonth).padStart(2, "0")}`}
@@ -545,7 +545,7 @@ export default function Dashboard() {
                           const y = d.getFullYear();
                           const m = d.getMonth() + 1;
                           opts.push({
-                            label: `Month ${m}/${y}`,
+                            label: `Tháng ${m}/${y}`,
                             value: `${y}-${String(m).padStart(2, "0")}`,
                           });
                           d.setMonth(d.getMonth() - 1);
@@ -577,10 +577,10 @@ export default function Dashboard() {
                             {khoa.ten_chuyen_khoa}
                           </div>
                           <div style={{ fontSize: 12, color: "#8c8c8c", marginBottom: 4 }}>
-                            {khoa.so_bac_si} Doctor · {khoa.so_luot_kham} Visits
+                            {khoa.so_bac_si} Bác sĩ · {khoa.so_luot_kham} Lượt khám
                           </div>
                           <div style={{ fontSize: 15, fontWeight: 700, color: c }}>
-                            {Number(khoa.doanh_thu).toLocaleString()} VND
+                            {Number(khoa.doanh_thu).toLocaleString()} VNĐ
                           </div>
                         </div>
                       </Col>
@@ -618,13 +618,13 @@ export default function Dashboard() {
                       <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
                       <Tooltip
                         formatter={(value, name) => {
-                          if (name === "doanh_thu") return [Number(value).toLocaleString() + " VND", "Revenue"];
-                          return [value, "Number of visits"];
+                          if (name === "doanh_thu") return [Number(value).toLocaleString() + " VNĐ", "Doanh thu"];
+                          return [value, "Số lượt khám"];
                         }}
                       />
                       <Legend />
-                      <Bar yAxisId="left" dataKey="so_luot_kham" name="Number of visits" fill="#1677ff" radius={[4, 4, 0, 0]} />
-                      <Bar yAxisId="right" dataKey="doanh_thu" name="Revenue" fill="#52c41a" radius={[4, 4, 0, 0]} />
+                      <Bar yAxisId="left" dataKey="so_luot_kham" name="Số lượt khám" fill="#1677ff" radius={[4, 4, 0, 0]} />
+                      <Bar yAxisId="right" dataKey="doanh_thu" name="Doanh thu" fill="#52c41a" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -644,7 +644,7 @@ export default function Dashboard() {
                 style={{
                   borderRadius: 16,
                 }}
-                title="Recent Medical Records"
+                title="Phiếu khám gần đây"
                 // extra={
                 //   <Button type="primary">
                 //     View All
@@ -669,7 +669,7 @@ export default function Dashboard() {
                 style={{
                   borderRadius: 16,
                 }}
-                title="Clinic Performance"
+                title="Hiệu suất phòng khám"
               >
                 <div
                   style={{
@@ -677,7 +677,7 @@ export default function Dashboard() {
                   }}
                 >
                   <p>
-                    Appointment Rate
+                    Tỷ lệ đặt lịch
                   </p>
 
                   <Progress
@@ -696,8 +696,8 @@ export default function Dashboard() {
                   }}
                 >
                   <p>
-                    Patient
-                    Satisfaction
+                    Hài lòng
+                    bệnh nhân
                   </p>
 
                   <Progress
@@ -713,8 +713,8 @@ export default function Dashboard() {
 
                 <div>
                   <p>
-                    Completed
-                    Treatments
+                    Hoàn thành
+                    điều trị
                   </p>
 
                   <Progress

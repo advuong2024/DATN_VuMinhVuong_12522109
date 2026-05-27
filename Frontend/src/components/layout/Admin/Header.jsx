@@ -28,12 +28,12 @@ function timeAgo(dateStr) {
   const now = Date.now();
   const diff = now - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins} minutes ago`;
+  if (mins < 1) return "Vừa xong";
+  if (mins < 60) return `${mins} phút trước`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hours ago`;
+  if (hours < 24) return `${hours} giờ trước`;
   const days = Math.floor(hours / 24);
-  return `${days} days ago`;
+  return `${days} ngày trước`;
 }
 
 export default function AppHeader() {
@@ -100,7 +100,7 @@ export default function AppHeader() {
       {
         key: "profile",
         icon: <UserOutlined />,
-        label: "Profile",
+        label: "Hồ sơ",
         onClick: () => navigate("/admin/profile"),
       },
       { type: "divider" },
@@ -108,7 +108,7 @@ export default function AppHeader() {
         key: "logout",
         danger: true,
         icon: <LogoutOutlined />,
-        label: "Log out",
+        label: "Đăng xuất",
         onClick: handleLogout,
       },
     ],
@@ -200,10 +200,10 @@ export default function AppHeader() {
   };
 
   const roleMap = {
-    ADMIN: "ADMIN",
-    BAC_SI: "DOCTOR",
-    LE_TAN: "RECEPTIONIST",
-    THU_NGAN: "CASHIER",
+    ADMIN: "QUẢN TRỊ VIÊN",
+    BAC_SI: "BÁC SĨ",
+    LE_TAN: "LỄ TÂN",
+    THU_NGAN: "THU NGÂN",
   };
 
   return (
@@ -244,7 +244,7 @@ export default function AppHeader() {
               lineHeight: 1.1,
             }}
           >
-            POLYCLINIC
+            PHÒNG KHÁM ĐA KHOA
           </div>
         </div>
       </div>
@@ -264,7 +264,7 @@ export default function AppHeader() {
             if (notifications.length === 0) {
               return (
                 <div style={{ textAlign: "center", padding: "16px 0", color: "#94a3b8", fontSize: 13, background: "#fff", borderRadius: 8 }}>
-                  No notifications
+                  Không có thông báo
                 </div>
               );
             }
@@ -274,7 +274,7 @@ export default function AppHeader() {
                 <Divider style={{ margin: 0 }} />
                 <div style={{ padding: "4px 8px", textAlign: "center" }}>
                   <Button type="link" size="small" style={{ width: "100%" }} onClick={handleMarkAllRead}>
-                    Mark all as read
+                    Đánh dấu đã đọc
                   </Button>
                 </div>
               </div>

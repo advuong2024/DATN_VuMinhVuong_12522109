@@ -40,22 +40,22 @@ export default function PatientForm({ form, initialValues, onSubmit }) {
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item
-            label="Patient Name"
+            label="Tên bệnh nhân"
             name="name"
             rules={[
-              { required: true, message: "Please enter name" },
-              { pattern: /^[^\d]+$/, message: "No numbers allowed" },
+              { required: true, message: "Vui lòng nhập tên" },
+              { pattern: /^[^\d]+$/, message: "Không được chứa số" },
             ]}
           >
-            <Input placeholder="Enter name" />
+            <Input placeholder="Nhập tên" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Date of Birth"
+            label="Ngày sinh"
             name="dob"
-            rules={[{ required: true, message: "Select date" }]}
+            rules={[{ required: true, message: "Chọn ngày" }]}
           >
             <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
           </Form.Item>
@@ -63,26 +63,26 @@ export default function PatientForm({ form, initialValues, onSubmit }) {
 
         <Col span={12}>
           <Form.Item
-            label="Gender"
+            label="Giới tính"
             name="gender"
             rules={[{ required: true }]}
           >
-            <Select placeholder="Select gender" options={GENDER_OPTIONS} />
+            <Select placeholder="Chọn giới tính" options={GENDER_OPTIONS} />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Phone"
+            label="SĐT"
             name="phone"
             rules={[
               { required: true },
-              { pattern: /^[0-9]{10}$/, message: "10 digits" },
+              { pattern: /^[0-9]{10}$/, message: "Phải 10 số" },
             ]}
           >
             <Input
               maxLength={10}
-              placeholder="Enter phone"
+              placeholder="Nhập SĐT"
               onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key)) e.preventDefault();
               }} 
@@ -96,12 +96,12 @@ export default function PatientForm({ form, initialValues, onSubmit }) {
             name="cccd"
             rules={[
               { required: true },
-              { pattern: /^[0-9]{12}$/, message: "12 digits" },
+              { pattern: /^[0-9]{12}$/, message: "Phải 12 số" },
             ]}
           >
             <Input
               maxLength={12}
-              placeholder="Enter CCCD"
+              placeholder="Nhập CCCD"
               onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key)) e.preventDefault();
               }} 
@@ -114,23 +114,23 @@ export default function PatientForm({ form, initialValues, onSubmit }) {
             label="Email"
             name="email"
           >
-            <Input placeholder="Enter email" />
+            <Input placeholder="Nhập email" />
           </Form.Item>
         </Col>
 
         <Col span={24}>
           <Form.Item 
-            label="Address" 
+            label="Địa chỉ" 
             name="address"
             rules={[{ required: true }]}
           >
-            <Input placeholder="Enter address" />
+            <Input placeholder="Nhập địa chỉ" />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item label="Medical History" name="medicalHistory">
-            <Input.TextArea rows={3} placeholder="Enter history" />
+          <Form.Item label="Tiền sử bệnh" name="medicalHistory">
+            <Input.TextArea rows={3} placeholder="Nhập tiền sử" />
           </Form.Item>
         </Col>
       </Row>
@@ -138,7 +138,7 @@ export default function PatientForm({ form, initialValues, onSubmit }) {
       <Form.Item>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="primary" htmlType="submit">
-            {initialValues ? "Update" : "Create"}
+            {initialValues ? "Cập nhật" : "Tạo mới"}
           </Button>
         </Space>
       </Form.Item>

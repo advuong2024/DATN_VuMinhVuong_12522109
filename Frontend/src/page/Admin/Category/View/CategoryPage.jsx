@@ -138,10 +138,10 @@ export default function CategoryManagement() {
       if (activeTab === "specialty") {
         if (editingRecord) {
           await updateSpecialty(editingRecord.key, values);
-          toast.success("Updated!");
+          toast.success("Cập nhật thành công!");
         } else {
           await createSpecialty(values);
-          toast.success("Created!");
+          toast.success("Tạo mới thành công!");
         }
       } else {
         const type =
@@ -149,10 +149,10 @@ export default function CategoryManagement() {
 
         if (editingRecord) {
           await updateCategory(editingRecord.key, values);
-          toast.success("Updated!");
+          toast.success("Cập nhật thành công!");
         } else {
           await createCategory({ ...values, type });
-          toast.success("Created!");
+          toast.success("Tạo mới thành công!");
         }
       }
 
@@ -166,16 +166,16 @@ export default function CategoryManagement() {
   };
 
   const columns = [
-    { title: "Category Name", dataIndex: "name", width: 250 },
+    { title: "Tên danh mục", dataIndex: "name", width: 250 },
 
     {
-      title: "Description",
+      title: "Mô tả",
       dataIndex: "description",
       ellipsis: true,
     },
 
     {
-      title: "Type",
+      title: "Loại",
       dataIndex: "type",
       width: 200,
       render: (t) =>
@@ -183,7 +183,7 @@ export default function CategoryManagement() {
     },
 
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 150,
       render: (_, record) => (
@@ -207,7 +207,7 @@ export default function CategoryManagement() {
 
   const columnsSpecialty = [
     {
-      title: "Image",
+      title: "Ảnh",
       dataIndex: "hinh_anh",
       width: 90,
       align: "center",
@@ -218,14 +218,14 @@ export default function CategoryManagement() {
           <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f0f0f0" }} />
         ),
     },
-    { title: "Specialty Name", dataIndex: "name", width: 350 },
+    { title: "Tên chuyên khoa", dataIndex: "name", width: 350 },
     {
-      title: "Description",
+      title: "Mô tả",
       dataIndex: "description",
       ellipsis: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 150,
       render: (_, record) => (
@@ -244,27 +244,27 @@ export default function CategoryManagement() {
   ];
 
   const getTitle = () => {
-    if (activeTab === "medicine") return "MEDICINE CATEGORY";
-    if (activeTab === "service") return "SERVICE CATEGORY";
-    return "SPECIALTY";
+    if (activeTab === "medicine") return "DANH MỤC THUỐC";
+    if (activeTab === "service") return "DANH MỤC DỊCH VỤ";
+    return "CHUYÊN KHOA";
   };
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-      <h3>Category Management</h3>
+      <h3>Quản lý danh mục</h3>
 
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="Category Medicine" key="medicine">
+        <TabPane tab="Danh mục thuốc" key="medicine">
           <Header onAdd={handleAdd} onSearch={setSearchText} />
           <DataTable columns={columns} data={filteredData} />
         </TabPane>
 
-        <TabPane tab="Category Service" key="service">
+        <TabPane tab="Danh mục dịch vụ" key="service">
           <Header onAdd={handleAdd} onSearch={setSearchText} />
           <DataTable columns={columns} data={filteredData} />
         </TabPane>
 
-        <TabPane tab="Specialty" key="specialty">
+        <TabPane tab="Chuyên khoa" key="specialty">
           <Header onAdd={handleAdd} onSearch={setSearchText} />
           <DataTable columns={columnsSpecialty} data={filteredData} />
         </TabPane>
@@ -277,7 +277,7 @@ export default function CategoryManagement() {
         footer={null}
         title={
           <div style={{ textAlign: "center" }}>
-            {editingRecord ? "UPDATE" : "ADD"} {getTitle()}
+            {editingRecord ? "CẬP NHẬT" : "THÊM"} {getTitle()}
           </div>
         }
       >
@@ -294,7 +294,7 @@ export default function CategoryManagement() {
         onCancel={() => setOpenView(false)}
         footer={null}
         title={<div style={{ textAlign: "center" }}>
-          {getTitle()} DETAIL
+          CHI TIẾT {getTitle()}
         </div>}
       >
         {viewRecord && (
@@ -310,16 +310,16 @@ export default function CategoryManagement() {
               </div>
             )}
             <Descriptions column={1} bordered>
-              <Descriptions.Item label="Name">
+              <Descriptions.Item label="Tên">
                 {viewRecord.name}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Description">
+              <Descriptions.Item label="Mô tả">
                 {viewRecord.description}
               </Descriptions.Item>
 
               {activeTab !== "specialty" && (
-                <Descriptions.Item label="Type">
+                <Descriptions.Item label="Loại">
                   {TYPE_OPTIONS.find(x => x.value === viewRecord.type)?.label}
                 </Descriptions.Item>
               )}
@@ -336,7 +336,7 @@ function Header({ onAdd, onSearch }) {
     <Row justify="end" style={{ marginBottom: 16 }}>
       <Col span={5}>
         <Input 
-          placeholder="Search by name" 
+          placeholder="Tìm theo tên" 
           onChange={(e) => onSearch(e.target.value)}
         />
       </Col>
@@ -347,7 +347,7 @@ function Header({ onAdd, onSearch }) {
           style={{ marginLeft: 10, backgroundColor: "#af050e" }}
           onClick={onAdd}
         >
-          ADD
+          THÊM
         </Button>
       </Col>
     </Row>

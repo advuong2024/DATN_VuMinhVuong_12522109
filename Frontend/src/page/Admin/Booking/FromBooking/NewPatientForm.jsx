@@ -50,7 +50,7 @@ export default function NewPatientForm() {
   const handleFinish = async (values) => {
     try {
         if (!values.doctor) {
-            toast.error("Please select doctor");
+            toast.error("Vui lòng chọn bác sĩ");
             return;
         }
 
@@ -71,7 +71,7 @@ export default function NewPatientForm() {
         const patientId = newPatient?.data?.id_benh_nhan;
 
         if (!patientId) {
-            throw new Error("Create patient failed");
+            throw new Error("Tạo bệnh nhân thất bại");
         }
 
         const bookingPayload = {
@@ -86,28 +86,28 @@ export default function NewPatientForm() {
         console.log("BOOKING:", bookingPayload);
 
         await createBooking(bookingPayload);
-        toast.success("Booking successfully");
+        toast.success("Đặt lịch thành công");
 
         form.resetFields();
         setDoctors([]);
     } catch (err) {
         console.error("Error:", err);
-        toast.error("Failed");
+        toast.error("Thất bại");
     }
   };
 
   return (
     <Form form={form} layout="vertical" onFinish={handleFinish}>
-      <Divider>Patient Info</Divider>
+      <Divider>Thông tin bệnh nhân</Divider>
 
       <Row gutter={12}>
         <Col span={8}>
           <Form.Item
             name="name"
-            label="Name"
+            label="Họ tên"
             rules={[
-                { required: true, message: "Please enter name" },
-                { min: 2, message: "Name must be at least 2 characters" },
+                { required: true, message: "Vui lòng nhập họ tên" },
+                { min: 2, message: "Họ tên phải có ít nhất 2 ký tự" },
             ]}
           >
             <Input />
@@ -117,8 +117,8 @@ export default function NewPatientForm() {
         <Col span={8}>
           <Form.Item
             name="dob"
-            label="DOB"
-            rules={[{ required: true, message: "Please select date of birth" }]}
+            label="Ngày sinh"
+            rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
           >
             <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY"/>
           </Form.Item>
@@ -127,8 +127,8 @@ export default function NewPatientForm() {
         <Col span={8}>
           <Form.Item
             name="gender"
-            label="Gender"
-            rules={[{ required: true, message: "Please select gender" }]}
+            label="Giới tính"
+            rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
           >
             <Select options={GENDER_OPTIONS} />
           </Form.Item>
@@ -137,12 +137,12 @@ export default function NewPatientForm() {
         <Col span={8}>
           <Form.Item
             name="phone"
-            label="Phone"
+            label="SĐT"
             rules={[
-                { required: true, message: "Please enter phone number" },
+                { required: true, message: "Vui lòng nhập số điện thoại" },
                 {
                 pattern: /^[0-9]{10}$/,
-                message: "Phone must be exactly 10 digits",
+                message: "SĐT phải có đúng 10 số",
                 },
             ]}
           >
@@ -159,10 +159,10 @@ export default function NewPatientForm() {
             name="cccd"
             label="CCCD"
             rules={[
-                { required: true, message: "Please enter CCCD" },
+                { required: true, message: "Vui lòng nhập CCCD" },
                 {
                 pattern: /^[0-9]{12}$/,
-                message: "CCCD must be exactly 12 digits",
+                message: "CCCD phải có đúng 12 số",
                 },
             ]}
           >
@@ -177,10 +177,10 @@ export default function NewPatientForm() {
         <Col span={8}>
           <Form.Item
             name="address"
-            label="Address"
+            label="Địa chỉ"
             rules={[
-                { required: true, message: "Please enter address" },
-                { min: 5, message: "Address is too short" },
+                { required: true, message: "Vui lòng nhập địa chỉ" },
+                { min: 5, message: "Địa chỉ quá ngắn" },
             ]}
           >
             <Input />
@@ -188,27 +188,27 @@ export default function NewPatientForm() {
         </Col>
       </Row>
 
-      <Divider>Booking</Divider>
+      <Divider>Đặt lịch</Divider>
       <Row gutter={12}>
         <Col span={12}>
-          <Form.Item name="service" label="Specialty" rules={[{ required: true }]}>
+          <Form.Item name="service" label="Chuyên khoa" rules={[{ required: true }]}>          
             <Select options={services} onChange={handleServiceChange} />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item name="doctor" label="Doctor" rules={[{ required: true }]}>
+          <Form.Item name="doctor" label="Bác sĩ" rules={[{ required: true }]}>          
             <Select options={doctors} disabled={!selectedService}/>
           </Form.Item>
         </Col>
       </Row>
 
-      <Form.Item name="note" label="Note">
+      <Form.Item name="note" label="Ghi chú">
         <Input.TextArea />
       </Form.Item>
 
       <Button type="primary" htmlType="submit">
-        Create
+        Tạo lịch hẹn
       </Button>
     </Form>
   );

@@ -58,7 +58,7 @@ export default function AppFooter() {
                 PHÒNG KHÁM ĐA KHOA AN TÂM
               </h3>
               <p style={{ margin: "2px 0 0", color: "#91d5ff", fontSize: 14, fontWeight: 500 }}>
-                AN TAM GENERAL CLINIC
+                PHÒNG KHÁM ĐA KHOA AN TÂM
               </p>
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function AppFooter() {
       </Row>
 
       <div style={{ textAlign: "center", color: "#91d5ff", fontSize: 13, padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-        © {new Date().getFullYear()} Phòng khám Đa khoa An Tâm. All rights reserved.
+        © {new Date().getFullYear()} Phòng khám Đa khoa An Tâm. Đã đăng ký bản quyền.
       </div>
     </Footer>
   );

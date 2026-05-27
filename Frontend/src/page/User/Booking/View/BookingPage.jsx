@@ -541,7 +541,7 @@ export default function BookingPage() {
                                     <Col key={time} flex="0 0 90px">
                                     <div
                                         onClick={() => {
-                                            if (disabled) return;
+                                          if (disabled) return;
                                             setSelectedTime(time);
                                             setTimeError("");
                                             form.setFieldsValue({ time });

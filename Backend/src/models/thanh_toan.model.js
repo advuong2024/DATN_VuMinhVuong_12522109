@@ -167,7 +167,7 @@ const getPaymentDetailByPhieuKham = async (
     });
 
   if (!payment) {
-    throw new Error("Not found");
+    throw new Error("Không tìm thấy");
   }
 
   let consultation = {

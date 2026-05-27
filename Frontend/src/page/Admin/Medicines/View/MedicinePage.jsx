@@ -102,10 +102,10 @@ export default function MedicineManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Delete medicine?",
-      content: "Are you sure?",
-      okText: "Delete",
-      cancelText: "Cancel",
+      title: "Xóa thuốc?",
+      content: "Bạn có chắc chắn?",
+      okText: "Xóa",
+      cancelText: "Hủy",
       onOk: async () => {
         await deleteMedicine(record.key);
         fetchData();
@@ -117,34 +117,34 @@ export default function MedicineManagement() {
     try {
       if (editingRecord) {
         await updateMedicine(editingRecord.key, values);
-        toast.success("Update!")
+        toast.success("Cập nhật thành công!")
       } else {
         await createMedicine(values);
-        toast.success("Created!")
+        toast.success("Tạo mới thành công!")
       }
 
       await fetchData();
       setOpen(false);
     } catch (err) {
       console.error(err);
-      toast.error("Error!");
+      toast.error("Lỗi!");
     }
   };
 
   const columns = [
-    { title: "Medicine Name", dataIndex: "name", width: 200 },
+    { title: "Tên thuốc", dataIndex: "name", width: 200 },
 
     {
-      title: "Price",
+      title: "Giá",
       dataIndex: "price",
       width: 150,
-      render: (p) => (p ? `${Number(p).toLocaleString()} VND` : "0 VND"),
+      render: (p) => (p ? `${Number(p).toLocaleString()} VNĐ` : "0 VNĐ"),
     },
 
-    { title: "Quantity", dataIndex: "quantity", width: 120 },
+    { title: "Số lượng", dataIndex: "quantity", width: 120 },
 
     { 
-      title: "Unit", 
+      title: "ĐVT", 
       dataIndex: "unit", 
       width: 120, 
       render: (u) => {
@@ -156,7 +156,7 @@ export default function MedicineManagement() {
     },
 
     {
-      title: "Expiry Date",
+      title: "Hạn sử dụng",
       dataIndex: "expiryDate",
       width: 150,
       align: "center",
@@ -164,13 +164,13 @@ export default function MedicineManagement() {
     },
 
     {
-      title: "Category",
+      title: "Danh mục",
       dataIndex: "category",
       width: 150,
     },
 
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 120,
       render: (_, record) => (
@@ -198,12 +198,12 @@ export default function MedicineManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-      <h3>Medicine Management</h3>
+      <h3>Quản lý thuốc</h3>
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Input
-            placeholder="Search by medicine / category"
+            placeholder="Tìm theo thuốc / danh mục"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -211,7 +211,7 @@ export default function MedicineManagement() {
 
         <Col>
           <Button type="primary" style={{ marginLeft: 10, backgroundColor: "#af050e" }} onClick={handleAdd}>
-            ADD
+            THÊM
           </Button>
         </Col>
       </Row>
@@ -224,7 +224,7 @@ export default function MedicineManagement() {
         onCancel={() => setOpen(false)}
         footer={null}
         title={<div style={{ textAlign: "center" }}>
-          {editingRecord ? "UPDATE" : "ADD"} MEDICINE
+          {editingRecord ? "CẬP NHẬT" : "THÊM"} THUỐC
         </div>}
       >
         <MedicineForm
@@ -242,30 +242,30 @@ export default function MedicineManagement() {
       >
         {viewRecord && (
           <Descriptions column={1} bordered>
-            <Descriptions.Item label="Medicine Name">
+            <Descriptions.Item label="Tên thuốc">
               {viewRecord.name}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Price">
+            <Descriptions.Item label="Giá">
               {viewRecord.price
                 ? `${Number(viewRecord.price).toLocaleString()} VND`
                 : "—"
               }
             </Descriptions.Item>
 
-            <Descriptions.Item label="Quantity">
+            <Descriptions.Item label="Số lượng">
               {viewRecord.quantity}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Unit">
+            <Descriptions.Item label="ĐVT">
               {viewRecord.unit}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Expiry Date">
+            <Descriptions.Item label="Hạn sử dụng">
               {dayjs(viewRecord.expiryDate).format("DD-MM-YYYY")}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Category">
+            <Descriptions.Item label="Danh mục">
               { viewRecord.category }
             </Descriptions.Item>
           </Descriptions>

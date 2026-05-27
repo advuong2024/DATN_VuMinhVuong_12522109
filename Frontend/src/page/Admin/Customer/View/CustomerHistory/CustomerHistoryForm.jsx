@@ -94,31 +94,31 @@ export default function MedicalHistory() {
 
   const columns = [
     {
-      title: "Doctor Name",
+      title: "Bác sĩ",
       dataIndex: "doctor",
       width: 140,
     },
     {
-      title: "Symptoms",
+      title: "Triệu chứng",
       dataIndex: "symptoms",
       width: 145,
       ellipsis: true,
     },
     {
-      title: "Diagnosis",
+      title: "Chẩn đoán",
       dataIndex: "diagnosis",
       width: 145,
       ellipsis: true,
     },
     {
-      title: "Date",
+      title: "Ngày",
       dataIndex: "createdAt",
       align: "center",
       width: 100,
       render: (d) => dayjs(d).format("DD/MM/YYYY"),
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       width: 120,
       align: "center",
@@ -131,7 +131,7 @@ export default function MedicalHistory() {
       },
     },
     {
-      title: "Action",
+      title: "Thao tác",
       width: 70,
       align: "center",
       render: (_, record) => (
@@ -154,10 +154,10 @@ export default function MedicalHistory() {
           style={{ cursor: "pointer" }}
           onClick={() => navigate(-1)}
         >
-          Patient Management
+          Quản lý bệnh nhân
         </Breadcrumb.Item>
 
-        <Breadcrumb.Item>Medical History</Breadcrumb.Item>
+        <Breadcrumb.Item>Lịch sử khám</Breadcrumb.Item>
       </Breadcrumb>
 
       {/* <Row justify="space-between" style={{ marginBottom: 16 }}>
@@ -180,27 +180,27 @@ export default function MedicalHistory() {
 
       <Row gutter={16}>
         <Col span={8}>
-          <Card title="Patient Information">
+          <Card title="Thông tin bệnh nhân">
             {!patient ? (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={
-                  <span style={{ color: "#888", fontWeight: 500 }}>
-                    No data
-                  </span>
+                    <span style={{ color: "#888", fontWeight: 500 }}>
+                      Không có dữ liệu
+                    </span>
                 }
               />
             ) : (
               <Form layout="vertical">
                 <Row gutter={16}>
                   <Col span={12}>
-                    <Form.Item label="Name">
+                    <Form.Item label="Họ tên">
                       <Input value={patient.name} disabled />
                     </Form.Item>
                   </Col>
 
                   <Col span={12}>
-                    <Form.Item label="Date of Birth">
+                    <Form.Item label="Ngày sinh">
                       <Input
                         value={
                           patient.dob
@@ -213,13 +213,13 @@ export default function MedicalHistory() {
                   </Col>
 
                   <Col span={12}>
-                    <Form.Item label="Phone">
+                    <Form.Item label="SĐT">
                       <Input value={patient.phone} disabled />
                     </Form.Item>
                   </Col>
 
                   <Col span={12}>
-                    <Form.Item label="Gender">
+                    <Form.Item label="Giới tính">
                       <Input
                         value={patient.gender === "NAM" ? "Nam" : "Nữ"}
                         disabled
@@ -243,13 +243,13 @@ export default function MedicalHistory() {
                   </Col>
 
                   <Col span={12}>
-                    <Form.Item label="Medical History">
+                    <Form.Item label="Tiền sử bệnh">
                       <Input value={patient.medical || "N/A"} disabled />
                     </Form.Item>
                   </Col>
 
                   <Col span={12}>
-                    <Form.Item label="Address">
+                    <Form.Item label="Địa chỉ">
                       <Input value={patient.address} disabled />
                     </Form.Item>
                   </Col>
@@ -266,7 +266,7 @@ export default function MedicalHistory() {
 
       <Modal
         centered
-        title="Medical Record Detail"
+        title="Chi tiết phiếu khám"
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
@@ -276,36 +276,36 @@ export default function MedicalHistory() {
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
-              <span style={{ color: "#888", fontWeight: 500 }}>
-                No data
-              </span>
+                <span style={{ color: "#888", fontWeight: 500 }}>
+                  Không có dữ liệu
+                </span>
             }
           />
-        ) : (
-          <>
-            <Descriptions bordered column={2} size="small">
-              <Descriptions.Item label="Doctor">
-                {detail.bac_si?.ten_nhan_vien}
+          ) : (
+              <>
+                <Descriptions bordered column={2} size="small">
+                  <Descriptions.Item label="Bác sĩ">
+                    {detail.bac_si?.ten_nhan_vien}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Date">
+              <Descriptions.Item label="Ngày">
                 {dayjs(detail.created_at).format("DD/MM/YYYY")}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Symptoms">
+              <Descriptions.Item label="Triệu chứng">
                 {detail.trieu_chung}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Diagnosis">
+              <Descriptions.Item label="Chẩn đoán">
                 {detail.chan_doan}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Note" span={2}>
+              <Descriptions.Item label="Ghi chú" span={2}>
                 {detail.ghi_chu || "N/A"}
               </Descriptions.Item>
             </Descriptions>
 
-            <h4 style={{ marginTop: 16 }}>Services</h4>
+            <h4 style={{ marginTop: 16 }}>Dịch vụ</h4>
             <Table
               size="small"
               pagination={false}
@@ -313,21 +313,21 @@ export default function MedicalHistory() {
               rowKey="id"
               columns={[
                 {
-                  title: "Service Name",
+                  title: "Tên dịch vụ",
                   dataIndex: ["dich_vu", "ten_dich_vu"],
                 },
                 {
-                  title: "Quantity",
+                  title: "Số lượng",
                   dataIndex: "so_luong",
                 },
                 {
-                  title: "Price",
+                  title: "Đơn giá",
                   dataIndex: ["dich_vu", "gia"],
                 },
               ]}
             />
 
-            <h4 style={{ marginTop: 16 }}>Medicines</h4>
+            <h4 style={{ marginTop: 16 }}>Thuốc</h4>
             <Table
               size="small"
               pagination={false}
@@ -335,19 +335,19 @@ export default function MedicalHistory() {
               rowKey="id"
               columns={[
                 {
-                  title: "Medicine",
+                  title: "Tên thuốc",
                   dataIndex: ["thuoc", "ten_thuoc"],
                 },
                 {
-                  title: "Quantity",
+                  title: "Số lượng",
                   dataIndex: "so_luong",
                 },
                 {
-                  title: "price",
+                  title: "Đơn giá",
                   dataIndex: ["thuoc", "gia"],
                 },
                 {
-                  title: "Usage",
+                  title: "Liều dùng",
                   dataIndex: "lieu_dung",
                 },
               ]}

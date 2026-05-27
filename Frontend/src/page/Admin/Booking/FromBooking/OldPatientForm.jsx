@@ -62,7 +62,7 @@ export default function OldPatientForm() {
             setCanBookMessage(check.data.message || "");
         } catch (err) {
             setCanBookState(false);
-            setCanBookMessage("Cannot check booking");
+            setCanBookMessage("Không thể kiểm tra lịch hẹn");
         }
     } else {
         setPatient(null);
@@ -96,12 +96,12 @@ export default function OldPatientForm() {
     if (!patient?.id_benh_nhan) return;
 
     if (!canBookState) {
-        toast.warning(canBookMessage || "Patient cannot book");
+        toast.warning(canBookMessage || "Bệnh nhân không thể đặt lịch");
         return;
     }
 
     if (!values.doctor) {
-        return alert("Please select doctor");
+        return alert("Vui lòng chọn bác sĩ");
     }
 
     const payload = {
@@ -116,7 +116,7 @@ export default function OldPatientForm() {
     console.log("PAYLOAD:", payload);
 
     await createBooking(payload);
-    toast.success("Booking created successfully");
+    toast.success("Đặt lịch thành công");
 
     form.resetFields();
     setPatient(null);
@@ -124,17 +124,17 @@ export default function OldPatientForm() {
 
   return (
     <Form form={form} layout="vertical" onFinish={handleFinish}>
-      <Divider>Find Patient</Divider>
+      <Divider>Tìm bệnh nhân</Divider>
 
       <Row gutter={16}>
         <Col span={12}>
             <Form.Item
             name="keyword"
-            rules={[{ required: true, message: "Please enter phone or CCCD" }]}
+            rules={[{ required: true, message: "Vui lòng nhập SĐT hoặc CCCD" }]}
             >
             <Input.Search
-                placeholder="Enter phone or CCCD"
-                enterButton="Search"
+                placeholder="Nhập SĐT hoặc CCCD"
+                enterButton="Tìm"
                 onSearch={handleSearch}
             />
             </Form.Item>
@@ -143,49 +143,49 @@ export default function OldPatientForm() {
 
       {patient && (
         <>
-          <Divider>Info</Divider>
+          <Divider>Thông tin</Divider>
 
-          <Form.Item name="name" label="Name">
+          <Form.Item name="name" label="Họ tên">
             <Input disabled />
           </Form.Item>
 
-          <Divider>Booking</Divider>
+          <Divider>Đặt lịch</Divider>
 
           <Row gutter={16}>
             <Col span={12}>
                 <Form.Item
                     name="service"
-                    label="Specialty"
+                    label="Chuyên khoa"
                     rules={[{ required: true }]}
                 >
                     <Select
                     options={serviceOptions}
                     onChange={handleServiceChange}
-                    placeholder="Select specialty"
+                    placeholder="Chọn chuyên khoa"
                     />
                 </Form.Item>
             </Col>
             <Col span={12}>
                 <Form.Item
                     name="doctor"
-                    label="Doctor"
+                    label="Bác sĩ"
                     rules={[{ required: true }]}
                 >
                     <Select
                         options={doctors}
-                        placeholder="Select doctor"
+                        placeholder="Chọn bác sĩ"
                         disabled={!selectedService}
                     />
                 </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item name="note" label="Note">
+          <Form.Item name="note" label="Ghi chú">
             <Input.TextArea />
           </Form.Item>
 
           <Button type="primary" htmlType="submit">
-            Create
+            Tạo lịch hẹn
           </Button>
         </>
       )}

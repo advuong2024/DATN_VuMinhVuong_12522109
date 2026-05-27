@@ -64,13 +64,13 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
 
   const serviceColumns = [
     {
-      title: "Service",
+      title: "Dịch vụ",
       align: "center",
       dataIndex: "id_dich_vu",
       render: (_, record, index) => (
         <Select
           style={{ width: 200 }}
-          placeholder="Select"
+          placeholder="Chọn"
           value={record.id_dich_vu}
           disabled={record.is_paid}
           options={servicesOptions}
@@ -88,7 +88,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       )
     },
     {
-      title: "Quantity",
+      title: "Số lượng",
       dataIndex: "so_luong",
       align: "center",
       render: (_, record, index) => (
@@ -106,13 +106,13 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       )
     },
     {
-      title: "Price",
+      title: "Đơn giá",
       align: "center",
       dataIndex: "gia",
       render: (val) => <InputNumber value={val} disabled />
     },
     {
-      title: "Total",
+      title: "Thành tiền",
       align: "center",
       dataIndex: "thanh_tien",
       render: (val) => <InputNumber value={val} disabled />
@@ -130,13 +130,13 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
 
   const medicineColumns = [
     {
-      title: "Medicine",
+      title: "Thuốc",
       align: "center",
       dataIndex: "id_thuoc",
       render: (_, record, index) => (
         <Select
           style={{ width: 200 }}
-          placeholder="Select"
+          placeholder="Chọn"
           value={record.id_thuoc}
           options={medicinesOptions}
           onChange={(value) => {
@@ -153,7 +153,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       )
     },
     {
-      title: "Quantity",
+      title: "Số lượng",
       dataIndex: "so_luong",
       align: "center",
       render: (_, record, index) => (
@@ -170,19 +170,19 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       )
     },
     {
-      title: "Price",
+      title: "Đơn giá",
       align: "center",
       dataIndex: "gia",
       render: (val) => <InputNumber value={val} disabled />
     },
     {
-      title: "Total",
+      title: "Thành tiền",
       align: "center",
       dataIndex: "thanh_tien",
       render: (val) => <InputNumber value={val} disabled />
     },
     {
-      title: "Dosage",
+      title: "Liều dùng",
       align: "center",
       dataIndex: "lieu_dung",
       render: (_, record, index) => (
@@ -238,18 +238,18 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
   };
 
   return (
-    <Card title="Examination">
+    <Card title="Khám bệnh">
       <Form layout="vertical" form={form}>
         <Form.Item
           name="trieu_chung"
-          label="Symptom"
+          label="Triệu chứng"
           rules={[
             {
               validator: (_, value) => {
                 if (!value || !value.trim()) {
                   return Promise.reject(
                     new Error(
-                      "Please enter symptom"
+                      "Vui lòng nhập triệu chứng"
                     )
                   );
                 }
@@ -264,14 +264,14 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
 
         <Form.Item
           name="chan_doan"
-          label="Diagnose"
+          label="Chẩn đoán"
           rules={[
             {
               validator: (_, value) => {
                 if (!value || !value.trim()) {
                   return Promise.reject(
                     new Error(
-                      "Please enter diagnose"
+                      "Vui lòng nhập chẩn đoán"
                     )
                   );
                 }
@@ -284,7 +284,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           <TextArea />
         </Form.Item>
 
-        <Form.Item name="ghi_chu" label="Note">
+        <Form.Item name="ghi_chu" label="Ghi chú">
           <TextArea />
         </Form.Item>
 
@@ -292,7 +292,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           items={[
             {
               key: "1",
-              label: "Services",
+              label: "Dịch vụ",
               children: (
                 <>
                   <Space style={{ marginBottom: 10 }}>
@@ -300,14 +300,14 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
                       type="primary"
                       onClick={() => setServices([...services, {}])}
                     >
-                      + Add Service
+                      + Thêm dịch vụ
                     </Button>
                     <Button
                       type="primary"
                       disabled={services.length === 0}
                       onClick={() => setShowServiceRequest(true)}
                     >
-                      Print request form
+                      In phiếu yêu cầu
                     </Button>
                   </Space>
                   <Table
@@ -321,7 +321,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
             },
             {
               key: "2",
-              label: "Medicines",
+              label: "Thuốc",
               children: (
                 <>
                   <Space style={{ marginBottom: 10 }}>
@@ -329,14 +329,14 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
                       type="primary"
                       onClick={() => setMedicines([...medicines, {}])}
                     >
-                      + Add Medicine
+                      + Thêm thuốc
                     </Button>
                     <Button
                       type="primary"
                       disabled={medicines.length === 0}
                       onClick={() => setShowPrescription(true)}
                     >
-                      Print prescriptions
+                      In đơn thuốc
                     </Button>
                   </Space>
                   <Table
@@ -353,21 +353,21 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
 
         <Space style={{ marginTop: 20 }}>
           <Button type="primary" onClick={handlePauseExamination}>
-            Pause Examination
+            Tạm dừng
           </Button>
           <Button
             type="primary"
             disabled={!symptoms?.trim() || !diagnosis?.trim()}
             onClick={handleCompleteExamination}
           >
-            Complete Examination
+            Hoàn thành
           </Button>
           <Button
             type="primary"
             disabled={!symptoms?.trim() || !diagnosis?.trim()}
             onClick={() => setShowEncounter(true)}
           >
-            Print examination form
+            In phiếu khám
           </Button>
         </Space>
       </Form>
@@ -375,7 +375,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       <PrintPreviewModal
         open={showServiceRequest}
         onClose={() => setShowServiceRequest(false)}
-        title="Service Request Form"
+        title="Phiếu yêu cầu dịch vụ"
         filename={`yeu_cau_dich_vu_${bookingData?.encounterId || ""}.pdf`}
       >
         <PrintServiceRequest
@@ -396,7 +396,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       <PrintPreviewModal
         open={showEncounter}
         onClose={() => setShowEncounter(false)}
-        title="Medical examination card"
+        title="Phiếu khám bệnh"
         filename={`phieu_kham_${bookingData?.encounterId || ""}.pdf`}
       >
         <PrintEncounter
@@ -420,7 +420,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       <PrintPreviewModal
         open={showPrescription}
         onClose={() => setShowPrescription(false)}
-        title="Prescription"
+        title="Đơn thuốc"
         filename={`don_thuoc_${bookingData?.encounterId || ""}.pdf`}
       >
         <PrintPrescription

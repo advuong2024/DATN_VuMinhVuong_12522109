@@ -9,8 +9,8 @@ import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 
-const STATUS_MAP = { HOAT_DONG: { label: "Active", color: "green" }, KHOA: { label: "Locked", color: "red" } };
-const ROLE_MAP = { ADMIN: "Administrator", BAC_SI: "Doctor", LE_TAN: "Receptionist", THU_NGAN: "Cashier" };
+const STATUS_MAP = { HOAT_DONG: { label: "Hoạt động", color: "green" }, KHOA: { label: "Khóa", color: "red" } };
+const ROLE_MAP = { ADMIN: "Quản trị viên", BAC_SI: "Bác sĩ", LE_TAN: "Lễ tân", THU_NGAN: "Thu ngân" };
 
 export default function ProfilePage() {
   const [form] = Form.useForm();
@@ -40,7 +40,7 @@ export default function ProfilePage() {
       });
       if (data.chung_chis) setCertificates(data.chung_chis);
     } catch (err) {
-      message.error("Failed to load profile");
+      message.error("Tải hồ sơ thất bại");
     } finally {
       setLoading(false);
     }
@@ -53,11 +53,11 @@ export default function ProfilePage() {
       const values = await form.validateFields();
       setSaving(true);
       await updateProfile({ ...values, hinh_anh: avatar });
-      message.success("Updated successfully");
+      message.success("Cập nhật thành công");
       fetchData();
     } catch (err) {
       if (err.errorFields) return;
-      message.error("Update failed");
+      message.error("Cập nhật thất bại");
     } finally {
       setSaving(false);
     }
@@ -67,22 +67,22 @@ export default function ProfilePage() {
     if (!newCert.ten_chung_chi) return;
     try {
       await createCertificate(newCert);
-      message.success("Certificate added");
+      message.success("Đã thêm chứng chỉ");
       setNewCert({ ten_chung_chi: "", noi_cap: "", nam_cap: null });
       const certs = await getCertificates();
       setCertificates(certs);
     } catch (err) {
-      message.error("Failed to add certificate");
+      message.error("Thêm chứng chỉ thất bại");
     }
   };
 
   const handleDeleteCert = (cert) => {
     Modal.confirm({
-      title: "Delete certificate",
-      content: `Delete "${cert.ten_chung_chi}"?`,
+      title: "Xóa chứng chỉ",
+      content: `Xóa "${cert.ten_chung_chi}"?`,
       onOk: async () => {
         await deleteCertificate(cert.id_chung_chi);
-        message.success("Deleted");
+        message.success("Đã xóa");
         setCertificates((prev) => prev.filter((c) => c.id_chung_chi !== cert.id_chung_chi));
       },
     });
@@ -99,7 +99,7 @@ export default function ProfilePage() {
         <Avatar size={100} src={avatar} icon={!avatar ? <UserOutlined /> : undefined} style={{ backgroundColor: "#1677ff", marginBottom: 12 }} />
         <div style={{ marginBottom: 8 }}>
           <ImageUpload onUpload={(url) => setAvatar(url)}>
-            <Button size="small">Change photo</Button>
+            <Button size="small">Đổi ảnh</Button>
           </ImageUpload>
         </div>
         <Title level={4} style={{ margin: 0 }}>{profile?.ten_nhan_vien}</Title>
@@ -109,46 +109,46 @@ export default function ProfilePage() {
         </Space>
       </Card>
 
-      <Card title="Personal Information" style={{ borderRadius: 12, marginBottom: 24 }}>
+      <Card title="Thông tin cá nhân" style={{ borderRadius: 12, marginBottom: 24 }}>
         <Form form={form} layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Full name" name="name" rules={[{ required: true, message: "Please enter your full name" }]}>
+              <Form.Item label="Họ và tên" name="name" rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}>
                 <Input size="large" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Date of birth" name="dob">
+              <Form.Item label="Ngày sinh" name="dob">
                 <Input type="date" size="large" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item label="Gender" name="gender">
+              <Form.Item label="Giới tính" name="gender">
                 <Select size="large" options={GENDER_OPTIONS} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Phone number" name="phone" rules={[{ pattern: /^0\d{9}$/, message: "Phone must be 10 digits, starting with 0" }]}>
+              <Form.Item label="Số điện thoại" name="phone" rules={[{ pattern: /^0\d{9}$/, message: "SĐT phải 10 số, bắt đầu bằng 0" }]}>
                 <Input size="large" maxLength={10} />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item label="Address" name="address">
+          <Form.Item label="Địa chỉ" name="address">
             <Input size="large" />
           </Form.Item>
           <Button type="primary" icon={<SaveOutlined />} size="large" onClick={handleSave} loading={saving}>
-            Save changes
+            Lưu thay đổi
           </Button>
         </Form>
       </Card>
 
       {currentRole === "BAC_SI" && (
-        <Card title="Certificates" style={{ borderRadius: 12 }}>
+        <Card title="Chứng chỉ" style={{ borderRadius: 12 }}>
           <List
             dataSource={certificates}
-            locale={{ emptyText: "No certificates yet" }}
+            locale={{ emptyText: "Chưa có chứng chỉ" }}
             renderItem={(cert) => (
               <List.Item
                 actions={[<Button key="del" type="text" danger icon={<DeleteOutlined />} onClick={() => handleDeleteCert(cert)} />]}
@@ -162,13 +162,13 @@ export default function ProfilePage() {
           />
           <Divider />
           <Space.Compact style={{ width: "100%" }}>
-            <Input placeholder="Certificate name" value={newCert.ten_chung_chi}
+            <Input placeholder="Tên chứng chỉ" value={newCert.ten_chung_chi}
               onChange={(e) => setNewCert((p) => ({ ...p, ten_chung_chi: e.target.value }))} />
-            <Input placeholder="Issued by" value={newCert.noi_cap}
+            <Input placeholder="Nơi cấp" value={newCert.noi_cap}
               onChange={(e) => setNewCert((p) => ({ ...p, noi_cap: e.target.value }))} />
-            <Input placeholder="Year" type="number" value={newCert.nam_cap}
+            <Input placeholder="Năm" type="number" value={newCert.nam_cap}
               onChange={(e) => setNewCert((p) => ({ ...p, nam_cap: e.target.value ? Number(e.target.value) : null }))} />
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCert}>Add</Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCert}>Thêm</Button>
           </Space.Compact>
         </Card>
       )}

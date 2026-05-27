@@ -49,61 +49,61 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item
-            label="Service Name"
+            label="Tên dịch vụ"
             name="name"
-            rules={[{ required: true, message: "Please enter service name" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ" }]}
           >
-            <Input placeholder="Enter service name" />
+            <Input placeholder="Nhập tên dịch vụ" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Price"
+            label="Giá"
             name="price"
             rules={[
-              { required: true, message: "Please enter price" },
-              { pattern: /^[0-9]+$/, message: "Must be a number" },
+              { required: true, message: "Vui lòng nhập giá" },
+              { pattern: /^[0-9]+$/, message: "Phải là số" },
             ]}
           >
-            <Input placeholder="Enter price" />
+            <Input placeholder="Nhập giá" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Category"
+            label="Danh mục"
             name="category"
-            rules={[{ required: true, message: "Please select category" }]}
+            rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
           >
-            <Select placeholder="Select category" options={categories} />
+            <Select placeholder="Chọn danh mục" options={categories} />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Specialty"
+            label="Chuyên khoa"
             name="specialty"
-            rules={[{ required: true, message: "Please select specialty" }]}
+            rules={[{ required: true, message: "Vui lòng chọn chuyên khoa" }]}
           >
-            <Select placeholder="Select specialty" options={specialty} />
+            <Select placeholder="Chọn chuyên khoa" options={specialty} />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item label="Image" name="hinh_anh">
+          <Form.Item label="Ảnh" name="hinh_anh">
             <ImageUpload />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item label="Short Description" name="shortDescription">
-            <Input.TextArea rows={2} placeholder="Short description for homepage..." />
+          <Form.Item label="Mô tả ngắn" name="shortDescription">
+            <Input.TextArea rows={2} placeholder="Mô tả ngắn cho trang chủ..." />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item label="Description" name="description">
+          <Form.Item label="Mô tả" name="description">
             <RichTextEditor />
           </Form.Item>
         </Col>
@@ -112,7 +112,7 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
       <Form.Item>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="primary" htmlType="submit">
-            {initialValues ? "Update" : "Create"}
+            {initialValues ? "Cập nhật" : "Tạo mới"}
           </Button>
         </Space>
       </Form.Item>

@@ -50,7 +50,7 @@ function ColorPicker({ editor }) {
 
   return (
     <div className="color-picker-wrapper" ref={ref}>
-      <button type="button" className="color-btn" onClick={() => setOpen(!open)} title="Text Color">
+      <button type="button" className="color-btn" onClick={() => setOpen(!open)} title="Màu chữ">
         <FaPalette style={{ color: currentColor }} />
         <span className="color-underline" style={{ background: currentColor }} />
       </button>
@@ -71,7 +71,7 @@ function ColorPicker({ editor }) {
             ))}
           </div>
           <div className="color-custom">
-            <span style={{ fontSize: 11, color: "#888" }}>Custom</span>
+            <span style={{ fontSize: 11, color: "#888" }}>Tùy chỉnh</span>
             <input
               type="color"
               value={currentColor}
@@ -119,29 +119,29 @@ function MenuBar({ editor }) {
 
   return (
     <div className="tiptap-toolbar">
-      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "is-active" : ""} title="Bold">
+      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "is-active" : ""} title="In đậm">
         <FaBold />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "is-active" : ""} title="Italic">
+      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "is-active" : ""} title="In nghiêng">
         <FaItalic />
       </button>
       <span className="divider" />
 
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive("heading", { level: 1 }) ? "is-active" : ""} title="Heading 1">
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={editor.isActive("heading", { level: 1 }) ? "is-active" : ""} title="Tiêu đề 1">
         <FaHeading />1
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive("heading", { level: 2 }) ? "is-active" : ""} title="Heading 2">
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive("heading", { level: 2 }) ? "is-active" : ""} title="Tiêu đề 2">
         <FaHeading />2
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive("heading", { level: 3 }) ? "is-active" : ""} title="Heading 3">
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive("heading", { level: 3 }) ? "is-active" : ""} title="Tiêu đề 3">
         <FaHeading />3
       </button>
       <span className="divider" />
 
-      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? "is-active" : ""} title="Bullet List">
+      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? "is-active" : ""} title="Danh sách không thứ tự">
         <FaListUl />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? "is-active" : ""} title="Ordered List">
+      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? "is-active" : ""} title="Danh sách có thứ tự">
         <FaListOl />
       </button>
       <span className="divider" />
@@ -149,43 +149,43 @@ function MenuBar({ editor }) {
       <ColorPicker editor={editor} />
       <span className="divider" />
 
-      <button type="button" onClick={addTable} title="Insert Table">
+      <button type="button" onClick={addTable} title="Chèn bảng">
         <FaTable />
       </button>
       {editor.isActive("table") && (
         <>
           <span className="divider" />
-          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} title="Add Row">
+          <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()} title="Thêm hàng">
             <FaPlus /> R
           </button>
-          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add Column">
+          <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()} title="Thêm cột">
             <FaPlus /> C
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} title="Delete Row">
+          <button type="button" onClick={() => editor.chain().focus().deleteRow().run()} title="Xóa hàng">
             <FaMinus /> R
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete Column">
+          <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()} title="Xóa cột">
             <FaMinus /> C
           </button>
-          <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} title="Delete Table">
+          <button type="button" onClick={() => editor.chain().focus().deleteTable().run()} title="Xóa bảng">
             <FaTrash />
           </button>
         </>
       )}
       <span className="divider" />
 
-      <button type="button" onClick={addImage} title="Insert Image">
+      <button type="button" onClick={addImage} title="Chèn hình ảnh">
         <FaImage />
       </button>
-      <button type="button" onClick={addVideo} title="Insert Video">
+      <button type="button" onClick={addVideo} title="Chèn video">
         <FaVideo />
       </button>
       <span className="divider" />
 
-      <button type="button" onClick={() => editor.chain().focus().undo().run()} title="Undo">
+      <button type="button" onClick={() => editor.chain().focus().undo().run()} title="Hoàn tác">
         <FaArrowRotateLeft />
       </button>
-      <button type="button" onClick={() => editor.chain().focus().redo().run()} title="Redo">
+      <button type="button" onClick={() => editor.chain().focus().redo().run()} title="Làm lại">
         <FaArrowRotateRight />
       </button>
     </div>
@@ -205,7 +205,7 @@ export default function RichTextEditor({ value, onChange }) {
       TableCell,
       TableHeader,
       Image,
-      Placeholder.configure({ placeholder: "Enter description..." }),
+      Placeholder.configure({ placeholder: "Nhập mô tả..." }),
       Video,
     ],
     content: value || "",

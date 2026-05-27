@@ -135,6 +135,6 @@ exports.getNhanVienChuaCoTK = async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error("🔥 ERROR:", err);
-    res.status(500).json({ message: "Error" });
+    res.status(500).json({ message: "Lỗi" });
   }
 };

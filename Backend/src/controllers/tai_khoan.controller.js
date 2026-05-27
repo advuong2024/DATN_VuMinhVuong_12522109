@@ -81,7 +81,7 @@ exports.updateStatus = async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("🔥 ERROR:", err);
-    res.status(500).json({ message: "Update failed" });
+    res.status(500).json({ message: "Cập nhật thất bại" });
   }
 };
 
@@ -96,7 +96,7 @@ exports.updateRole = async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("🔥 ERROR:", err);
-    res.status(500).json({ message: "Update failed" });
+    res.status(500).json({ message: "Cập nhật thất bại" });
   }
 };
 

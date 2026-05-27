@@ -21,70 +21,70 @@ const { Sider } = Layout;
 const menuItems = [
   {
     key: "/admin",
-    label: "Dashboard",
+    label: "Tổng quan",
     icon: <FiHome size={16} />,
     roles: ["ADMIN", "BAC_SI", "LE_TAN", "THU_NGAN"],
   },
 
   {
     key: "/admin/account",
-    label: "Accounts",
+    label: "Tài khoản",
     icon: <RiAccountCircleLine size={16} />,
     roles: ["ADMIN"],
   },
 
   {
     key: "/admin/booking",
-    label: "Booking",
+    label: "Đặt lịch",
     icon: <FiCalendar size={16} />,
     roles: ["ADMIN", "LE_TAN"],
   },
 
   {
     key: "/admin/encounter",
-    label: "Encounter",
+    label: "Phiên khám",
     icon: <BsClipboardCheck size={16} />,
     roles: ["ADMIN", "BAC_SI"],
   },
 
   {
     key: "/admin/customer",
-    label: "Patients",
+    label: "Bệnh nhân",
     icon: <FiUser size={16} />,
     roles: ["ADMIN", "BAC_SI", "LE_TAN"],
   },
 
   {
     key: "/admin/doctor",
-    label: "Doctors",
+    label: "Bác sĩ",
     icon: <FaUserDoctor size={16} />,
     roles: ["ADMIN"],
   },
 
   {
     key: "/admin/service",
-    label: "Services",
+    label: "Dịch vụ",
     icon: <RiServiceLine size={16} />,
     roles: ["ADMIN"],
   },
 
   {
     key: "/admin/medicine",
-    label: "Medicines",
+    label: "Thuốc",
     icon: <GiMedicines size={16} />,
     roles: ["ADMIN", "BAC_SI"],
   },
 
   {
     key: "/admin/category",
-    label: "Category",
+    label: "Danh mục",
     icon: <MdOutlineCategory size={16} />,
     roles: ["ADMIN"],
   },
 
   {
     key: "/admin/bill",
-    label: "Bills",
+    label: "Hóa đơn",
     icon: <PiInvoice size={16} />,
     roles: ["ADMIN", "LE_TAN", "THU_NGAN"],
   },

@@ -55,12 +55,12 @@ export default function AccountForm({ initialValues, onSubmit }) {
       onFinish={handleFinish}
     >
       <Form.Item
-        label="Full Name"
+        label="Họ và tên"
         name="employeeId"
-        rules={[{ required: true, message: "Please select an employee" }]}
+        rules={[{ required: true, message: "Vui lòng chọn nhân viên" }]}
       >
         <Select
-          placeholder="Select Employee"
+          placeholder="Chọn nhân viên"
           options={employeeOptions}
           showSearch
           optionFilterProp="label"
@@ -69,37 +69,37 @@ export default function AccountForm({ initialValues, onSubmit }) {
       </Form.Item>
 
       <Form.Item
-        label="Username"
+        label="Tên đăng nhập"
         name="username"
         rules={[
-          { required: true, message: "Please enter a username" },
-          { min: 4, message: "At least 4 characters" },
+          { required: true, message: "Vui lòng nhập tên đăng nhập" },
+          { min: 4, message: "Ít nhất 4 ký tự" },
         ]}
       >
-        <Input placeholder="Enter username" />
+        <Input placeholder="Nhập tên đăng nhập" />
       </Form.Item>
 
       <Form.Item
-        label="Password"
+        label="Mật khẩu"
         name="password"
         rules={[
           {
             required: !initialValues,
-            message: "Please enter a password",
+            message: "Vui lòng nhập mật khẩu",
           },
-          { min: 6, message: "At least 6 characters" },
+          { min: 6, message: "Ít nhất 6 ký tự" },
         ]}
       >
-        <Input.Password placeholder="Enter password" />
+        <Input.Password placeholder="Nhập mật khẩu" />
       </Form.Item>
 
       <Form.Item
-        label="Role"
+        label="Vai trò"
         name="role"
-        rules={[{ required: true, message: "Please select a role" }]}
+        rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
       >
         <Select
-          placeholder="Select Role"
+          placeholder="Chọn vai trò"
           options={ROLE_OPTIONS}
         />
       </Form.Item>
@@ -107,7 +107,7 @@ export default function AccountForm({ initialValues, onSubmit }) {
       <Form.Item>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button htmlType="submit" type="primary">
-            {initialValues ? "Update" : "Create"}
+            {initialValues ? "Cập nhật" : "Tạo mới"}
           </Button>
         </Space>
       </Form.Item>

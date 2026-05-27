@@ -5,6 +5,6 @@ export const GENDER_OPTIONS = [
 ];
 
 export const PATIENT_OPTIONS = [
-  { label: "Cash", value: "TIEN_MAT" },
-  { label: "Bank transfer", value: "CHUYEN_KHOAN" },
+  { label: "Tiền mặt", value: "TIEN_MAT" },
+  { label: "Chuyển khoản", value: "CHUYEN_KHOAN" },
 ];

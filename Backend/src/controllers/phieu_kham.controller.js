@@ -72,8 +72,8 @@ exports.insert = async (req, res) => {
       taoThongBao(
         id_bac_si,
         "ENCOUNTER",
-        "New encounter",
-        "You have a new encounter to process",
+        "Phiếu khám mới",
+        "Bạn có phiếu khám mới cần xử lý",
         "/admin/encounter"
       );
     }
@@ -87,7 +87,7 @@ exports.insert = async (req, res) => {
       taoThongBaoNhieuNguoi(
         admins.map((u) => u.id_nhan_vien),
         "ENCOUNTER",
-        "New encounter created",
+        "Phiếu khám mới đã được tạo",
         null,
         "/admin/encounter"
       );
@@ -181,7 +181,7 @@ exports.startEncounter = async (req, res) => {
       taoThongBaoNhieuNguoi(
         admins.map((u) => u.id_nhan_vien),
         "ENCOUNTER",
-        "Encounter is being examined",
+        "Phiếu khám đang được khám",
         null,
         "/admin/encounter"
       );

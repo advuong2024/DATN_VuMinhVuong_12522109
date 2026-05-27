@@ -109,10 +109,10 @@ export default function PatientManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Delete patient?",
-      content: "Are you sure?",
-      okText: "Delete",
-      cancelText: "Cancel",
+      title: "Xóa bệnh nhân?",
+      content: "Bạn có chắc chắn?",
+      okText: "Xóa",
+      cancelText: "Hủy",
       onOk: async () => {
         await deletePatient(record.key);
         fetchData();
@@ -133,25 +133,25 @@ export default function PatientManagement() {
     try {
       if (editingRecord) {
         await updatePatient(editingRecord.key, values);
-        toast.success("Updated!");
+        toast.success("Cập nhật thành công!");
       } else {
         await createPatient(values);
-        toast.success("Created!");
+        toast.success("Tạo mới thành công!");
       }
 
       setOpen(false);
       fetchData();
     } catch (err) {
       console.error(err);
-      toast.error("Error!");
+      toast.error("Lỗi!");
     }
   };
 
   const columns = [
-    { title: "Full Name", dataIndex: "name", width: 190 },
+    { title: "Họ và tên", dataIndex: "name", width: 190 },
 
     {
-      title: "Date of Birth",
+      title: "Ngày sinh",
       dataIndex: "dob",
       align: "center",
       width: 150,
@@ -159,14 +159,14 @@ export default function PatientManagement() {
     },
 
     {
-      title: "Gender",
+      title: "Giới tính",
       dataIndex: "gender",
       align: "center",
       width: 100,
       render: (g) => (g === "NAM" ? "Nam" : "Nữ"),
     },
 
-    { title: "Phone", dataIndex: "phone", width: 120 },
+    { title: "SĐT", dataIndex: "phone", width: 120 },
 
     {
       title: "CCCD",
@@ -181,13 +181,13 @@ export default function PatientManagement() {
     { title: "Email", dataIndex: "email", width: 170, ellipsis: true, },
 
     {
-      title: "Address",
+      title: "Địa chỉ",
       dataIndex: "address",
       ellipsis: true,
       width: 170,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 120,
       render: (_, record) => (
@@ -235,12 +235,12 @@ export default function PatientManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-      <h3>Patient Management</h3>
+      <h3>Quản lý bệnh nhân</h3>
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={5}>
           <Input
-            placeholder="Search by name / phone"
+            placeholder="Tìm theo tên / SĐT"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -254,7 +254,7 @@ export default function PatientManagement() {
                 style={{ marginLeft: 10, backgroundColor: "#af050e" }}
                 onClick={handleAdd}
               >
-                ADD
+                THÊM
               </Button>
             )
           }
@@ -270,7 +270,7 @@ export default function PatientManagement() {
         footer={null}
         title={
           <div style={{ textAlign: "center" }}>
-            {editingRecord ? "UPDATE" : "ADD"} PATIENT
+            {editingRecord ? "CẬP NHẬT" : "THÊM"} BỆNH NHÂN
           </div>
         }
         >

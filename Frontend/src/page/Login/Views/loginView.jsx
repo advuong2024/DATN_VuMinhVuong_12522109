@@ -28,12 +28,12 @@ const LoginForm = () => {
       saveAuth({ accessToken, refreshToken, user });
       setUser(user);
 
-      toast.success("Login success");
+      toast.success("Đăng nhập thành công");
 
       navigate("/admin");
     } catch (err) {
       console.log("ERROR:", err.response?.data);
-      toast.error("Login failed");
+      toast.error("Đăng nhập thất bại");
     } finally {
       setLoading(false);
     }
@@ -80,21 +80,21 @@ const LoginForm = () => {
             alt="logo"
           />
           <div style={{ fontSize: 22, fontWeight: 700, color: "#034ea5", marginTop: 8, letterSpacing: 1 }}>
-            POLYCLINIC
+            PHÒNG KHÁM ĐA KHOA
           </div>
         </div>
 
         <Title level={3} style={{ textAlign: "center", marginBottom: 4, color: "#1f1f1f" }}>
-          Welcome back
+          Đăng nhập
         </Title>
 
         <Text style={{ display: "block", textAlign: "center", color: "#8c8c8c", marginBottom: 32, fontSize: 14 }}>
-          Clinic Management System
+          Hệ thống quản lý phòng khám
         </Text>
 
         <Input
           size="large"
-          placeholder="Username"
+          placeholder="Tên đăng nhập"
           prefix={<UserOutlined style={{ color: "#1677ff" }} />}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -104,7 +104,7 @@ const LoginForm = () => {
 
         <Input.Password
           size="large"
-          placeholder="Password"
+          placeholder="Mật khẩu"
           prefix={<LockOutlined style={{ color: "#1677ff" }} />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -113,7 +113,7 @@ const LoginForm = () => {
         />
 
         <div style={{ marginTop: 16 }}>
-          <Checkbox style={{ color: "#595959" }}>Remember me</Checkbox>
+          <Checkbox style={{ color: "#595959" }}>Ghi nhớ đăng nhập</Checkbox>
         </div>
 
         <Button
@@ -130,11 +130,11 @@ const LoginForm = () => {
             boxShadow: "0 4px 16px rgba(22, 119, 255, 0.3)",
           }}
         >
-          Login
+          Đăng nhập
         </Button>
 
         <Text style={{ display: "block", textAlign: "center", color: "#bfbfbf", fontSize: 12, marginTop: 24 }}>
-          POLYCLINIC © 2026
+          PHÒNG KHÁM ĐA KHOA © 2026
         </Text>
       </div>
     </div>

@@ -131,23 +131,23 @@ export default function BookingManagement() {
   };
 
   const columns = [
-    { title: "Customer Name", dataIndex: "name", align: "left", width: 180 },
-    { title: "Phone Number", dataIndex: "phone", align: "left", width: 170 },
-    { title: "Specialty", dataIndex: "specialty", align: "left", width: 180, ellipsis: true},
-    { title: "Date",  dataIndex: "date", align: "center", 
+    { title: "Tên khách hàng", dataIndex: "name", align: "left", width: 180 },
+    { title: "Số điện thoại", dataIndex: "phone", align: "left", width: 170 },
+    { title: "Chuyên khoa", dataIndex: "specialty", align: "left", width: 180, ellipsis: true},
+    { title: "Ngày",  dataIndex: "date", align: "center", 
       render: (date) => date ? dayjs(date).format("DD/MM/YYYY") : "-", width: 100 
     },
-    { title: "Time", dataIndex: "time", align: "center", width: 90 },
-    { title: "Doctor name", dataIndex: "doctor", align: "left", width: 180 },
+    { title: "Giờ", dataIndex: "time", align: "center", width: 90 },
+    { title: "Tên bác sĩ", dataIndex: "doctor", align: "left", width: 180 },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       align: "center",
       width: 150,
       render: (status, record) => renderStatusSelect(status, record, handleChangeStatus),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       render: (_, record) => (
         <Space>
@@ -174,9 +174,9 @@ export default function BookingManagement() {
       setData(newData);
 
       await updateStatus(record.key, value);
-      toast.success("Updated!");
+      toast.success("Cập nhật thành công!");
     } catch (err) {
-      toast.error("Update failed");
+      toast.error("Cập nhật thất bại");
       fetchData(filters);
     } finally {
       setUpdating(false);
@@ -197,12 +197,12 @@ export default function BookingManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-        <h3 style={{ marginBottom: 16 }}>Booking Management</h3>
+        <h3 style={{ marginBottom: 16 }}>Quản lý đặt lịch</h3>
 
         <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
           <Col span={5}>
             <Input
-              placeholder="Search by name / phone"
+              placeholder="Tìm theo tên / SĐT"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -213,7 +213,7 @@ export default function BookingManagement() {
 
           <Col span={3}>
             <Select
-              placeholder="Select Status"
+              placeholder="Chọn trạng thái"
               allowClear
               value={status}
               onChange={(value) => {
@@ -226,7 +226,7 @@ export default function BookingManagement() {
 
           <Col span={3}>
             <DatePicker
-              placeholder="Start Date"
+              placeholder="Từ ngày"
               style={{ width: "100%" }}
               format="DD/MM/YYYY"
               value={startDate}
@@ -239,7 +239,7 @@ export default function BookingManagement() {
 
           <Col span={3}>
             <DatePicker
-              placeholder="End Date"
+              placeholder="Đến ngày"
               style={{ width: "100%" }}
               format="DD/MM/YYYY"
               value={endDate}
@@ -275,7 +275,7 @@ export default function BookingManagement() {
                 fetchData(reset);
               }}
             >
-              CLEAR
+              XÓA
             </Button>
           </Col>
 
@@ -289,7 +289,7 @@ export default function BookingManagement() {
                 }}
                 onClick={() => setOpenCreate(true)}
                 >
-                ADD
+                THÊM
             </Button>
           </Col>
         </Row>
@@ -302,7 +302,7 @@ export default function BookingManagement() {
           onCancel={() => setOpenCreate(false)}
           footer={null}
           style={{ textAlign: "center" }}
-          title="ADD BOOKING"
+          title="THÊM LỊCH HẸN"
           width={800}
         >
           <BookingForm
@@ -332,7 +332,7 @@ export default function BookingManagement() {
           open={openEncounter}
           onCancel={() => setOpenEncounter(false)}
           footer={null}
-          title="Create Medical Record"
+          title="Tạo phiếu khám"
           width={800}
           centered
         >
@@ -349,35 +349,35 @@ export default function BookingManagement() {
           open={openView}
           onCancel={() => setOpenView(false)}
           footer={null}
-          title={<div style={{ textAlign: "center" }}>BOOKING DETAILS</div>}
+          title={<div style={{ textAlign: "center" }}>CHI TIẾT LỊCH HẸN</div>}
         >
           {viewRecord && (
             <Descriptions column={1} bordered>
-              <Descriptions.Item label="Customer Name">
+              <Descriptions.Item label="Tên khách hàng">
                 {viewRecord.name}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Phone Number">
+              <Descriptions.Item label="Số điện thoại">
                 {viewRecord.phone}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Specialty">
+              <Descriptions.Item label="Chuyên khoa">
                 {viewRecord.specialty}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Date">
+              <Descriptions.Item label="Ngày">
                 {dayjs(viewRecord.date).format("DD/MM/YYYY")}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Time">
+              <Descriptions.Item label="Giờ">
                 {viewRecord.time}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Doctor Name">
+              <Descriptions.Item label="Tên bác sĩ">
                 {viewRecord.doctor}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Reason">
+              <Descriptions.Item label="Lý do">
                 {viewRecord.reason || "-"}
               </Descriptions.Item>
             </Descriptions>

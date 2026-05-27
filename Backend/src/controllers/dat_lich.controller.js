@@ -95,8 +95,8 @@ exports.insert = async (req, res) => {
       taoThongBaoNhieuNguoi(
         dsNhan,
         "BOOKING",
-        "New appointment",
-        "Patient has booked an appointment",
+        "Lịch hẹn mới",
+        "Bệnh nhân đã đặt lịch hẹn",
         "/admin/booking"
       );
     }
@@ -155,8 +155,8 @@ exports.createBooking = async (req, res) => {
       taoThongBaoNhieuNguoi(
         dsNhan,
         "BOOKING",
-        "New appointment",
-        `${patient.name} has booked an appointment`,
+        "Lịch hẹn mới",
+        `${patient.name} đã đặt lịch hẹn`,
         "/admin/booking"
       );
     }
@@ -202,7 +202,7 @@ exports.updateStatus = async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("🔥 ERROR:", err);
-    res.status(500).json({ message: "Update failed" });
+    res.status(500).json({ message: "Cập nhật thất bại" });
   }
 };
 
@@ -232,6 +232,6 @@ exports.canBook = async (req, res) => {
     return res.json(result);
   } catch (err) {
     console.error("🔥 ERROR:", err);
-    return res.status(500).json({ message: "Error" });
+    return res.status(500).json({ message: "Lỗi" });
   }
 };

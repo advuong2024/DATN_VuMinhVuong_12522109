@@ -77,39 +77,39 @@ export default function BookingManagement() {
   };
 
   const columns = [
-    { title: "Customer Name", dataIndex: "name", align: "left", width: 185 },
-    { title: "Phone Number", dataIndex: "phone", align: "left", width: 170 },
-    { title: "Specialty", dataIndex: "specialty", align: "left", width: 200, ellipsis: true},
-    { title: "Time", dataIndex: "time", align: "center", width: 95 },
-    { title: "Doctor name", dataIndex: "doctor", align: "left", width: 185 },
+    { title: "Tên khách hàng", dataIndex: "name", align: "left", width: 185 },
+    { title: "Số điện thoại", dataIndex: "phone", align: "left", width: 170 },
+    { title: "Chuyên khoa", dataIndex: "specialty", align: "left", width: 200, ellipsis: true},
+    { title: "Giờ", dataIndex: "time", align: "center", width: 95 },
+    { title: "Tên bác sĩ", dataIndex: "doctor", align: "left", width: 185 },
     {
-      title: "Status",
+      title: "Trạng thái",
       align: "center",
       width: 150,
       render: (_, record) => {
         const pk = record.phieu_kham;
 
         if (pk.trang_thai === "NHAP") {
-          return <Tag color="gold">Paused</Tag>
+          return <Tag color="gold">Tạm dừng</Tag>
         }
 
         if (pk.trang_thai === "CHO_KHAM") {
-          return <Tag color="orange">Pending</Tag>;
+          return <Tag color="orange">Chờ khám</Tag>;
         }
 
         if (pk.trang_thai === "DANG_KHAM") {
-          return <Tag color="blue">In Progress</Tag>;
+          return <Tag color="blue">Đang khám</Tag>;
         }
 
         if (pk.trang_thai === "HOAN_THANH") {
-          return <Tag color="green">Done</Tag>;
+          return <Tag color="green">Hoàn thành</Tag>;
         }
 
         return null;
       },
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 150,
       render: (_, record) => {
@@ -131,8 +131,8 @@ export default function BookingManagement() {
           >
             {
               isPaused
-                ? "Continue"
-                : "Examination"
+                ? "Tiếp tục"
+                : "Khám"
             }
           </Button>
         );
@@ -177,12 +177,12 @@ export default function BookingManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-        <h3 style={{ marginBottom: 16 }}>Encounter Management</h3>
+        <h3 style={{ marginBottom: 16 }}>Quản lý phiên khám</h3>
 
         <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
           <Col span={6}>
             <Input
-              placeholder="Search by name / phone"
+              placeholder="Tìm theo tên / SĐT"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />

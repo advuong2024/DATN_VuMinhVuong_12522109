@@ -49,45 +49,45 @@ export default function MedicineForm({ form, initialValues, onSubmit }) {
         
         <Col span={12}>
           <Form.Item
-            label="Medicine Name"
+            label="Tên thuốc"
             name="name"
-            rules={[{ required: true, message: "Please enter the medicine name" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên thuốc" }]}
           >
-            <Input placeholder="Enter medicine name" />
+            <Input placeholder="Nhập tên thuốc" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Price"
+            label="Giá"
             name="price"
             rules={[
-              { required: true, message: "Please enter the price" },
-              { pattern: /^[0-9]+$/, message: "Must be a number" },
+              { required: true, message: "Vui lòng nhập giá" },
+              { pattern: /^[0-9]+$/, message: "Phải là số" },
             ]}
           >
-            <Input placeholder="Enter price" />
+            <Input placeholder="Nhập giá" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
           <Form.Item
-            label="Quantity"
+            label="Số lượng"
             name="quantity"
-            rules={[{ required: true, message: "Please enter the quantity" }]}
+            rules={[{ required: true, message: "Vui lòng nhập số lượng" }]}
           >
-            <Input placeholder="Enter quantity" />
+            <Input placeholder="Nhập số lượng" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
             <Form.Item
-                label="Unit"
+                label="ĐVT"
                 name="unit"
-                rules={[{ required: true, message: "Please select unit" }]}
+                rules={[{ required: true, message: "Vui lòng chọn ĐVT" }]}
             >
                 <Select
-                placeholder="Select unit"
+                placeholder="Chọn ĐVT"
                 options={UNIT_OPTIONS}
                 showSearch
                 optionFilterProp="label"
@@ -97,9 +97,9 @@ export default function MedicineForm({ form, initialValues, onSubmit }) {
 
         <Col span={12}>
           <Form.Item
-            label="Expiry Date"
+            label="Hạn sử dụng"
             name="expiryDate"
-            rules={[{ required: true, message: "Please select the expiry date" }]}
+            rules={[{ required: true, message: "Vui lòng chọn hạn sử dụng" }]}
           >
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
@@ -107,12 +107,12 @@ export default function MedicineForm({ form, initialValues, onSubmit }) {
 
         <Col span={12}>
           <Form.Item
-            label="Category"
+            label="Danh mục"
             name="category"
-            rules={[{ required: true, message: "Please select a category" }]}
+            rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
           >
             <Select
-              placeholder="Select a category"
+              placeholder="Chọn danh mục"
               options={categories}
             />
           </Form.Item>
@@ -123,7 +123,7 @@ export default function MedicineForm({ form, initialValues, onSubmit }) {
       <Form.Item>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="primary" htmlType="submit">
-            {initialValues ? "Update" : "Create"}
+            {initialValues ? "Cập nhật" : "Tạo mới"}
           </Button>
         </Space>
       </Form.Item>

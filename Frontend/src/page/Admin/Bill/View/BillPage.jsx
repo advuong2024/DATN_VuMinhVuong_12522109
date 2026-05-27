@@ -48,12 +48,12 @@ const BillingPage = () => {
 
       const mapped = res.data.map((item) => ({
         key: item.id_thanh_toan,
-        invoiceId: "IN" + item.id_thanh_toan,
+        invoiceId: "HD" + item.id_thanh_toan,
         name: item.patient_name,
         phone: item.patient_phone,
         date: dayjs(item.ngay_thanh_toan || item.ngay_kham).format("DD/MM/YYYY"),
         doctor: item.doctor_name,
-        total: Number(item.tong_tien).toLocaleString() + " VND",
+        total: Number(item.tong_tien).toLocaleString() + " VNĐ",
         loai_item: item.loai_item,
         status:
           item.trang_thai === "CHUA_THANH_TOAN"
@@ -98,7 +98,7 @@ const BillingPage = () => {
 
             total:
               item.totalAmount.toLocaleString() +
-              " VND",
+              " VNĐ",
           })
         );
 
@@ -130,53 +130,53 @@ const BillingPage = () => {
 
   const columns = [
     {
-      title: "Customer Name",
+      title: "Tên khách hàng",
       dataIndex: "name",
       width: 170,
     },
     {
-      title: "Date",
+      title: "Ngày",
       dataIndex: "date",
       width: 120,
       align: "center",
     },
     {
-      title: "Doctor Name",
+      title: "Tên bác sĩ",
       dataIndex: "doctor",
       width: 170,
     },
     {
-      title: "Total Amount",
+      title: "Tổng tiền",
       dataIndex: "total",
       width: 150,
     },
     {
-      title: "Payment Method",
+      title: "Phương thức",
       dataIndex: "loai_item",
       width: 180,
       render: (value) => {
-         if (value === "TONG_HOP") return "Total Invoice";
-        if (value === "PHI_KHAM") return "Examination Fee";
-        if (value === "THUOC") return "Medication";
-        if (value === "DICH_VU") return "Service";
+         if (value === "TONG_HOP") return "Tổng hóa đơn";
+        if (value === "PHI_KHAM") return "Phí khám";
+        if (value === "THUOC") return "Thuốc";
+        if (value === "DICH_VU") return "Dịch vụ";
         return value || "-";
       },
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       width: 120,
       align: "center",
       render: (_, record) => (
         <Tag color={record.status === "pending" ? "orange" : "green"}>
           {record.status === "pending"
-            ? "Pending"
-            : "Paid"}
+            ? "Chờ thanh toán"
+            : "Đã thanh toán"}
         </Tag>
       ),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       width: 130,
       align: "center",
       render: (_, record) => (
@@ -186,7 +186,7 @@ const BillingPage = () => {
               type="primary"
               onClick={() => openModal(record, "view")}
             >
-              View
+              Xem
             </Button>
           )}
 
@@ -201,7 +201,7 @@ const BillingPage = () => {
                 "process"
               )}
             >
-              Process
+              Xử lý
             </Button>
           )}
         </Space>
@@ -211,20 +211,20 @@ const BillingPage = () => {
 
   return (
     <div style={{ padding: 16 }}>
-      <h3>Bill Management</h3>
+      <h3>Quản lý hóa đơn</h3>
 
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
         items={[
-          { key: "pending", label: "Waiting Payment" },
-          { key: "paid", label: "Paid Invoices" },
+          { key: "pending", label: "Chờ thanh toán" },
+          { key: "paid", label: "Đã thanh toán" },
         ]}
       />
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
         <Input
-          placeholder="Search invoice / customer"
+          placeholder="Tìm hóa đơn / khách hàng"
           style={{ width: 300 }}
           onChange={(e) => setKeyword(e.target.value)}
         />
@@ -235,7 +235,7 @@ const BillingPage = () => {
         columns={
           activeTab === "paid"
             ? columns.filter(
-                (c) => c.title !== "Actions"
+                (c) => c.title !== "Thao tác"
               )
             : columns
         }
@@ -265,42 +265,42 @@ const BillingPage = () => {
                     </div> */}
 
                     <div style={{ width: 160 }}>
-                      <div style={{ fontSize: 12, color: "#aaa" }}>Customer</div>
+                      <div style={{ fontSize: 12, color: "#aaa" }}>Khách hàng</div>
                       <div style={{ fontWeight: 500, fontSize: 13 }}>{item.name}</div>
                     </div>
 
                     <div style={{ width: 110 }}>
-                      <div style={{ fontSize: 12, color: "#aaa" }}>Date</div>
+                      <div style={{ fontSize: 12, color: "#aaa" }}>Ngày</div>
                       <div style={{ fontSize: 13 }}>{item.date}</div>
                     </div>
 
                     <div style={{ width: 160 }}>
-                      <div style={{ fontSize: 12, color: "#aaa" }}>Doctor</div>
+                      <div style={{ fontSize: 12, color: "#aaa" }}>Bác sĩ</div>
                       <div style={{ fontSize: 13 }}>{item.doctor}</div>
                     </div>
 
                     <div style={{ width: 140 }}>
-                      <div style={{ fontSize: 12, color: "#aaa" }}>Total</div>
+                      <div style={{ fontSize: 12, color: "#aaa" }}>Tổng</div>
                       <div style={{ fontWeight: 600, fontSize: 13, color: "#1677ff" }}>
                         {item.total}
                       </div>
                     </div>
 
                     <div style={{ width: 160 }}>
-                      <div style={{ fontSize: 12, color: "#aaa" }}>Method</div>
+                      <div style={{ fontSize: 12, color: "#aaa" }}>Phương thức</div>
                       <Tag color="blue" style={{ marginTop: 2 }}>
                         {item.loai_item === "PHI_KHAM"
-                          ? "Examination Fee"
+                          ? "Phí khám"
                           : item.loai_item === "THUOC"
-                          ? "Medication"
+                          ? "Thuốc"
                           : item.loai_item === "DICH_VU"
-                          ? "Service"
+                          ? "Dịch vụ"
                           : item.loai_item || "-"}
                       </Tag>
                     </div>
 
                     <Tag color="green" style={{ fontWeight: 500 }}>
-                      Paid
+                      Đã thanh toán
                     </Tag>
 
                     <Button
@@ -311,7 +311,7 @@ const BillingPage = () => {
                         openModal(item, "view");
                       }}
                     >
-                      View
+                      Xem
                     </Button>
                   </div>
                 ))}

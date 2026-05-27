@@ -28,8 +28,8 @@ import { toast } from "react-toastify";
 import { ROLE_OPTIONS } from "../Constants/account_option"
 
 const STATUS_OPTIONS = [
-  { label: "Active", value: "HOAT_DONG", color: "#52c41a" },
-  { label: "Locked", value: "KHOA", color: "#ff4d4f" },
+  { label: "Hoạt động", value: "HOAT_DONG", color: "#52c41a" },
+  { label: "Khóa", value: "KHOA", color: "#ff4d4f" },
 ];
 
 export default function AccountManagement() {
@@ -92,7 +92,7 @@ export default function AccountManagement() {
       setData(mapped);
       setFilteredData(mapped);
     } catch (err) {
-      toast.error("Load failed");
+      toast.error("Tải dữ liệu thất bại");
     } finally {
       setLoading(false);
     }
@@ -100,14 +100,14 @@ export default function AccountManagement() {
 
   const handleResetPassword = (record) => {
     Modal.confirm({
-      title: "Confirm password reset?",
-      content: "Password will be reset to 123456",
+      title: "Xác nhận đặt lại mật khẩu?",
+      content: "Mật khẩu sẽ được đặt lại thành 123456",
       onOk: async () => {
         try {
           await resetPassword(record.id, "123456");
-          toast.success("Reset done");
+          toast.success("Đặt lại thành công");
         } catch {
-          toast.error("Error");
+          toast.error("Lỗi");
         }
       },
     });
@@ -119,24 +119,24 @@ export default function AccountManagement() {
 
   const columns = [
     {
-      title: "Full Name",
+      title: "Họ và tên",
       dataIndex: "name",
       width: 230,
     },
     {
-      title: "Account Name",
+      title: "Tên đăng nhập",
       dataIndex: "username",
       width: 180,
     },
     {
-      title: "Password",
+      title: "Mật khẩu",
       dataIndex: "password",
       align: "center",
       width: 150,
       render: () => "••••••••",
     },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       align: "center",
       width: 150,
@@ -160,7 +160,7 @@ export default function AccountManagement() {
       ),
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       width: 150,
       align: "center",
@@ -186,24 +186,24 @@ export default function AccountManagement() {
       ),
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 120,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Show detail">
+          <Tooltip title="Xem chi tiết">
             <EyeOutlined
               style={{ fontSize: 18, color: "#1677ff", cursor: "pointer", marginRight: 8 }}
               onClick={() => handleView(record)}
             />
           </Tooltip>
-          <Tooltip title="Reset password">
+          <Tooltip title="Đặt lại mật khẩu">
             <Button
               onClick={() => handleResetPassword(record)}
               type="primary"
               danger
             >
-              Reset
+              Đặt lại
             </Button>
           </Tooltip>
         </Space>
@@ -234,20 +234,20 @@ export default function AccountManagement() {
   const handleChangeStatus = async (value, record) => {
     try {
       await updateAccountStatus(record.id, value);
-      toast.success("Updated!");
+      toast.success("Cập nhật thành công!");
       fetchAccounts();
     } catch (err) {
-      toast.error("Update failed");
+      toast.error("Cập nhật thất bại");
     }
   };
 
   const handleChangeRole = async (value, record) => {
     try {
       await updateAccountRole(record.id, value);
-      toast.success("Updated!");
+      toast.success("Cập nhật thành công!");
       fetchAccounts();
     } catch (err) {
-      toast.error("Update failed");
+      toast.error("Cập nhật thất bại");
     }
   };
 
@@ -255,34 +255,34 @@ export default function AccountManagement() {
     try {
       if (editingRecord) {
         await updateAccount(editingRecord.id, values);
-        toast.success("Updated!");
+        toast.success("Cập nhật thành công!");
       } else {
         await createAccount(values);
-        toast.success("Created!");
+        toast.success("Tạo mới thành công!");
       }
 
       fetchAccounts();
       setOpen(false);
     } catch (err) {
-      toast.error("Error!");
+      toast.error("Lỗi!");
     }
   };
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-      <h3 style={{ marginBottom: 16 }}>Account Management</h3>
+      <h3 style={{ marginBottom: 16 }}>Quản lý tài khoản</h3>
 
       <Row gutter={16} justify="end" style={{ marginBottom: 16 }}>
         <Col span={5}>
           <Input
-            placeholder="Search by name / username"
+            placeholder="Tìm theo tên / tài khoản"
             onChange={(e) => setSearchText(e.target.value)}
           />
         </Col>
 
         <Col span={3}>
           <Select
-            placeholder="Select Status"
+            placeholder="Chọn trạng thái"
             style={{ width: "100%" }}
             allowClear
             options={STATUS_OPTIONS}
@@ -296,7 +296,7 @@ export default function AccountManagement() {
             style={{ backgroundColor: "#af050e" }}
             onClick={handleAdd}
           >
-            ADD
+            THÊM
           </Button>
         </Col>
       </Row>
@@ -309,7 +309,7 @@ export default function AccountManagement() {
         footer={null}
         title={
             <div style={{ textAlign: "center", width: "100%" }}>
-              {editingRecord ? "UPDATE ACCOUNT" : "ADD ACCOUNT"}
+              {editingRecord ? "CẬP NHẬT TÀI KHOẢN" : "THÊM TÀI KHOẢN"}
             </div>
         }
       >
@@ -325,21 +325,21 @@ export default function AccountManagement() {
         footer={null}
         title={
           <div style={{ textAlign: "center", fontWeight: 600 }}>
-            Account Details
+            Chi tiết tài khoản
           </div>
         }
         >
         {viewRecord && (
             <Descriptions column={1} bordered>
-            <Descriptions.Item label="Full Name">
+            <Descriptions.Item label="Họ và tên">
                 {viewRecord.name}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Username">
+            <Descriptions.Item label="Tên đăng nhập">
                 {viewRecord.username}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Password">
+            <Descriptions.Item label="Mật khẩu">
                 <Space>
                     <span>
                     {showPassword ? viewRecord.password : "••••••••"}
@@ -359,13 +359,13 @@ export default function AccountManagement() {
                 </Space>
             </Descriptions.Item>
 
-            <Descriptions.Item label="Role">
+            <Descriptions.Item label="Vai trò">
                 {viewRecord.role}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Status">
+            <Descriptions.Item label="Trạng thái">
               <Tag color={viewRecord.status === "HOAT_DONG" ? "green" : "red"}>
-                {viewRecord.status === "HOAT_DONG" ? "Active" : "Locked"}
+                {viewRecord.status === "HOAT_DONG" ? "Hoạt động" : "Khóa"}
               </Tag>
             </Descriptions.Item>
             </Descriptions>

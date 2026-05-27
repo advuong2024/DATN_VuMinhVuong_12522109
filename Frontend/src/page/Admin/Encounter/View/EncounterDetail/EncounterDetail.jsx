@@ -46,7 +46,7 @@ export default function EncounterPage() {
       );
 
     } catch {
-      toast.error("Load data failed!");
+      toast.error("Tải dữ liệu thất bại!");
     }
   };
 
@@ -84,20 +84,20 @@ export default function EncounterPage() {
       const res = await updateEncounter(bookingData.encounterId, payload);
       const payment = res?.data?.payment;
       if (values.trang_thai === "NHAP") {
-        toast.success("Examination paused successfully!");
+        toast.success("Tạm dừng khám thành công!");
       } else {
-        toast.success("Examination completed successfully!");
+        toast.success("Hoàn thành khám thành công!");
       }
 
       if ( values.trang_thai === "HOAN_THANH" && payment) {
-        toast.info("Don't forget to process the payment!");
+        toast.info("Đừng quên xử lý thanh toán!");
       }
 
       navigate("/admin/encounter");
 
     } catch (err) {
       console.error(err);
-      toast.error("Create Error!");
+      toast.error("Lỗi tạo phiếu khám!");
     }
   };
 
@@ -108,31 +108,31 @@ export default function EncounterPage() {
           {
             title: (
               <span onClick={() => navigate("/admin/encounter")} style={{ cursor: "pointer" }}>
-                Encounter Management
+                Quản lý phiên khám
               </span>
             ),
           },
           {
-            title: "Examination",
+            title: "Khám bệnh",
           },
         ]}
       />
-      <Card title="Explore information" style={{ marginBottom: 16 }}>
+      <Card title="Thông tin khám" style={{ marginBottom: 16 }}>
         <Row gutter={[16, 8]}>
           <Col span={12}>
-            <b>Patient:</b> {bookingData?.name}
+            <b>Bệnh nhân:</b> {bookingData?.name}
           </Col>
 
           <Col span={12}>
-            <b>Doctor:</b> {bookingData?.doctor}
+            <b>Bác sĩ:</b> {bookingData?.doctor}
           </Col>
 
           <Col span={12}>
-            <b>Phone:</b> {bookingData?.phone}
+            <b>SĐT:</b> {bookingData?.phone}
           </Col>
 
           <Col span={12}>
-            <b>Specialty:</b> {bookingData?.specialty}
+            <b>Chuyên khoa:</b> {bookingData?.specialty}
           </Col>
         </Row>
       </Card>

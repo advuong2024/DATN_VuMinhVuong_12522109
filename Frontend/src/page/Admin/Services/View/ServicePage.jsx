@@ -93,10 +93,10 @@ export default function ServiceManagement() {
 
   const handleDelete = (record) => {
     Modal.confirm({
-      title: "Delete service?",
-      content: "Are you sure?",
-      okText: "Delete",
-      cancelText: "Cancel",
+      title: "Xóa dịch vụ?",
+      content: "Bạn có chắc chắn?",
+      okText: "Xóa",
+      cancelText: "Hủy",
       onOk: async () => {
         await deleteService(record.key);
         fetchServices();
@@ -108,22 +108,22 @@ export default function ServiceManagement() {
     try {
       if (editingRecord) {
         await updateService(editingRecord.key, values);
-        toast.success("Update!");
+        toast.success("Cập nhật thành công!");
       } else {
         await createService(values);
-        toast.success("Created!");
+        toast.success("Tạo mới thành công!");
       }
       fetchServices();
       setOpen(false);
     } catch (err) {
       console.log(err);
-      toast.error("Error!");
+      toast.error("Lỗi!");
     }
   };
 
   const columns = [
     {
-      title: "Image",
+      title: "Ảnh",
       dataIndex: "hinh_anh",
       width: 100,
       align: "center",
@@ -134,28 +134,28 @@ export default function ServiceManagement() {
           <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f0f0f0" }} />
         ),
     },
-    { title: "Service Name", dataIndex: "name", width: 230 },
+    { title: "Tên dịch vụ", dataIndex: "name", width: 230 },
     {
-      title: "Price",
+      title: "Giá",
       dataIndex: "price",
       width: 180,
-      render: (p) => (p ? `${Number(p).toLocaleString()} VND` : "0 VND"),
+      render: (p) => (p ? `${Number(p).toLocaleString()} VNĐ` : "0 VNĐ"),
     },
-    { title: "Category", dataIndex: "category", width: 180, },
-    { title: "Specialty", dataIndex: "specialty", width: 180 },
+    { title: "Danh mục", dataIndex: "category", width: 180, },
+    { title: "Chuyên khoa", dataIndex: "specialty", width: 180 },
     {
-      title: "Short Desc",
+      title: "Mô tả ngắn",
       dataIndex: "shortDescription",
       ellipsis: true,
       width: 150,
     },
     {
-      title: "Description",
+      title: "Mô tả",
       dataIndex: "description",
       ellipsis: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       align: "center",
       width: 120,
       render: (_, record) => (
@@ -175,12 +175,12 @@ export default function ServiceManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-      <h3>Service Management</h3>
+      <h3>Quản lý dịch vụ</h3>
 
       <Row justify="end" style={{ marginBottom: 16 }}>
         <Col span={6}>
           <Input
-            placeholder="Search by service, category, specialty "
+            placeholder="Tìm theo dịch vụ, danh mục, chuyên khoa"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
@@ -191,7 +191,7 @@ export default function ServiceManagement() {
             style={{ marginLeft: 10, backgroundColor: "#af050e" }}
             onClick={handleAdd}
           >
-            ADD
+            THÊM
           </Button>
         </Col>
       </Row>
@@ -206,7 +206,7 @@ export default function ServiceManagement() {
         width={700}
         title={
           <div style={{ textAlign: "center" }}>
-            {editingRecord ? "UPDATE" : "ADD"} SERVICE
+            {editingRecord ? "CẬP NHẬT" : "THÊM"} DỊCH VỤ
           </div>
         }
       >
@@ -221,7 +221,7 @@ export default function ServiceManagement() {
         open={openView}
         onCancel={() => setOpenView(false)}
         footer={null}
-        title={<div style={{ textAlign: "center" }}>SERVICE DETAILS</div>}
+        title={<div style={{ textAlign: "center" }}>CHI TIẾT DỊCH VỤ</div>}
       >
         {viewRecord && (
           <>
@@ -236,25 +236,25 @@ export default function ServiceManagement() {
               </div>
             )}
             <Descriptions column={1} bordered>
-              <Descriptions.Item label="Service Name">
+              <Descriptions.Item label="Tên dịch vụ">
                 {viewRecord.name}
               </Descriptions.Item>
-              <Descriptions.Item label="Price">
+              <Descriptions.Item label="Giá">
                 {viewRecord.price
-                  ? `${Number(viewRecord.price).toLocaleString()} VND`
+                  ? `${Number(viewRecord.price).toLocaleString()} VNĐ`
                   : "—"
                 }
               </Descriptions.Item>
-              <Descriptions.Item label="Category">
+              <Descriptions.Item label="Danh mục">
                 {viewRecord.category}
               </Descriptions.Item>
-              <Descriptions.Item label="Specialty">
+              <Descriptions.Item label="Chuyên khoa">
                 {viewRecord.specialty}
               </Descriptions.Item>
-              <Descriptions.Item label="Short Description">
+              <Descriptions.Item label="Mô tả ngắn">
                 {viewRecord.shortDescription || "—"}
               </Descriptions.Item>
-              <Descriptions.Item label="Description">
+              <Descriptions.Item label="Mô tả">
                 {viewRecord.description ? (
                   <div className="tiptap-view" dangerouslySetInnerHTML={{ __html: viewRecord.description }} />
                 ) : "—"}

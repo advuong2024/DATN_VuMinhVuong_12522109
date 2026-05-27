@@ -30,7 +30,7 @@ const thongBaoController = {
         Number(req.params.id),
         req.user.id_nhan_vien
       );
-      res.json({ message: "ok" });
+      res.json({ message: "Thành công" });
     } catch (err) {
       next(err);
     }
@@ -39,7 +39,7 @@ const thongBaoController = {
   markAllRead: async (req, res, next) => {
     try {
       await thongBaoModel.markAllAsRead(req.user.id_nhan_vien);
-      res.json({ message: "ok" });
+      res.json({ message: "Thành công" });
     } catch (err) {
       next(err);
     }

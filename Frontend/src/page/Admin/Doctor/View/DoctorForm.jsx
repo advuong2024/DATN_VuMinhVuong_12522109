@@ -61,7 +61,7 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
 
   const handleAddCert = () => {
     if (!newCertName.trim()) {
-      toast.warning("Enter certificate name");
+      toast.warning("Nhập tên chứng chỉ");
       return;
     }
 
@@ -73,8 +73,8 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
         year: newCertYear ? Number(newCertYear) : null,
       }).then((res) => {
         setCerts((prev) => [...prev, res.data]);
-        toast.success("Certificate added successfully");
-      }).catch(() => toast.error("Failed to add certificate"));
+        toast.success("Thêm chứng chỉ thành công");
+      }).catch(() => toast.error("Thêm chứng chỉ thất bại"));
     } else {
       setPendingCerts((prev) => [
         ...prev,
@@ -97,9 +97,9 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
       deleteCertificate(item.id_chung_chi)
         .then(() => {
           setCerts((prev) => prev.filter((c) => c.id_chung_chi !== item.id_chung_chi));
-          toast.success("Certificate deleted successfully");
+          toast.success("Xóa chứng chỉ thành công");
         })
-        .catch(() => toast.error("Failed to delete certificate"));
+        .catch(() => toast.error("Xóa chứng chỉ thất bại"));
     } else {
       setPendingCerts((prev) => prev.filter((c) => c._tempId !== item._tempId));
     }
@@ -115,7 +115,7 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
     try {
       if (initialValues) {
         await updateDoctor(initialValues.key, payload);
-        toast.success("Update success");
+        toast.success("Cập nhật thành công");
         onSuccess();
         form.resetFields();
       } else {
@@ -133,13 +133,13 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
             )
           );
         }
-        toast.success("Create success");
+        toast.success("Tạo mới thành công");
         onSuccess();
         form.resetFields();
       }
     } catch (err) {
       console.error(err);
-      toast.error("Action failed");
+      toast.error("Thao tác thất bại");
     }
   };
 
@@ -149,99 +149,99 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
     <Form form={form} layout="vertical" onFinish={handleFinish}>
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Doctor Name" name="name"
+          <Form.Item label="Tên bác sĩ" name="name"
             rules={[
-              { required: true, message: "Please enter doctor name" },
-              { pattern: /^[^\d]+$/, message: "Does not contain numbers" },
+              { required: true, message: "Vui lòng nhập tên bác sĩ" },
+              { pattern: /^[^\d]+$/, message: "Không được chứa số" },
             ]}
           >
-            <Input placeholder="Enter doctor name" />
+            <Input placeholder="Nhập tên bác sĩ" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Date Of Birth" name="dob"
-            rules={[{ required: true, message: "Please select date of birth" }]}
+          <Form.Item label="Ngày sinh" name="dob"
+            rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
           >
             <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" allowClear />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Gender" name="gender"
-            rules={[{ required: true, message: "Please select gender" }]}
+          <Form.Item label="Giới tính" name="gender"
+            rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
           >
-            <Select placeholder="Select gender" options={GENDER_OPTIONS} />
+            <Select placeholder="Chọn giới tính" options={GENDER_OPTIONS} />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Phone" name="phone"
+          <Form.Item label="SĐT" name="phone"
             rules={[
-              { required: true, message: "Please enter phone number" },
-              { pattern: /^[0-9]{10}$/, message: "Must be 10 digits" },
+              { required: true, message: "Vui lòng nhập SĐT" },
+              { pattern: /^[0-9]{10}$/, message: "Phải là 10 số" },
             ]}
           >
-            <Input placeholder="Enter phone number" maxLength={10} />
+            <Input placeholder="Nhập SĐT" maxLength={10} />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Position" name="position"
-            rules={[{ required: true, message: "Please select position" }]}
+          <Form.Item label="Chức vụ" name="position"
+            rules={[{ required: true, message: "Vui lòng nhập chức vụ" }]}
           >
-            <Input placeholder="Enter Position" />
+            <Input placeholder="Nhập chức vụ" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Specialty" name="specialty">
-            <Select placeholder="Select specialty" options={specialtyOptions} />
+          <Form.Item label="Chuyên khoa" name="specialty">
+            <Select placeholder="Chọn chuyên khoa" options={specialtyOptions} />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Degree" name="degree">
-            <Input placeholder="Enter degree" />
+          <Form.Item label="Bằng cấp" name="degree">
+            <Input placeholder="Nhập bằng cấp" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Experience" name="experience">
-            <Input placeholder="Enter years of experience" type="number" />
+          <Form.Item label="Kinh nghiệm" name="experience">
+            <Input placeholder="Nhập số năm kinh nghiệm" type="number" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Location" name="location">
-            <Input placeholder="Enter location" />
+          <Form.Item label="Cơ sở" name="location">
+            <Input placeholder="Nhập cơ sở" />
           </Form.Item>
         </Col>
 
         <Col span={12}>
-          <Form.Item label="Image" name="hinh_anh">
+          <Form.Item label="Ảnh" name="hinh_anh">
             <ImageUpload />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item label="Short Description" name="short_desc">
-            <Input.TextArea rows={3} placeholder="Enter short description" />
+          <Form.Item label="Mô tả ngắn" name="short_desc">
+            <Input.TextArea rows={3} placeholder="Nhập mô tả ngắn" />
           </Form.Item>
         </Col>
 
         <Col span={24}>
-          <Form.Item label="Address" name="address">
-            <Input placeholder="Enter address" />
+          <Form.Item label="Địa chỉ" name="address">
+            <Input placeholder="Nhập địa chỉ" />
           </Form.Item>
         </Col>
       </Row>
 
-      <Divider orientation="left">Certificates</Divider>
+      <Divider orientation="left">Chứng chỉ</Divider>
       <List
         size="small"
         dataSource={allCerts}
-        locale={{ emptyText: "No certificates yet" }}
+        locale={{ emptyText: "Chưa có chứng chỉ" }}
         renderItem={(item) => (
           <List.Item
             actions={[
@@ -261,33 +261,33 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
       />
       <Space style={{ width: "100%", marginTop: 8 }} align="start">
         <Input
-          placeholder="Certificate name"
+          placeholder="Tên chứng chỉ"
           value={newCertName}
           onChange={(e) => setNewCertName(e.target.value)}
           style={{ width: 200 }}
         />
         <Input
-          placeholder="Issuing organization"
+          placeholder="Nơi cấp"
           value={newCertIssuer}
           onChange={(e) => setNewCertIssuer(e.target.value)}
           style={{ width: 160 }}
         />
         <Input
-          placeholder="Year"
+          placeholder="Năm"
           value={newCertYear}
           onChange={(e) => setNewCertYear(e.target.value)}
           type="number"
           style={{ width: 100 }}
         />
         <Button type="primary" icon={<PlusOutlined />} onClick={handleAddCert}>
-          Add
+          Thêm
         </Button>
       </Space>
 
       <Form.Item style={{ marginTop: 16 }}>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="primary" htmlType="submit">
-            {initialValues ? "Update" : "Create"}
+            {initialValues ? "Cập nhật" : "Tạo mới"}
           </Button>
         </Space>
       </Form.Item>

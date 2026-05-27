@@ -193,14 +193,14 @@ exports.pay = async (req, res) => {
       taoThongBaoNhieuNguoi(
         dsNhan,
         "PAYMENT",
-        "Payment successful",
-        `Encounter #${id_phieu_kham} has been paid`,
+        "Thanh toán thành công",
+        `Phiếu khám #${id_phieu_kham} đã được thanh toán`,
         `/admin/bill`
       );
     }
 
     return res.status(200).json({
-      message: "Payment success",
+      message: "Thanh toán thành công",
       data: result,
     });
 

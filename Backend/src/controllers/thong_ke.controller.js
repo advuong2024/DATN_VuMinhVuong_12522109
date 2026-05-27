@@ -13,7 +13,7 @@ exports.getDashboard = async (req, res) => {
     ]);
 
     res.status(200).json({
-      message: "Success",
+      message: "Thành công",
       data: {
         summary,
         recentPatients,
@@ -55,7 +55,7 @@ exports.getRevenueChart = async (
       );
 
     res.status(200).json({
-      message: "Success",
+      message: "Thành công",
       data,
     });
   } catch (error) {

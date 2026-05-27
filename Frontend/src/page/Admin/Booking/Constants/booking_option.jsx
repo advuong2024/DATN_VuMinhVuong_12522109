@@ -5,7 +5,7 @@ export const STATUS_COLORS = {
 };
 
 export const STATUS_OPTIONS = [
-  { label: "Booked", value: "DA_DAT", color: "#faad14" },
-  { label: "Completed", value: "DA_DEN", color: "#52c41a" },
-  { label: "Cancelled", value: "DA_HUY", color: "#ff4d4f" },
+  { label: "Đã đặt", value: "DA_DAT", color: "#faad14" },
+  { label: "Đã đến", value: "DA_DEN", color: "#52c41a" },
+  { label: "Đã hủy", value: "DA_HUY", color: "#ff4d4f" },
 ];

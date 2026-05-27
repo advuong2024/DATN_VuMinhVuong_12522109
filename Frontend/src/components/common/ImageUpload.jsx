@@ -15,9 +15,9 @@ const ImageUpload = ({ value, onChange }) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       onChange?.(res.data.url);
-      message.success("Image uploaded successfully");
+      message.success("Tải ảnh lên thành công");
     } catch {
-      message.error("Image uploaded failed");
+      message.error("Tải ảnh lên thất bại");
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ const ImageUpload = ({ value, onChange }) => {
           accept="image/jpeg,image/png,image/webp,image/gif"
         >
           <Button icon={loading ? <Spin /> : <UploadOutlined />} loading={loading}>
-            Enter Image
+            Chọn ảnh
           </Button>
         </Upload>
       )}

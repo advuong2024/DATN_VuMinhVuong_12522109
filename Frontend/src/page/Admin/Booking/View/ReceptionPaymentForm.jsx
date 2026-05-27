@@ -45,7 +45,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
       setServices(res.data || []);
     } catch (err) {
       console.error(err);
-      toast.error("Cannot load services");
+      toast.error("Không thể tải dịch vụ");
     }
   };
 
@@ -73,7 +73,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
         const encounter = res.data;
 
         if (!encounter || !encounter.chi_tiets) {
-          throw new Error("No detailed response received from the encounter creation system.");
+          throw new Error("Không nhận được phản hồi từ hệ thống tạo phiếu khám");
         }
 
         const map = new Map(
@@ -99,11 +99,10 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
 
         await updateStatus(booking.key, "DA_DEN");
 
-        toast.success("Check-in and payment successful!");
-        onSuccess();
+        toast.success("Đón tiếp và thanh toán thành công!");
     } catch (err) {
         console.error(err);
-        toast.error(err.message || "Error during check-in/payment");
+        toast.error(err.message || "Lỗi trong quá trình đón tiếp/thanh toán");
     } finally {
         setLoading(false);
     }
@@ -111,43 +110,43 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
 
   return (
     <Form layout="vertical" form={form} onFinish={handleSubmit}>
-      <Divider>Patient Information</Divider>
+      <Divider>Thông tin bệnh nhân</Divider>
 
-      <Form.Item label="Name">
+      <Form.Item label="Tên">
         <Input value={booking?.name} disabled style={{ color: '#000' }} />
       </Form.Item>
 
-      <Form.Item label="Phone">
+      <Form.Item label="SĐT">
         <Input value={booking?.phone} disabled style={{ color: '#000' }} />
       </Form.Item>
 
-      <Form.Item label="Doctor">
+      <Form.Item label="Bác sĩ">
         <Input value={booking?.doctor} disabled style={{ color: '#000' }} />
       </Form.Item>
 
-      <Divider>Initial Services</Divider>
+      <Divider>Dịch vụ ban đầu</Divider>
 
       <Form.Item
         name="services"
-        label="Select Services"
-        rules={[{ required: true, message: "Please select at least 1 service" }]}
+        label="Chọn dịch vụ"
+        rules={[{ required: true, message: "Vui lòng chọn ít nhất 1 dịch vụ" }]}
       >
         <Select
           mode="multiple"
-          placeholder="Select services"
+          placeholder="Chọn dịch vụ"
           allowClear
           options={services.map((s) => ({
             value: s.id_dich_vu,
-            label: `${s.ten_dich_vu} - ${s.gia.toLocaleString()} VND`,
+            label: `${s.ten_dich_vu} - ${s.gia.toLocaleString()} VNĐ`,
           }))}
         />
       </Form.Item>
 
-      <Divider>Initial Payment</Divider>
+      <Divider>Tạm ứng</Divider>
 
       <Form.Item
         name="tam_ung"
-        label="Total Payment"
+        label="Tổng thanh toán"
         initialValue={0}
       >
         <InputNumber
@@ -155,24 +154,24 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
             style={{ width: "100%", color: '#d32f2f', fontWeight: 'bold' }}
             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-            addonAfter="VND"
+            addonAfter="VNĐ"
         />
       </Form.Item>
 
       <Form.Item
         name="phuong_thuc"
-        label="Payment Method"
+        label="Phương thức thanh toán"
         initialValue="TIEN_MAT"
         rules={[{ required: true }]}
       >
         <Select
-          placeholder="Select payment method"
+          placeholder="Chọn phương thức"
           options={ PATIENT_OPTIONS }
         />
       </Form.Item>
 
       <Button type="primary" htmlType="submit" block loading={loading} style={{ marginTop: 10 }}>
-        Confirm Check-in
+        Xác nhận đón tiếp
       </Button>
     </Form>
   );

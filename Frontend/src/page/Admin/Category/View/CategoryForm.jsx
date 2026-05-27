@@ -32,17 +32,17 @@ export default function CategoryForm({
       <Row gutter={16}>
         <Col span={activeTab === "specialty" ? 12 : 24}>
           <Form.Item
-            label={activeTab === "specialty" ? "Specialty Name" : "Category Name"}
+            label={activeTab === "specialty" ? "Tên chuyên khoa" : "Tên danh mục"}
             name="name"
-            rules={[{ required: true, message: "Please enter name" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên" }]}
           >
-            <Input placeholder="Enter name" />
+            <Input placeholder="Nhập tên" />
           </Form.Item>
         </Col>
 
         {activeTab === "specialty" && (
           <Col span={12}>
-            <Form.Item label="Image" name="hinh_anh">
+            <Form.Item label="Ảnh" name="hinh_anh">
               <ImageUpload />
             </Form.Item>
           </Col>
@@ -50,9 +50,9 @@ export default function CategoryForm({
       </Row>
 
       <Form.Item
-        label="Description"
+        label="Mô tả"
         name="description"
-        rules={[{ required: true, message: "Please enter description" }]}
+        rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
       >
         <Input.TextArea rows={5} />
       </Form.Item>
@@ -60,7 +60,7 @@ export default function CategoryForm({
       <Form.Item>
         <Space style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button type="primary" htmlType="submit">
-            {initialValues ? "Update" : "Create"}
+            {initialValues ? "Cập nhật" : "Tạo mới"}
           </Button>
         </Space>
       </Form.Item>

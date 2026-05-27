@@ -113,7 +113,7 @@ exports.logout = async (req, res) => {
 
     await TaiKhoan.clearRefreshToken(userId);
 
-    return res.json({ message: "Logout success" });
+    return res.json({ message: "Đăng xuất thành công" });
   } catch (err) {
     console.error("🔥 ERROR:", err);
     return res.status(500).json({ error: err.message });

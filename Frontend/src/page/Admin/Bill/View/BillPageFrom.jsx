@@ -66,15 +66,15 @@ export default function PaymentForm({ record, mode, onSuccess }) {
 
   const serviceColumns = [
     {
-      title: "Service",
+      title: "Dịch vụ",
       dataIndex: "name",
     },
     {
-      title: "Qty",
+      title: "SL",
       dataIndex: "quantity",
     },
     {
-      title: "Price",
+      title: "Đơn giá",
       dataIndex: "price",
       render: (v) => Number(v).toLocaleString(),
     },
@@ -82,15 +82,15 @@ export default function PaymentForm({ record, mode, onSuccess }) {
 
   const medicineColumns = [
     {
-      title: "Medicine",
+      title: "Thuốc",
       dataIndex: "name",
     },
     {
-      title: "Qty",
+      title: "SL",
       dataIndex: "quantity",
     },
     {
-      title: "Price",
+      title: "Đơn giá",
       dataIndex: "price",
       render: (v) => Number(v).toLocaleString(),
     },
@@ -112,13 +112,13 @@ export default function PaymentForm({ record, mode, onSuccess }) {
 
       await payBill(payload);
 
-      toast.success("Payment success");
+      toast.success("Thanh toán thành công");
 
       onSuccess?.();
     } catch (error) {
       console.error(error);
 
-      toast.error("Payment failed");
+      toast.error("Thanh toán thất bại");
     } finally {
       setLoading(false);
     }
@@ -130,32 +130,32 @@ export default function PaymentForm({ record, mode, onSuccess }) {
     <div style={{ maxWidth: 850, margin: "0 auto" }}>
       <h3 style={{ marginBottom: 12 }}>
         {mode === "view"
-          ? "View Payment Detail"
-          : "Process Payment"}
+          ? "Xem chi tiết thanh toán"
+          : "Xử lý thanh toán"}
       </h3>
 
       <Card size="small" style={{ marginBottom: 12 }}>
         <Descriptions size="small" column={2}>
-          <Descriptions.Item label="Patient">
+          <Descriptions.Item label="Bệnh nhân">
             {record?.name || "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Phone">
+          <Descriptions.Item label="SĐT">
             {record?.phone || "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Doctor">
+          <Descriptions.Item label="Bác sĩ">
             {record?.doctor || "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Invoice">
+          <Descriptions.Item label="Hóa đơn">
             {record?.invoiceId || "-"}
           </Descriptions.Item>
         </Descriptions>
       </Card>
 
       {service.items.length > 0 && (
-        <Card size="small" title="Services" style={{ marginBottom: 12 }}>
+        <Card size="small" title="Dịch vụ" style={{ marginBottom: 12 }}>
           <Table
             size="small"
             dataSource={service.items}
@@ -165,13 +165,13 @@ export default function PaymentForm({ record, mode, onSuccess }) {
           />
 
           <div style={{ textAlign: "right", marginTop: 8 }}>
-            <b>Service Total: {service.total.toLocaleString()}</b>
+            <b>Tổng dịch vụ: {service.total.toLocaleString()}</b>
           </div>
         </Card>
       )}
 
       {medicine.items.length > 0 && (
-        <Card size="small" title="Medicine (Optional)" style={{ marginBottom: 12 }}>
+        <Card size="small" title="Thuốc (Tùy chọn)" style={{ marginBottom: 12 }}>
           <Table
             size="small"
             dataSource={medicine.items}
@@ -187,12 +187,12 @@ export default function PaymentForm({ record, mode, onSuccess }) {
             checked={hasMedicine}
             onChange={(e) => setHasMedicine(e.target.checked)}
           >
-            Customer buys medicine
+            Khách hàng mua thuốc
           </Checkbox>
 
           <div style={{ textAlign: "right", marginTop: 8 }}>
             <b>
-              Medicine Total: {(hasMedicine ? medicine.total : 0).toLocaleString()}
+              Tổng thuốc: {(hasMedicine ? medicine.total : 0).toLocaleString()}
             </b>
           </div>
         </Card>
@@ -207,7 +207,7 @@ export default function PaymentForm({ record, mode, onSuccess }) {
           }}
         >
           <div>
-            <b>Payment Method:</b>
+            <b>Phương thức thanh toán:</b>
 
             <Select
               value={paymentMethod}
@@ -216,11 +216,11 @@ export default function PaymentForm({ record, mode, onSuccess }) {
               onChange={setPaymentMethod}
               options={[
                 {
-                  label: "Cash",
+                  label: "Tiền mặt",
                   value: "TIEN_MAT",
                 },
                 {
-                  label: "Bank Transfer",
+                  label: "Chuyển khoản",
                   value: "CHUYEN_KHOAN",
                 },
               ]}
@@ -228,7 +228,7 @@ export default function PaymentForm({ record, mode, onSuccess }) {
           </div>
 
           <h3>
-            Total: {total.toLocaleString()}
+            Tổng: {total.toLocaleString()}
           </h3>
         </div>
 
@@ -237,7 +237,7 @@ export default function PaymentForm({ record, mode, onSuccess }) {
             <Space>
               {hasMedicine && (
                 <Button onClick={() => setShowInvoice(true)}>
-                  Print invoice
+                  In hóa đơn
                 </Button>
               )}
               <Button
@@ -245,7 +245,7 @@ export default function PaymentForm({ record, mode, onSuccess }) {
                 loading={loading}
                 onClick={handlePay}
               >
-                Payment Bill
+                Thanh toán
               </Button>
             </Space>
           </div>
