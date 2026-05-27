@@ -24,6 +24,7 @@ function normalize(body = {}) {
     mo_ta: body.description?.trim(),
     mo_ta_ngan: body.shortDescription?.trim() || null,
     hinh_anh: body.hinh_anh?.trim() || null,
+    hien_thi: body.hien_thi !== undefined ? Boolean(body.hien_thi) : undefined,
 
     ...(categoryId && !isNaN(categoryId) && {
       danh_muc: {
@@ -39,9 +40,9 @@ function normalize(body = {}) {
   };
 }
 
-exports.getAll = async (_req, res) => {
+exports.getAll = async (req, res) => {
   try {
-    const rows = await DichVu.getAll();
+    const rows = await DichVu.getAll(req.query.hien_thi);
     res.json(rows);
   } catch (err) {
     console.error("🔥 ERROR:", err);

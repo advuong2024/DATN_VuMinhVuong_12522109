@@ -10,6 +10,11 @@ export const getEmployeesNoAccount = async () => {
   return res.data;
 };
 
+export const getPatientsNoAccount = async () => {
+  const res = await axiosClient.get("/benh-nhan/chua-co-tai-khoan");
+  return res;
+};
+
 export const createAccount = async (data) => {
   const res = await axiosClient.post("/tai-khoan", data);
   return res;

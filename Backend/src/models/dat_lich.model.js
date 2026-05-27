@@ -83,7 +83,7 @@ const getAllDaDen = async (params = {}, user) => {
 
   const where = {
     trang_thai: "DA_DEN",
-    thoi_gian: getTodayRange(),
+    // thoi_gian: getTodayRange(),
   };
 
   if (user.vai_tro === "BAC_SI") {

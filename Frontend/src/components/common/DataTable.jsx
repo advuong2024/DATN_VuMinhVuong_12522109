@@ -40,13 +40,12 @@ export default function DataTable({
     return col;
   });
 
-  const finalColumns = showSTT
-  ? [
-      sttColumn,
-      ...enhanceColumns,
-      Table.EXPAND_COLUMN
-    ]
-  : [...enhanceColumns, Table.EXPAND_COLUMN];
+  const baseColumns = showSTT
+    ? [sttColumn, ...enhanceColumns]
+    : [...enhanceColumns];
+  const finalColumns = expandable
+    ? [...baseColumns, Table.EXPAND_COLUMN]
+    : baseColumns;
 
   return (
     <Table

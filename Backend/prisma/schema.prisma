@@ -37,7 +37,8 @@ model nhan_vien {
   updated_at       DateTime           @updatedAt
   id_nhan_vien     Int                @id @default(autoincrement())
   ten_nhan_vien    String
-  chi_tiets        chi_tiet_dich_vu[]
+  chi_tiets        chi_tiet_dich_vu[]    @relation("bac_si_relation")
+  chi_tiet_thuc_hien chi_tiet_dich_vu[]  @relation("thuc_hien_relation")
   dat_lichs        dat_lich[]
   chuyen_khoa      chuyen_khoa?       @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
   phieu_khams      phieu_kham[]
@@ -63,14 +64,16 @@ model chung_chi {
 model tai_khoan {
   vai_tro       VaiTro
   trang_thai    TrangThaiTaiKhoan @default(HOAT_DONG)
-  id_nhan_vien  Int               @unique
+  id_nhan_vien  Int?              @unique
+  id_benh_nhan  Int?              @unique
   is_deleted    Boolean           @default(false)
   created_at    DateTime          @default(now())
   password      String
   username      String            @unique
   id_tai_khoan  Int               @id @default(autoincrement())
   refresh_token String?           @db.Text
-  nhan_vien     nhan_vien         @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
+  nhan_vien     nhan_vien?        @relation(fields: [id_nhan_vien], references: [id_nhan_vien])
+  benh_nhan     benh_nhan?        @relation(fields: [id_benh_nhan], references: [id_benh_nhan])
 }
 
 model benh_nhan {
@@ -87,6 +90,7 @@ model benh_nhan {
   ten_benh_nhan String
   dat_lichs     dat_lich[]
   phieu_khams   phieu_kham[]
+  tai_khoan     tai_khoan?
 
   @@index([ten_benh_nhan])
 }
@@ -110,6 +114,7 @@ model dich_vu {
   mo_ta          String?   @db.Text
   mo_ta_ngan     String?
   hinh_anh       String?
+  hien_thi       Boolean            @default(true)
   ten_dich_vu    String
   chi_tiets      chi_tiet_dich_vu[]
   chuyen_khoa    chuyen_khoa        @relation(fields: [id_chuyen_khoa], references: [id_chuyen_khoa])
@@ -184,13 +189,19 @@ model chi_tiet_dich_vu {
   id_chi_tiet   Int             @id @default(autoincrement())
   id_bac_si     Int
   loai_chi_tiet String?         @db.VarChar(50)
-  bac_si        nhan_vien       @relation(fields: [id_bac_si], references: [id_nhan_vien])
-  dich_vu       dich_vu         @relation(fields: [id_dich_vu], references: [id_dich_vu])
-  phieu_kham    phieu_kham      @relation(fields: [id_phieu_kham], references: [id_phieu_kham], onDelete: Cascade)
+  ket_qua         String?         @db.Text
+  file_ket_qua    String?
+  ngay_thuc_hien  DateTime?
+  nguoi_thuc_hien Int?
+  bac_si          nhan_vien       @relation("bac_si_relation", fields: [id_bac_si], references: [id_nhan_vien])
+  nhan_vien_thuc_hien nhan_vien?  @relation("thuc_hien_relation", fields: [nguoi_thuc_hien], references: [id_nhan_vien])
+  dich_vu         dich_vu         @relation(fields: [id_dich_vu], references: [id_dich_vu])
+  phieu_kham      phieu_kham      @relation(fields: [id_phieu_kham], references: [id_phieu_kham], onDelete: Cascade)
 
   @@index([id_bac_si], map: "chi_tiet_dich_vu_id_bac_si_fkey")
   @@index([id_dich_vu], map: "chi_tiet_dich_vu_id_dich_vu_fkey")
   @@index([id_phieu_kham], map: "chi_tiet_dich_vu_id_phieu_kham_fkey")
+  @@index([nguoi_thuc_hien], map: "chi_tiet_dich_vu_nguoi_thuc_hien_fkey")
 }
 
 model don_thuoc {
@@ -265,6 +276,8 @@ enum VaiTro {
   BAC_SI
   LE_TAN
   THU_NGAN
+  KY_THUAT_VIEN
+  NGUOI_DUNG
 }
 
 enum TrangThaiTaiKhoan {

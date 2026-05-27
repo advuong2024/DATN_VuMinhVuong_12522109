@@ -43,12 +43,22 @@ exports.login = async (req, res) => {
       vai_tro: account.vai_tro,
       trang_thai: account.trang_thai,
 
-      nhan_vien: {
-        ten_nhan_vien: account.nhan_vien?.ten_nhan_vien,
-        hinh_anh: account.nhan_vien?.hinh_anh,
-        id_chuyen_khoa: account.nhan_vien?.id_chuyen_khoa,
-        chuc_vu: account.nhan_vien?.chuc_vu,
-      },
+      nhan_vien: account.nhan_vien
+        ? {
+            ten_nhan_vien: account.nhan_vien.ten_nhan_vien,
+            hinh_anh: account.nhan_vien.hinh_anh,
+            id_chuyen_khoa: account.nhan_vien.id_chuyen_khoa,
+            chuc_vu: account.nhan_vien.chuc_vu,
+          }
+        : null,
+
+      benh_nhan: account.benh_nhan
+        ? {
+            id_benh_nhan: account.benh_nhan.id_benh_nhan,
+            ten_benh_nhan: account.benh_nhan.ten_benh_nhan,
+            so_dien_thoai: account.benh_nhan.so_dien_thoai,
+          }
+        : null,
     };
 
     return res.json({

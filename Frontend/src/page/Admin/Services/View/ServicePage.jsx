@@ -8,6 +8,7 @@ import {
   Descriptions,
   Form,
   Image,
+  Tag
 } from "antd";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/common/DataTable";
@@ -43,6 +44,7 @@ export default function ServiceManagement() {
         shortDescription: item.mo_ta_ngan || null,
         description: item.mo_ta || null,
         hinh_anh: item.hinh_anh || null,
+        hien_thi: item.hien_thi !== false,
       }));
 
       setData(formatted);
@@ -134,15 +136,15 @@ export default function ServiceManagement() {
           <div style={{ width: 48, height: 48, borderRadius: 8, background: "#f0f0f0" }} />
         ),
     },
-    { title: "Tên dịch vụ", dataIndex: "name", width: 230 },
+    { title: "Tên dịch vụ", dataIndex: "name", width: 200 },
     {
       title: "Giá",
       dataIndex: "price",
-      width: 180,
+      width: 150,
       render: (p) => (p ? `${Number(p).toLocaleString()} VNĐ` : "0 VNĐ"),
     },
-    { title: "Danh mục", dataIndex: "category", width: 180, },
-    { title: "Chuyên khoa", dataIndex: "specialty", width: 180 },
+    { title: "Danh mục", dataIndex: "category", width: 160, },
+    { title: "Chuyên khoa", dataIndex: "specialty", width: 160 },
     {
       title: "Mô tả ngắn",
       dataIndex: "shortDescription",
@@ -153,6 +155,15 @@ export default function ServiceManagement() {
       title: "Mô tả",
       dataIndex: "description",
       ellipsis: true,
+    },
+    {
+      title: "Hiển thị",
+      dataIndex: "hien_thi",
+      align: "center",
+      width: 100,
+      render: (val) => (
+        <Tag color={val ? "green" : "red"}>{val ? "Hiện" : "Ẩn"}</Tag>
+      ),
     },
     {
       title: "Thao tác",

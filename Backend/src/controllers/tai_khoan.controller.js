@@ -9,6 +9,7 @@ function normalize(body = {}) {
       : Number(v);
 
   data.id_nhan_vien = toNumOrNull(data.id_nhan_vien);
+  data.id_benh_nhan = toNumOrNull(data.id_benh_nhan);
 
   ["ten_dang_nhap", "mat_khau"].forEach((k) => {
     if (typeof data[k] === "string") data[k] = data[k].trim();

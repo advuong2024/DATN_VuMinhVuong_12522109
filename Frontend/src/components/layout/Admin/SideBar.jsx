@@ -6,7 +6,7 @@ import {
   FiUser,
 } from "react-icons/fi";
 import { PiInvoice } from "react-icons/pi";
-import { FaUserDoctor } from "react-icons/fa6";
+import { FaUserDoctor, FaFlask } from "react-icons/fa6";
 import { RiAccountCircleLine, RiServiceLine } from "react-icons/ri";
 import { GiMedicines } from "react-icons/gi";
 import { BsClipboardCheck } from "react-icons/bs";
@@ -45,6 +45,13 @@ const menuItems = [
     label: "Phiên khám",
     icon: <BsClipboardCheck size={16} />,
     roles: ["ADMIN", "BAC_SI"],
+  },
+
+  {
+    key: "/admin/service-execution",
+    label: "Thực hiện dịch vụ",
+    icon: <FaFlask size={16} />,
+    roles: ["ADMIN", "BAC_SI", "KY_THUAT_VIEN"],
   },
 
   {

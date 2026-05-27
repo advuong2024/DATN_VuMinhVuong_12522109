@@ -4,6 +4,7 @@ const controller = require("../controllers/benh_nhan.controller");
 
 router.get("/lich-su/:id", controller.getAppointmentHistory);
 router.get("/tim-kiem", controller.findPatientByPhone);
+router.get("/chua-co-tai-khoan", controller.getPatientsNoAccount);
 router.get("/", controller.getAll);
 router.get("/:id", controller.getById);
 router.post("/", controller.insert);

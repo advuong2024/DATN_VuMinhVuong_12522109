@@ -154,7 +154,7 @@ export default function PatientManagement() {
       title: "Ngày sinh",
       dataIndex: "dob",
       align: "center",
-      width: 150,
+      width: 130,
       render: (d) => dayjs(d).format("DD/MM/YYYY"),
     },
 

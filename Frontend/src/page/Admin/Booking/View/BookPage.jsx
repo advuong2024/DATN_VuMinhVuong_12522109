@@ -199,10 +199,11 @@ export default function BookingManagement() {
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
         <h3 style={{ marginBottom: 16 }}>Quản lý đặt lịch</h3>
 
-        <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
+        <Row gutter={18} justify="end" style={{ marginBottom: 16, }}>
           <Col span={5}>
             <Input
               placeholder="Tìm theo tên / SĐT"
+              style={{ width: "100%" }}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -211,9 +212,10 @@ export default function BookingManagement() {
             />
           </Col>
 
-          <Col span={3}>
+          <Col span={4}>
             <Select
               placeholder="Chọn trạng thái"
+              style={{ width: "100%" }}
               allowClear
               value={status}
               onChange={(value) => {

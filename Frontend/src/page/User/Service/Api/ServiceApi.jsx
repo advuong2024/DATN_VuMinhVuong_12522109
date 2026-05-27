@@ -1,7 +1,7 @@
 import axiosClient from "@/components/common/axiosClient";
 
 export const getAllServices = async () => {
-  const res = await axiosClient.get("/dich-vu");
+  const res = await axiosClient.get("/dich-vu", { params: { hien_thi: true } });
   return res.data;
 };
 

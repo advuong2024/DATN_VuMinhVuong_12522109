@@ -1,4 +1,4 @@
-import { Form, Input, Select, Button, Space, Row, Col } from "antd";
+import { Form, Input, Select, Button, Space, Row, Col, Switch } from "antd";
 import { useEffect, useState } from "react";
 import { getCategory, getSpecialty } from "../Api/ServicesApi";
 import ImageUpload from "@/components/common/ImageUpload";
@@ -105,6 +105,12 @@ export default function ServiceForm({ form, initialValues, onSubmit }) {
         <Col span={24}>
           <Form.Item label="Mô tả" name="description">
             <RichTextEditor />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
+          <Form.Item label="Hiển thị trên trang người dùng" name="hien_thi" valuePropName="checked">
+            <Switch checkedChildren="Hiện" unCheckedChildren="Ẩn" defaultChecked />
           </Form.Item>
         </Col>
       </Row>

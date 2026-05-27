@@ -10,13 +10,14 @@ const storage = multer.diskStorage({
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/x-matroska"];
-const ALLOWED = [...IMAGE_TYPES, ...VIDEO_TYPES];
+const PDF_TYPES = ["application/pdf"];
+const ALLOWED = [...IMAGE_TYPES, ...VIDEO_TYPES, ...PDF_TYPES];
 
 const fileFilter = (_req, file, cb) => {
   if (ALLOWED.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Chỉ chấp nhận file ảnh (JPEG, PNG, WebP, GIF) hoặc video (MP4, WebM, MOV, AVI, MKV)"), false);
+    cb(new Error("Chỉ chấp nhận file ảnh (JPEG, PNG, WebP, GIF), PDF hoặc video (MP4, WebM, MOV, AVI, MKV)"), false);
   }
 };
 

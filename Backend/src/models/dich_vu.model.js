@@ -1,7 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const getAll = () => {
+const getAll = (hien_thi) => {
+    const where = { is_deleted: false };
+    if (hien_thi === 'true') where.hien_thi = true;
+
     return prisma.dich_vu.findMany({
         include: {
             danh_muc: {
@@ -20,7 +23,7 @@ const getAll = () => {
         orderBy: {
             id_dich_vu: 'desc',
         },
-        where: { is_deleted: false },
+        where,
     });
 };
 

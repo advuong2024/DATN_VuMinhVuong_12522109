@@ -25,6 +25,7 @@ import CategoryPage from "@/page/Admin/Category/View/CategoryPage";
 import BillPage from "@/page/Admin/Bill/View/BillPage";
 import HistoryPage from "@/page/Admin/Customer/View/CustomerHistory/CustomerHistoryForm";
 import ProfilePage from "@/page/Admin/Profile/View/ProfilePage";
+import ServiceExecutionPage from "@/page/Admin/ServiceExecution/View/ServiceExecutionPage";
 
 import {
   loginUrl,
@@ -79,6 +80,7 @@ const router = createBrowserRouter([
       { path: MedicineUrl, element: <MedicinePage /> },
       { path: categoryUrl, element: <CategoryPage /> },
       { path: billUrl, element: <BillPage /> },
+      { path: "service-execution", element: <ServiceExecutionPage /> },
       { path: `${customerUrl}/:id`, element: <HistoryPage /> },
       { path: "profile", element: <ProfilePage /> },
     ],

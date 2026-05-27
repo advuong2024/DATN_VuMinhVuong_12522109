@@ -11,6 +11,9 @@ const getAll = (query) => {
         },
         include: {
           nhan_vien: true,
+          benh_nhan: {
+            select: { id_benh_nhan: true, ten_benh_nhan: true, so_dien_thoai: true },
+          },
         },
         orderBy: {
           id_tai_khoan: 'desc',
@@ -26,6 +29,9 @@ const getById = (id_tai_khoan) => {
         },
         include: {
             nhan_vien: true,
+            benh_nhan: {
+              select: { id_benh_nhan: true, ten_benh_nhan: true, so_dien_thoai: true },
+            },
         },
     });
 };
@@ -86,6 +92,13 @@ const findByUsername = (username) => {
           hinh_anh: true
         },
       },
+      benh_nhan: {
+        select: {
+          id_benh_nhan: true,
+          ten_benh_nhan: true,
+          so_dien_thoai: true,
+        },
+      },
     },
   });
 };
@@ -95,6 +108,9 @@ const findByIdWithNV = (id_tai_khoan) => {
     where: { id_tai_khoan },
     include: {
       nhan_vien: true,
+      benh_nhan: {
+        select: { id_benh_nhan: true, ten_benh_nhan: true, so_dien_thoai: true },
+      },
     },
   });
 };

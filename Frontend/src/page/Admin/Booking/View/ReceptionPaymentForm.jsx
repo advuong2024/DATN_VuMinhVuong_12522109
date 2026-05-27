@@ -100,6 +100,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
         await updateStatus(booking.key, "DA_DEN");
 
         toast.success("Đón tiếp và thanh toán thành công!");
+        onSuccess?.();
     } catch (err) {
         console.error(err);
         toast.error(err.message || "Lỗi trong quá trình đón tiếp/thanh toán");

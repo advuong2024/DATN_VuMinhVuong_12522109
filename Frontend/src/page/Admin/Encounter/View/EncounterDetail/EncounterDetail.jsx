@@ -84,15 +84,11 @@ export default function EncounterPage() {
       const res = await updateEncounter(bookingData.encounterId, payload);
       const payment = res?.data?.payment;
       if (values.trang_thai === "NHAP") {
-        toast.success("Tạm dừng khám thành công!");
+        toast.success("Tạm dừng khám bệnh!");
       } else {
-        toast.success("Hoàn thành khám thành công!");
+        toast.success("Hoàn thành khám bệnh!");
       }
-
-      if ( values.trang_thai === "HOAN_THANH" && payment) {
-        toast.info("Đừng quên xử lý thanh toán!");
-      }
-
+      
       navigate("/admin/encounter");
 
     } catch (err) {

@@ -81,8 +81,9 @@ export default function AccountManagement() {
 
       const mapped = res.data.map((item) => ({
         id: item.id_tai_khoan,
-        name: item.nhan_vien?.ten_nhan_vien || "N/A",
+        name: item.nhan_vien?.ten_nhan_vien || item.benh_nhan?.ten_benh_nhan || "N/A",
         employeeId: item.nhan_vien?.id_nhan_vien,
+        patientId: item.benh_nhan?.id_benh_nhan,
         username: item.username,
         password: item.password,
         role: item.vai_tro,

@@ -1,6 +1,7 @@
-import { Card, Form, Input, Button, Tabs, Table, InputNumber, Select, Space } from "antd";
+import { Card, Form, Input, Button, Tabs, Table, InputNumber, Select, Space, Tag, Modal } from "antd";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { CheckCircleOutlined, HourglassOutlined, EyeOutlined } from "@ant-design/icons";
 import PrintPreviewModal from "@/components/print/PrintPreviewModal";
 import PrintServiceRequest from "@/components/print/PrintServiceRequest";
 import PrintEncounter from "@/components/print/PrintEncounter";
@@ -18,6 +19,8 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
   const [showServiceRequest, setShowServiceRequest] = useState(false);
   const [showEncounter, setShowEncounter] = useState(false);
   const [showPrescription, setShowPrescription] = useState(false);
+  const [openResult, setOpenResult] = useState(false);
+  const [viewingResult, setViewingResult] = useState(null);
 
   const calcTotal = (gia = 0, so_luong = 0) => gia * so_luong;
 
@@ -34,6 +37,9 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
         gia: Number(ct.gia),
         thanh_tien: ct.so_luong * Number(ct.gia),
         loai_chi_tiet: ct.loai_chi_tiet,
+        trang_thai: ct.trang_thai,
+        ket_qua: ct.ket_qua,
+        file_ket_qua: ct.file_ket_qua,
         is_paid: ct.is_paid,
       })) || [];
 
@@ -118,6 +124,24 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       render: (val) => <InputNumber value={val} disabled />
     },
     {
+      title: "Kết quả",
+      align: "center",
+      width: 120,
+      render: (_, record) => {
+        if (record.trang_thai === "HOAN_THANH")
+          return (
+            <Space>
+              <Tag color="green" icon={<CheckCircleOutlined />}>Hoàn thành</Tag>
+              <EyeOutlined
+                style={{ fontSize: 16, color: "#1677ff", cursor: "pointer" }}
+                onClick={() => { setViewingResult(record); setOpenResult(true); }}
+              />
+            </Space>
+          );
+        return <Tag color="orange" icon={<HourglassOutlined />}>Chờ TH</Tag>;
+      },
+    },
+    {
       title: "",
       align: "center",
       render: (_, record, index) => (
@@ -168,18 +192,6 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           }}
         />
       )
-    },
-    {
-      title: "Đơn giá",
-      align: "center",
-      dataIndex: "gia",
-      render: (val) => <InputNumber value={val} disabled />
-    },
-    {
-      title: "Thành tiền",
-      align: "center",
-      dataIndex: "thanh_tien",
-      render: (val) => <InputNumber value={val} disabled />
     },
     {
       title: "Liều dùng",
@@ -298,7 +310,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
                   <Space style={{ marginBottom: 10 }}>
                     <Button
                       type="primary"
-                      onClick={() => setServices([...services, {}])}
+                      onClick={() => setServices([...services, { so_luong: 1 }])}
                     >
                       + Thêm dịch vụ
                     </Button>
@@ -327,7 +339,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
                   <Space style={{ marginBottom: 10 }}>
                     <Button
                       type="primary"
-                      onClick={() => setMedicines([...medicines, {}])}
+                      onClick={() => setMedicines([...medicines, { so_luong: 1 }])}
                     >
                       + Thêm thuốc
                     </Button>
@@ -440,6 +452,48 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           }))}
         />
       </PrintPreviewModal>
+
+      <Modal
+        open={openResult}
+        onCancel={() => { setOpenResult(false); setViewingResult(null); }}
+        footer={null}
+        width={600}
+        title={
+          <div style={{textAlign: "center"}}>Kết quả khám</div>
+        }
+      >
+        {viewingResult && (
+          <div>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <tbody>
+                {[
+                  { label: "Dịch vụ", value: servicesOptions.find(o => o.value === viewingResult.id_dich_vu)?.label || "-" },
+                  { label: "Bệnh nhân", value: bookingData?.name },
+                  { label: "Bác sĩ yêu cầu", value: bookingData?.doctor },
+                  { label: "Kết quả", value: viewingResult.ket_qua },
+                ].map((row) => (
+                  <tr key={row.label} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <td style={{ padding: "8px 12px", fontWeight: 600, width: 140, background: "#fafafa", verticalAlign: "top" }}>{row.label}</td>
+                    <td style={{ padding: "8px 12px", whiteSpace: "pre-wrap" }}>{row.value || "-"}</td>
+                  </tr>
+                ))}
+                {viewingResult.file_ket_qua && (
+                  <tr style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <td style={{ padding: "8px 12px", fontWeight: 600, width: 140, background: "#fafafa" }}>File đính kèm</td>
+                    <td style={{ padding: "8px 12px" }}>
+                      {viewingResult.file_ket_qua.match(/\.(jpg|jpeg|png|gif|webp)/i) ? (
+                        <img src={viewingResult.file_ket_qua} alt="Kết quả" style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 4 }} />
+                      ) : (
+                        <a href={viewingResult.file_ket_qua} target="_blank" rel="noopener noreferrer">Tải file</a>
+                      )}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Modal>
     </Card>
   );
 }

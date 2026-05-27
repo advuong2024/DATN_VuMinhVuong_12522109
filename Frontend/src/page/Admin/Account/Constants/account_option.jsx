@@ -3,4 +3,5 @@ export const ROLE_OPTIONS = [
   { label: "Bác sĩ", value: "BAC_SI" },
   { label: "Lễ tân", value: "LE_TAN" },
   { label: "Thu ngân", value: "THU_NGAN" },
+  { label: "Kỹ thuật viên", value: "KY_THUAT_VIEN" },
 ];

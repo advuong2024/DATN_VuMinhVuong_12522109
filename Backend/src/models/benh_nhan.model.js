@@ -91,6 +91,16 @@ const getAppointmentHistoryByPatient = async (id_benh_nhan) => {
 };
 
 
+const getPatientsNoAccount = () => {
+  return prisma.benh_nhan.findMany({
+    where: {
+      is_deleted: false,
+      tai_khoan: null,
+    },
+    orderBy: { id_benh_nhan: 'desc' },
+  });
+};
+
 module.exports = {
     findByPhoneOrCCCD,
     getAll,
@@ -98,5 +108,6 @@ module.exports = {
     insert,
     update,
     remove,
-    getAppointmentHistoryByPatient
+    getAppointmentHistoryByPatient,
+    getPatientsNoAccount,
 };

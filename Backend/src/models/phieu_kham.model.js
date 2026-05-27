@@ -73,7 +73,7 @@ const insert = async (data) => {
               so_luong: i.so_luong,
               gia: i.gia,
               id_bac_si,
-              trang_thai: "HOAN_THANH",
+              trang_thai: "CHO_THUC_HIEN",
               loai_chi_tiet: i.loai_chi_tiet || "DICH_VU",
             })),
           }

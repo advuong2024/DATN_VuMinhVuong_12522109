@@ -260,7 +260,7 @@ export default function AppHeader() {
           menu={notifMenu}
           trigger={["click"]}
           placement="bottomRight"
-          dropdownRender={(menu) => {
+          popupRender={(menu) => {
             if (notifications.length === 0) {
               return (
                 <div style={{ textAlign: "center", padding: "16px 0", color: "#94a3b8", fontSize: 13, background: "#fff", borderRadius: 8 }}>
