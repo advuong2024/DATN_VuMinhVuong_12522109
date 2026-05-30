@@ -7,6 +7,7 @@ import {
   Row,
   Col,
   Divider,
+  Tooltip,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -40,10 +41,16 @@ export default function NewPatientForm() {
     const res = await getDoctorCK(value);
 
     setDoctors(
-        res.map((d) => ({
-        label: d.ten_nhan_vien,
-        value: d.id_nhan_vien,
-        }))
+      res.map((d) => {
+        const conLai = d.con_lai !== null ? d.con_lai : null;
+        return {
+          label: d.ten_nhan_vien,
+          value: d.id_nhan_vien,
+          disabled: conLai !== null && conLai <= 0,
+          conLai,
+          max: d.so_luong_toi_da,
+        };
+      })
     );
   };
 
@@ -92,7 +99,8 @@ export default function NewPatientForm() {
         setDoctors([]);
     } catch (err) {
         console.error("Error:", err);
-        toast.error("Thất bại");
+        const msg = err.response?.data?.error || err.response?.data?.message || "Thất bại";
+        toast.error(msg);
     }
   };
 
@@ -198,7 +206,23 @@ export default function NewPatientForm() {
 
         <Col span={12}>
           <Form.Item name="doctor" label="Bác sĩ" rules={[{ required: true }]}>          
-            <Select options={doctors} disabled={!selectedService}/>
+            <Select
+              options={doctors}
+              disabled={!selectedService}
+              optionRender={(option) => {
+                const d = option.data;
+                const label = d.conLai !== null
+                  ? `${d.label} (còn ${d.conLai}/${d.max})`
+                  : d.label;
+                return d.disabled ? (
+                  <Tooltip title="Bác sĩ này hôm nay đã tới giới hạn bệnh nhân được khám">
+                    <span style={{ color: "#999" }}>{label}</span>
+                  </Tooltip>
+                ) : (
+                  <span>{label}</span>
+                );
+              }}
+            />
           </Form.Item>
         </Col>
       </Row>

@@ -73,25 +73,33 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       title: "Dịch vụ",
       align: "center",
       dataIndex: "id_dich_vu",
-      render: (_, record, index) => (
-        <Select
-          style={{ width: 200 }}
-          placeholder="Chọn"
-          value={record.id_dich_vu}
-          disabled={record.is_paid}
-          options={servicesOptions}
-          onChange={(value) => {
-            const selected = servicesOptions.find(s => s.value === value);
-            const newData = [...services];
-            newData[index] = {
-              ...newData[index],
-              id_dich_vu: value,
-              gia: selected?.price || 0
-            };
-            setServices(newData);
-          }}
-        />
-      )
+      render: (_, record, index) => {
+        const hiddenIds = services.flatMap((s, i) => {
+          if (i === index) return [];
+          if (s.id_chi_tiet && s.trang_thai !== "HOAN_THANH") return [s.id_dich_vu];
+          if (!s.id_chi_tiet && s.id_dich_vu) return [s.id_dich_vu];
+          return [];
+        });
+        return (
+          <Select
+            style={{ width: 200 }}
+            placeholder="Chọn"
+            value={record.id_dich_vu}
+            disabled={record.is_paid}
+            options={servicesOptions.filter(o => !hiddenIds.includes(o.value))}
+            onChange={(value) => {
+              const selected = servicesOptions.find(s => s.value === value);
+              const newData = [...services];
+              newData[index] = {
+                ...newData[index],
+                id_dich_vu: value,
+                gia: selected?.price || 0
+              };
+              setServices(newData);
+            }}
+          />
+        );
+      }
     },
     {
       title: "Số lượng",
@@ -157,24 +165,29 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       title: "Thuốc",
       align: "center",
       dataIndex: "id_thuoc",
-      render: (_, record, index) => (
-        <Select
-          style={{ width: 200 }}
-          placeholder="Chọn"
-          value={record.id_thuoc}
-          options={medicinesOptions}
-          onChange={(value) => {
-            const selected = medicinesOptions.find(m => m.value === value);
-            const newData = [...medicines];
-            newData[index] = {
-              ...newData[index],
-              id_thuoc: value,
-              gia: selected?.price || 0
-            };
-            setMedicines(newData);
-          }}
-        />
-      )
+      render: (_, record, index) => {
+        const hiddenIds = medicines.flatMap((s, i) =>
+          i !== index && s.id_thuoc ? [s.id_thuoc] : []
+        );
+        return (
+          <Select
+            style={{ width: 200 }}
+            placeholder="Chọn"
+            value={record.id_thuoc}
+            options={medicinesOptions.filter(o => !hiddenIds.includes(o.value))}
+            onChange={(value) => {
+              const selected = medicinesOptions.find(m => m.value === value);
+              const newData = [...medicines];
+              newData[index] = {
+                ...newData[index],
+                id_thuoc: value,
+                gia: selected?.price || 0
+              };
+              setMedicines(newData);
+            }}
+          />
+        );
+      }
     },
     {
       title: "Số lượng",

@@ -22,6 +22,7 @@ const LOAI_ICON = {
   ENCOUNTER: { color: "#fa8c16", bg: "#fff7e6" },
   MEDICINE: { color: "#ff4d4f", bg: "#fff2f0" },
   SYSTEM: { color: "#722ed1", bg: "#f9f0ff" },
+  TRANSFER: { color: "#fa8c16", bg: "#fff7e6" },
 };
 
 function timeAgo(dateStr) {

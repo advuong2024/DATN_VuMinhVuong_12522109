@@ -3,15 +3,13 @@ import {
   Select,
   Input,
   Button,
-  Checkbox,
-  Upload,
   Row,
   Col,
   Card,
   Typography,
   Steps,
   Modal,
-  message,
+  Tooltip,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
@@ -149,10 +147,16 @@ export default function BookingPage() {
       const data = await getDoctorCK(value);
 
       setDoctors(
-        data.map((item) => ({
-          label: item.ten_nhan_vien,
-          value: item.id_nhan_vien,
-        }))
+        data.map((item) => {
+          const conLai = item.con_lai !== null ? item.con_lai : null;
+          return {
+            label: item.ten_nhan_vien,
+            value: item.id_nhan_vien,
+            disabled: conLai !== null && conLai <= 0,
+            conLai,
+            max: item.so_luong_toi_da,
+          };
+        })
       );
 
       form.setFieldsValue({ doctor: null });
@@ -475,6 +479,19 @@ export default function BookingPage() {
                           options={doctors}
                           disabled={!form.getFieldValue("specialty")}
                           onChange={handleChangeDoctor}
+                          optionRender={(option) => {
+                            const d = option.data;
+                            const label = d.conLai !== null
+                              ? `${d.label} (còn ${d.conLai}/${d.max})`
+                              : d.label;
+                            return d.disabled ? (
+                              <Tooltip title="Bác sĩ này hôm nay đã tới giới hạn bệnh nhân được khám">
+                                <span style={{ color: "#999" }}>{label}</span>
+                              </Tooltip>
+                            ) : (
+                              <span>{label}</span>
+                            );
+                          }}
                         />
                       </Form.Item>
                     )}

@@ -51,3 +51,20 @@ export const createPatient = async (data) => {
 export const getCanBook = async (id) => {
   return axiosClient.get(`/dat-lich/${id}/can-book`) 
 }
+
+export const reportBusy = async (buoi) => {
+  const res = await axiosClient.post("/dat-lich/bao-ban", { buoi });
+  return res.data;
+}
+
+export const reassignDoctor = async (bookingId, newDoctorId) => {
+  const res = await axiosClient.patch(`/dat-lich/${bookingId}/chuyen-bac-si`, {
+    id_bac_si_moi: newDoctorId,
+  });
+  return res.data;
+}
+
+export const getDoctorsBySpecialty = async (specialtyId) => {
+  const res = await axiosClient.get(`/nhan-vien/bac-si/${specialtyId}`);
+  return res.data;
+}

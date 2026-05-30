@@ -2,6 +2,21 @@ const LichHen = require("../models/dat_lich.model");
 const prisma = require("../prisma/client");
 const { taoThongBao, taoThongBaoNhieuNguoi } = require("../utils/thong_bao.helper");
 
+const kiemTraSlot = async (id_bac_si) => {
+  const bs = await prisma.nhan_vien.findUnique({
+    where: { id_nhan_vien: id_bac_si },
+    select: { so_luong_toi_da: true },
+  });
+  if (bs && bs.so_luong_toi_da !== null) {
+    const daDat = await LichHen.demLichHomNay(id_bac_si);
+    if (daDat >= bs.so_luong_toi_da) {
+      const err = new Error("Bác sĩ đã đạt số lượng bệnh nhân tối đa trong ngày");
+      err.status = 400;
+      throw err;
+    }
+  }
+};
+
 function normalize(body = {}) {
   const data = { ...body };
 
@@ -77,6 +92,8 @@ exports.insert = async (req, res) => {
   try {
     const payload = normalize(req.body);
 
+    await kiemTraSlot(payload.id_bac_si || payload.id_nhan_vien);
+
     const created = await LichHen.insert(payload);
 
     const leTans = await prisma.tai_khoan.findMany({
@@ -109,7 +126,7 @@ exports.insert = async (req, res) => {
         message: "Khung giờ này đã có người đặt",
       });
     }
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
@@ -136,9 +153,10 @@ exports.createBooking = async (req, res) => {
       });
     }
 
-    const result = await LichHen.insertBooking(data);
-
     const doctorId = Number(booking.doctor?.value || booking.doctor);
+    await kiemTraSlot(doctorId);
+
+    const result = await LichHen.insertBooking(data);
     const leTans = await prisma.tai_khoan.findMany({
       where: { vai_tro: "LE_TAN", trang_thai: "HOAT_DONG" },
       select: { id_nhan_vien: true },
@@ -168,7 +186,7 @@ exports.createBooking = async (req, res) => {
   } catch (error) {
     console.error("CREATE BOOKING ERROR:", error);
 
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       message: error.message || "Lỗi server",
     });
   }
@@ -218,6 +236,117 @@ exports.delete = async (req, res) => {
     res.json({ message: "Xóa mềm thành công" });
   } catch (err) {
     console.error("🔥 ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.reportBusy = async (req, res) => {
+  try {
+    const doctorId = req.user.id_nhan_vien;
+    const { buoi } = req.body;
+
+    if (!["SANG", "CHIEU", "CA_NGAY"].includes(buoi)) {
+      return res.status(400).json({ message: "Buổi không hợp lệ (SANG / CHIEU / CA_NGAY)" });
+    }
+
+    const appointments = await LichHen.getUpcomingByDoctor(doctorId, buoi);
+
+    const tenBS = await prisma.nhan_vien.findUnique({
+      where: { id_nhan_vien: doctorId },
+      select: { ten_nhan_vien: true },
+    });
+
+    const buoiMap = { SANG: "sáng", CHIEU: "chiều", CA_NGAY: "cả ngày" };
+    const noiDung = `BS. ${tenBS.ten_nhan_vien} báo bận ${buoiMap[buoi]}. Cần chuyển ${appointments.length} lịch hẹn.`;
+
+    const leTans = await prisma.tai_khoan.findMany({
+      where: { vai_tro: "LE_TAN", trang_thai: "HOAT_DONG" },
+      select: { id_nhan_vien: true },
+    });
+
+    if (leTans.length > 0) {
+      taoThongBaoNhieuNguoi(
+        leTans.map((u) => u.id_nhan_vien),
+        "TRANSFER",
+        "Bác sĩ báo bận",
+        noiDung,
+        "/admin/booking"
+      );
+    }
+
+    res.json({
+      message: "Đã gửi thông báo đến lễ tân",
+      data: appointments,
+    });
+  } catch (err) {
+    console.error("🔥 ERROR reportBusy:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.reassignDoctor = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { id_bac_si_moi } = req.body;
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ error: "id không hợp lệ" });
+    }
+
+    if (!Number.isInteger(id_bac_si_moi)) {
+      return res.status(400).json({ error: "id_bac_si_moi không hợp lệ" });
+    }
+
+    const existing = await LichHen.getById(id);
+    if (!existing) {
+      return res.status(404).json({ error: "Không tìm thấy lịch hẹn" });
+    }
+    if (existing.trang_thai !== "DA_DAT") {
+      return res.status(400).json({ error: "Chỉ được chuyển bác sĩ khi lịch hẹn ở trạng thái Đã đặt" });
+    }
+
+    const bsMoi = await prisma.nhan_vien.findUnique({
+      where: { id_nhan_vien: id_bac_si_moi },
+      select: { id_nhan_vien: true, id_chuyen_khoa: true, ten_nhan_vien: true },
+    });
+    if (!bsMoi || bsMoi.id_chuyen_khoa !== existing.id_chuyen_khoa) {
+      return res.status(400).json({ error: "Bác sĩ mới không cùng chuyên khoa" });
+    }
+
+    await kiemTraSlot(id_bac_si_moi);
+
+    const updated = await LichHen.reassignDoctor(id, id_bac_si_moi);
+
+    const bsCu = await prisma.nhan_vien.findUnique({
+      where: { id_nhan_vien: existing.id_bac_si },
+      select: { ten_nhan_vien: true },
+    });
+
+    const gio = existing.thoi_gian.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    const tenBenhNhan = updated.benh_nhan?.ten_benh_nhan || "";
+
+    taoThongBao(
+      existing.id_bac_si,
+      "TRANSFER",
+      "Đã chuyển lịch hẹn",
+      `Lịch ${gio} - ${tenBenhNhan} đã chuyển sang BS. ${bsMoi.ten_nhan_vien}`,
+      "/admin/booking"
+    );
+
+    taoThongBao(
+      id_bac_si_moi,
+      "TRANSFER",
+      "Lịch hẹn mới được chuyển",
+      `Bạn có lịch hẹn mới lúc ${gio} - ${tenBenhNhan}`,
+      "/admin/encounter"
+    );
+
+    res.json({ message: "Chuyển bác sĩ thành công" });
+  } catch (err) {
+    console.error("🔥 ERROR reassignDoctor:", err);
+    if (err.code === "P2002") {
+      return res.status(400).json({ message: "Bác sĩ mới đã có lịch vào khung giờ này" });
+    }
     res.status(500).json({ error: err.message });
   }
 };

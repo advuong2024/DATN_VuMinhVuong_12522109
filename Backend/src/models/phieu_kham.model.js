@@ -281,6 +281,17 @@ const update = async (id_phieu_kham, data) => {
       },
     });
 
+    if (encounter.trang_thai === "HOAN_THANH") {
+      await tx.chi_tiet_dich_vu.updateMany({
+        where: {
+          id_phieu_kham,
+          loai_chi_tiet: "PHI_KHAM",
+          trang_thai: { not: "HOAN_THANH" },
+        },
+        data: { trang_thai: "HOAN_THANH" },
+      });
+    }
+
     let servicePayment = null;
     let medicinePayment = null;
 

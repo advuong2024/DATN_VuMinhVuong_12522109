@@ -1,15 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Tabs, Button, Input, Row, Col, Tag, Modal } from "antd";
-import { SearchOutlined, PlayCircleOutlined, RightCircleOutlined, EyeOutlined, } from "@ant-design/icons";
+import { SearchOutlined, RightCircleOutlined, EyeOutlined, } from "@ant-design/icons";
 import DataTable from "@/components/common/DataTable";
 import ServiceExecutionForm from "./ServiceExecutionForm";
-import { getServicesByStatus, updateServiceStatus } from "../Api/ServiceExecutionApi";
+import { getServicesByStatus } from "../Api/ServiceExecutionApi";
 import dayjs from "dayjs";
-import { toast } from "react-toastify";
 
 const STATUS_MAP = {
   CHO_THUC_HIEN: "CHO_THUC_HIEN",
-  DANG_THUC_HIEN: "DANG_THUC_HIEN",
   HOAN_THANH: "HOAN_THANH",
 };
 
@@ -17,7 +15,6 @@ export default function ServiceExecutionPage() {
   const [activeTab, setActiveTab] = useState(STATUS_MAP.CHO_THUC_HIEN);
   const [dataMap, setDataMap] = useState({
     CHO_THUC_HIEN: [],
-    DANG_THUC_HIEN: [],
     HOAN_THANH: [],
   });
   const [loading, setLoading] = useState(false);
@@ -32,12 +29,11 @@ export default function ServiceExecutionPage() {
   const fetchAll = useCallback(async () => {
     try {
       setLoading(true);
-      const [cho, dang, hoan] = await Promise.all(
+      const [cho, hoan] = await Promise.all(
         STATUSES.map((s) => getServicesByStatus(s))
       );
       setDataMap({
         CHO_THUC_HIEN: cho.data,
-        DANG_THUC_HIEN: dang.data,
         HOAN_THANH: hoan.data,
       });
     } catch (err) {
@@ -64,17 +60,6 @@ export default function ServiceExecutionPage() {
     );
   }, [data, searchText]);
 
-  const handleStart = useCallback(async (record) => {
-    try {
-      await updateServiceStatus(record.id_chi_tiet, STATUS_MAP.DANG_THUC_HIEN);
-      toast.success("Đã chuyển sang trạng thái Đang thực hiện");
-      fetchAll();
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi khi chuyển trạng thái");
-    }
-  }, [fetchAll]);
-
   const handleContinue = useCallback((record) => {
     setSelectedRecord(record);
     setOpenForm(true);
@@ -95,7 +80,7 @@ export default function ServiceExecutionPage() {
     const isHoanThanh = activeTab === STATUS_MAP.HOAN_THANH;
     const W = isHoanThanh
       ? { bn: 150, sdt: 120, dv: 160, bs: 150, nt: 150, nt2: 130, tt: 110, tac: 80 }
-      : { bn: 250, sdt: 160, dv: 280, bs: 200, tt: 140, tac: 100 };
+      : { bn: 250, sdt: 160, dv: 250, bs: 200, tt: 140, tac: 130 };
 
     return [
       { title: "Bệnh nhân", dataIndex: ["phieu_kham", "benh_nhan", "ten_benh_nhan"], width: W.bn, ellipsis: true },
@@ -114,7 +99,6 @@ export default function ServiceExecutionPage() {
         align: "center",
         render: (_, record) => {
           if (record.trang_thai === STATUS_MAP.CHO_THUC_HIEN) return <Tag color="orange">Chờ TH</Tag>;
-          if (record.trang_thai === STATUS_MAP.DANG_THUC_HIEN) return <Tag color="blue">Đang TH</Tag>;
           return <Tag color="green">Hoàn thành</Tag>;
         },
       },
@@ -124,9 +108,11 @@ export default function ServiceExecutionPage() {
         align: "center",
         render: (_, record) => {
           if (record.trang_thai === STATUS_MAP.CHO_THUC_HIEN)
-            return <Button type="primary" size="small" icon={<PlayCircleOutlined />} onClick={() => handleStart(record)} />;
-          if (record.trang_thai === STATUS_MAP.DANG_THUC_HIEN)
-            return <Button type="primary" size="small" icon={<RightCircleOutlined />} onClick={() => handleContinue(record)} />;
+            return (
+              <Button type="primary" size="small"  onClick={() => handleContinue(record)}>
+                Nhập kết quả
+              </Button>
+            );
           if (record.trang_thai === STATUS_MAP.HOAN_THANH)
             return (
               <EyeOutlined
@@ -138,11 +124,10 @@ export default function ServiceExecutionPage() {
         },
       },
     ];
-  }, [activeTab, handleStart, handleContinue, handleView]);
+  }, [activeTab, handleContinue, handleView]);
 
   const tabItems = [
     { key: STATUS_MAP.CHO_THUC_HIEN, label: "Chờ thực hiện" },
-    { key: STATUS_MAP.DANG_THUC_HIEN, label: "Đang thực hiện" },
     { key: STATUS_MAP.HOAN_THANH, label: "Hoàn thành" },
   ];
 
@@ -176,6 +161,7 @@ export default function ServiceExecutionPage() {
         footer={null}
         width={600}
         title="Nhập kết quả dịch vụ"
+        centered
       >
         {selectedRecord && (
           <ServiceExecutionForm

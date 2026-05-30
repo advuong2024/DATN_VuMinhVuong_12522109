@@ -324,6 +324,13 @@ export default function MedicalHistory() {
                   title: "Đơn giá",
                   dataIndex: ["dich_vu", "gia"],
                 },
+                {
+                  title: "Loại",
+                  dataIndex: "loai_chi_tiet",
+                  render: (val) =>
+                    val === "PHI_KHAM" ? "Phí khám" :
+                    val === "DICH_VU" ? "Dịch vụ" : val || "-",
+                }
               ]}
             />
 
@@ -341,10 +348,6 @@ export default function MedicalHistory() {
                 {
                   title: "Số lượng",
                   dataIndex: "so_luong",
-                },
-                {
-                  title: "Đơn giá",
-                  dataIndex: ["thuoc", "gia"],
                 },
                 {
                   title: "Liều dùng",

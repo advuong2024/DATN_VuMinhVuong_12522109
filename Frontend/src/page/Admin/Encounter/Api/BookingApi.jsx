@@ -25,3 +25,8 @@ export const getDoctorCK = async (id) => {
 export const createPatient = async (data) => {
   return axiosClient.post("/benh-nhan", data);
 }
+
+export const reportBusy = async (buoi) => {
+  const res = await axiosClient.post("/dat-lich/bao-ban", { buoi });
+  return res.data;
+}

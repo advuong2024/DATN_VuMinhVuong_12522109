@@ -83,7 +83,7 @@ const getAllDaDen = async (params = {}, user) => {
 
   const where = {
     trang_thai: "DA_DEN",
-    // thoi_gian: getTodayRange(),
+    thoi_gian: getTodayRange(),
   };
 
   if (user.vai_tro === "BAC_SI") {
@@ -305,6 +305,76 @@ const getByDoctorAndDate = (id_bac_si, date) => {
   });
 };
 
+const getUpcomingByDoctor = (id_bac_si, buoi) => {
+  const now = dayjs();
+  const endOfDay = now.endOf("day").toDate();
+  const nowDate = now.toDate();
+
+  const where = {
+    id_bac_si: Number(id_bac_si),
+    trang_thai: "DA_DAT",
+    thoi_gian: {
+      gte: nowDate,
+      lte: endOfDay,
+    },
+  };
+
+  if (buoi === "SANG") {
+    where.thoi_gian.lte = now.startOf("day").hour(11).minute(59).toDate();
+  } else if (buoi === "CHIEU") {
+    where.thoi_gian.gte = dayjs(nowDate).isAfter(dayjs().startOf("day").hour(12))
+      ? nowDate
+      : dayjs().startOf("day").hour(12).toDate();
+  }
+
+  return prisma.dat_lich.findMany({
+    where,
+    include: {
+      benh_nhan: {
+        select: {
+          ten_benh_nhan: true,
+          so_dien_thoai: true,
+        },
+      },
+      chuyen_khoa: {
+        select: {
+          ten_chuyen_khoa: true,
+        },
+      },
+    },
+    orderBy: { thoi_gian: "asc" },
+  });
+};
+
+const reassignDoctor = (id_dat_lich, id_bac_si_moi) => {
+  return prisma.dat_lich.update({
+    where: { id_dat_lich },
+    data: { id_bac_si: id_bac_si_moi },
+    include: {
+      benh_nhan: {
+        select: { ten_benh_nhan: true },
+      },
+      bac_si: {
+        select: { ten_nhan_vien: true },
+      },
+    },
+  });
+};
+
+const demLichHomNay = (id_bac_si) => {
+  const now = dayjs();
+  return prisma.dat_lich.count({
+    where: {
+      id_bac_si: Number(id_bac_si),
+      trang_thai: { in: ["DA_DAT", "DA_DEN"] },
+      thoi_gian: {
+        gte: now.startOf("day").toDate(),
+        lte: now.endOf("day").toDate(),
+      },
+    },
+  });
+};
+
 const canBook = async (id_benh_nhan, date) => {
   const dateRange = date ? {
     gte: dayjs(date).startOf("day").toDate(),
@@ -370,5 +440,8 @@ module.exports = {
     updateStatus,
     remove,
     getByDoctorAndDate,
+    getUpcomingByDoctor,
+    reassignDoctor,
+    demLichHomNay,
     canBook,
 };

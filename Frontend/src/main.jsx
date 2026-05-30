@@ -14,6 +14,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <style>{`
       .ant-select-item-option-active { background-color: #e6f4ff !important; }
       .ant-select-item-option:hover { background-color: #e6f4ff !important; }
+      .ant-modal-title { text-align: center !important; }
     `}</style>
   </React.StrictMode>
 );

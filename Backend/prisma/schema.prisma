@@ -31,6 +31,7 @@ model nhan_vien {
   mo_ta_ngan       String?            @db.Text
   co_so            String?
   nam_kinh_nghiem  Int?
+  so_luong_toi_da  Int?               @default(20)
   is_deleted       Boolean            @default(false)
   created_at       DateTime           @default(now())
   id_chuyen_khoa   Int?

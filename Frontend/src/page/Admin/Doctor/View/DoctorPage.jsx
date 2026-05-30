@@ -57,6 +57,7 @@ export default function PatientManagement() {
         location: item.co_so || null,
         short_desc: item.mo_ta_ngan || null,
         experience: item.nam_kinh_nghiem || null,
+        maxPatients: item.so_luong_toi_da || null,
         certificates: item.chung_chis || [],
       }));
 

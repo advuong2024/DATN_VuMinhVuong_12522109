@@ -1,4 +1,4 @@
-import { Form, Input, Button, Select, Row, Col, Divider } from "antd";
+import { Form, Input, Button, Select, Row, Col, Divider, Tooltip } from "antd";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
@@ -85,10 +85,16 @@ export default function OldPatientForm() {
     const res = await getDoctorCK(value);
 
     setDoctors(
-        (res || []).map((d) => ({
-        label: d.ten_nhan_vien,
-        value: d.id_nhan_vien,
-        }))
+      (res || []).map((d) => {
+        const conLai = d.con_lai !== null ? d.con_lai : null;
+        return {
+          label: d.ten_nhan_vien,
+          value: d.id_nhan_vien,
+          disabled: conLai !== null && conLai <= 0,
+          conLai,
+          max: d.so_luong_toi_da,
+        };
+      })
     );
   };
 
@@ -115,11 +121,15 @@ export default function OldPatientForm() {
 
     console.log("PAYLOAD:", payload);
 
-    await createBooking(payload);
-    toast.success("Đặt lịch thành công");
-
-    form.resetFields();
-    setPatient(null);
+    try {
+      await createBooking(payload);
+      toast.success("Đặt lịch thành công");
+      form.resetFields();
+      setPatient(null);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.response?.data?.message || "Đặt lịch thất bại";
+      toast.error(msg);
+    }
   };
 
   return (
@@ -175,6 +185,19 @@ export default function OldPatientForm() {
                         options={doctors}
                         placeholder="Chọn bác sĩ"
                         disabled={!selectedService}
+                        optionRender={(option) => {
+                          const d = option.data;
+                          const label = d.conLai !== null
+                            ? `${d.label} (còn ${d.conLai}/${d.max})`
+                            : d.label;
+                          return d.disabled ? (
+                            <Tooltip title="Bác sĩ này hôm nay đã tới giới hạn bệnh nhân được khám">
+                              <span style={{ color: "#999" }}>{label}</span>
+                            </Tooltip>
+                          ) : (
+                            <span>{label}</span>
+                          );
+                        }}
                     />
                 </Form.Item>
             </Col>

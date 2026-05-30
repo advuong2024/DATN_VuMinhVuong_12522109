@@ -1,23 +1,22 @@
 import {
   Space,
   Button,
-  Select,
-  DatePicker,
   Input,
   Row,
   Col,
   Modal, 
-  Descriptions,
   Tag,
+  Radio,
 } from "antd";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, BellOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { encounterUrl } from "@/routes/urls";
-import { getBookings } from "../Api/BookingApi"
+import { getBookings, reportBusy } from "../Api/BookingApi"
 import { updateEncounterStatus, createEncounter } from "../Api/EncounterApi"
+import { toast } from "react-toastify";
 
 export default function BookingManagement() {
   const [data, setData] = useState([]);
@@ -28,6 +27,10 @@ export default function BookingManagement() {
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [openBusy, setOpenBusy] = useState(false);
+  const [busyBuoi, setBusyBuoi] = useState("CA_NGAY");
+  const [busyLoading, setBusyLoading] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     fetchData({
@@ -140,6 +143,25 @@ export default function BookingManagement() {
     },
   ];
 
+  const handleReportBusy = async () => {
+    setBusyBuoi("CA_NGAY");
+    setBusyList([]);
+    setOpenBusy(true);
+  };
+
+  const confirmBusy = async () => {
+    try {
+      setBusyLoading(true);
+      const res = await reportBusy(busyBuoi);
+      toast.success(res.message || "Đã gửi thông báo đến lễ tân");
+      setOpenBusy(false);
+    } catch (err) {
+      toast.error("Gửi thông báo thất bại");
+    } finally {
+      setBusyLoading(false);
+    }
+  };
+
   const handleCreateEncounter = async (record) => {
     try {
       let encounterId = record.phieu_kham?.id_phieu_kham;
@@ -187,9 +209,44 @@ export default function BookingManagement() {
               onChange={(e) => setSearchText(e.target.value)}
             />
           </Col>
+          {user?.vai_tro === "BAC_SI" && (
+            <Col>
+              <Button
+                danger
+                icon={<BellOutlined />}
+                onClick={handleReportBusy}
+              >
+                Báo bận
+              </Button>
+            </Col>
+          )}
         </Row>
 
         <DataTable columns={columns} data={data} loading={false} />
+
+        <Modal
+          title="📢 Báo bận"
+          open={openBusy}
+          onOk={confirmBusy}
+          onCancel={() => setOpenBusy(false)}
+          confirmLoading={busyLoading}
+          okText="Xác nhận"
+          cancelText="Hủy"
+        >
+          <p style={{ marginBottom: 12, fontWeight: 500 }}>Chọn thời gian bạn bận:</p>
+          <Radio.Group
+            value={busyBuoi}
+            onChange={(e) => setBusyBuoi(e.target.value)}
+            style={{ marginBottom: 16 }}
+          >
+            <Radio value="CA_NGAY">Cả ngày</Radio>
+            <Radio value="SANG">Buổi sáng (trước 12:00)</Radio>
+            <Radio value="CHIEU">Buổi chiều (từ 12:00)</Radio>
+          </Radio.Group>
+          <p style={{ marginTop: 12, color: "#64748b", fontSize: 13 }}>
+            Thông báo sẽ được gửi đến lễ tân để xử lý.
+          </p>
+        </Modal>
     </div>
   );
 }

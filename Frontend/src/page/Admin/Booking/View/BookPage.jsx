@@ -12,8 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
-import { EyeOutlined } from "@ant-design/icons";
-import { getBookings, updateStatus } from "../Api/BookingApi"
+import { EyeOutlined, SwapOutlined } from "@ant-design/icons";
+import { getBookings, updateStatus, reassignDoctor, getDoctorsBySpecialty } from "../Api/BookingApi"
 import { STATUS_COLORS, STATUS_OPTIONS } from "../Constants/booking_option";
 import { toast } from "react-toastify";
 import EncounterForm from "./ReceptionPaymentForm";
@@ -38,6 +38,11 @@ export default function BookingManagement() {
   });
   const [openEncounter, setOpenEncounter] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [openTransfer, setOpenTransfer] = useState(false);
+  const [selectedTransfer, setSelectedTransfer] = useState(null);
+  const [doctorOptions, setDoctorOptions] = useState([]);
+  const [newDoctorId, setNewDoctorId] = useState(null);
+  const [transferLoading, setTransferLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -67,6 +72,8 @@ export default function BookingManagement() {
 
       const formatted = res.data.map((item) => ({
         key: item.id_dat_lich,
+        id_chuyen_khoa: item.id_chuyen_khoa,
+        id_bac_si: item.id_bac_si,
         name: item.benh_nhan?.ten_benh_nhan,
         phone: item.benh_nhan?.so_dien_thoai,
         specialty: item.chuyen_khoa?.ten_chuyen_khoa,
@@ -107,8 +114,8 @@ export default function BookingManagement() {
       return (
         <Select
           value={status}
-          style={{ width: 130 }}
           disabled
+          style={{ width: "100%" }}
           options={options.map(opt => ({
             value: opt.value,
             label: renderLabel(opt),
@@ -120,8 +127,8 @@ export default function BookingManagement() {
     return (
       <Select
         value={status}
-        style={{ width: 130 }}
         onChange={(value) => handleChangeStatus(value, record)}
+        style={{ width: "100%" }}
         options={options.map(opt => ({
           value: opt.value,
           label: renderLabel(opt),
@@ -132,13 +139,13 @@ export default function BookingManagement() {
 
   const columns = [
     { title: "Tên khách hàng", dataIndex: "name", align: "left", width: 180 },
-    { title: "Số điện thoại", dataIndex: "phone", align: "left", width: 170 },
-    { title: "Chuyên khoa", dataIndex: "specialty", align: "left", width: 180, ellipsis: true},
-    { title: "Ngày",  dataIndex: "date", align: "center", 
-      render: (date) => date ? dayjs(date).format("DD/MM/YYYY") : "-", width: 100 
+    { title: "Số điện thoại", dataIndex: "phone", align: "left", width: 150 },
+    { title: "Chuyên khoa", dataIndex: "specialty", align: "left", ellipsis: true, width: 150 },
+    { title: "Ngày",  dataIndex: "date", align: "center", width: 150, 
+      render: (date) => date ? dayjs(date).format("DD/MM/YYYY") : "-",
     },
-    { title: "Giờ", dataIndex: "time", align: "center", width: 90 },
-    { title: "Tên bác sĩ", dataIndex: "doctor", align: "left", width: 180 },
+    { title: "Giờ", dataIndex: "time", align: "center", width: 80},
+    { title: "Tên bác sĩ", dataIndex: "doctor", align: "left", width: 150 },
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -149,12 +156,21 @@ export default function BookingManagement() {
     {
       title: "Thao tác",
       align: "center",
+      width: 130,
       render: (_, record) => (
         <Space>
           <EyeOutlined style={{ fontSize: 18, cursor: "pointer", color: "#1677ff" }} onClick={() => handleShow(record)} />
+          {record.status === "DA_DAT" && (
+            <Button
+              size="small"
+              icon={<SwapOutlined />}
+              onClick={() => handleTransfer(record)}
+            >
+              Chuyển BS
+            </Button>
+          )}
         </Space>
       ),
-      width: 90,
     },
   ];
 
@@ -193,6 +209,46 @@ export default function BookingManagement() {
   const handleShow = (record) => {
     setViewRecord(record);
     setOpenView(true);
+  };
+
+  const handleTransfer = async (record) => {
+    setSelectedTransfer(record);
+    setNewDoctorId(null);
+    setDoctorOptions([]);
+    setOpenTransfer(true);
+
+    try {
+      const doctors = await getDoctorsBySpecialty(record.id_chuyen_khoa);
+      setDoctorOptions(
+        doctors
+          .filter((d) => d.id_nhan_vien !== record.id_bac_si)
+          .map((d) => ({
+            label: d.ten_nhan_vien,
+            value: d.id_nhan_vien,
+          }))
+      );
+    } catch (err) {
+      toast.error("Không thể tải danh sách bác sĩ");
+    }
+  };
+
+  const confirmTransfer = async () => {
+    if (!newDoctorId) {
+      toast.warning("Vui lòng chọn bác sĩ mới");
+      return;
+    }
+
+    try {
+      setTransferLoading(true);
+      await reassignDoctor(selectedTransfer.key, newDoctorId);
+      toast.success("Chuyển bác sĩ thành công");
+      setOpenTransfer(false);
+      fetchData(filters);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Chuyển bác sĩ thất bại");
+    } finally {
+      setTransferLoading(false);
+    }
   };
 
   return (
@@ -345,6 +401,36 @@ export default function BookingManagement() {
               fetchData();
             }}
           />
+        </Modal>
+
+        <Modal
+          title="Chuyển bác sĩ"
+          open={openTransfer}
+          onCancel={() => setOpenTransfer(false)}
+          onOk={confirmTransfer}
+          confirmLoading={transferLoading}
+          okText="Xác nhận"
+          cancelText="Hủy"
+          centered
+        >
+          {selectedTransfer && (
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="Bệnh nhân">{selectedTransfer.name}</Descriptions.Item>
+              <Descriptions.Item label="Ngày">{dayjs(selectedTransfer.date).format("DD/MM/YYYY")}</Descriptions.Item>
+              <Descriptions.Item label="Giờ">{selectedTransfer.time}</Descriptions.Item>
+              <Descriptions.Item label="BS hiện tại">{selectedTransfer.doctor}</Descriptions.Item>
+            </Descriptions>
+          )}
+          <div style={{ marginTop: 16 }}>
+            <p style={{ marginBottom: 8, fontWeight: 500 }}>Chọn bác sĩ mới:</p>
+            <Select
+              placeholder="Chọn bác sĩ..."
+              style={{ width: "100%" }}
+              value={newDoctorId}
+              onChange={setNewDoctorId}
+              options={doctorOptions}
+            />
+          </div>
         </Modal>
 
         <Modal

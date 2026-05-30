@@ -65,7 +65,7 @@ export default function EncounterPage() {
             id_dich_vu: Number(s.id_dich_vu),
             so_luong: Number(s.so_luong || 1),
             gia: Number(s.gia),
-            trang_thai: "HOAN_THANH",
+            trang_thai: s.loai_chi_tiet === "PHI_KHAM" ? "HOAN_THANH" : (s.trang_thai || "CHO_THUC_HIEN"),
             id_bac_si: bookingData.doctorId,
             loai_chi_tiet: s.loai_chi_tiet || "DICH_VU",
           })),
