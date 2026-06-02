@@ -79,12 +79,19 @@ const getAll = (params = {}) => {
 };
 
 const getAllDaDen = async (params = {}, user) => {
-  const { search } = params;
+  const { search, startDate, endDate } = params;
 
   const where = {
     trang_thai: "DA_DEN",
-    thoi_gian: getTodayRange(),
   };
+
+  if (startDate || endDate) {
+    where.thoi_gian = {};
+    if (startDate) where.thoi_gian.gte = dayjs(startDate).startOf("day").toDate();
+    if (endDate) where.thoi_gian.lte = dayjs(endDate).endOf("day").toDate();
+  } else {
+    where.thoi_gian = getTodayRange();
+  }
 
   if (user.vai_tro === "BAC_SI") {
     where.id_bac_si = user.id_nhan_vien;
@@ -361,15 +368,15 @@ const reassignDoctor = (id_dat_lich, id_bac_si_moi) => {
   });
 };
 
-const demLichHomNay = (id_bac_si) => {
-  const now = dayjs();
+const demLichTheoNgay = (id_bac_si, date) => {
+  const ngay = date ? dayjs(date) : dayjs();
   return prisma.dat_lich.count({
     where: {
       id_bac_si: Number(id_bac_si),
       trang_thai: { in: ["DA_DAT", "DA_DEN"] },
       thoi_gian: {
-        gte: now.startOf("day").toDate(),
-        lte: now.endOf("day").toDate(),
+        gte: ngay.startOf("day").toDate(),
+        lte: ngay.endOf("day").toDate(),
       },
     },
   });
@@ -430,6 +437,25 @@ const canBook = async (id_benh_nhan, date) => {
   };
 };
 
+const kiemTraCoTheBaoBan = async (id_bac_si) => {
+  const now = dayjs();
+  const motTiengSau = now.add(1, "hour").toDate();
+
+  const lichGanNhat = await prisma.dat_lich.findFirst({
+    where: {
+      id_bac_si: Number(id_bac_si),
+      trang_thai: "DA_DAT",
+      thoi_gian: {
+        gte: now.toDate(),
+        lte: motTiengSau,
+      },
+    },
+    orderBy: { thoi_gian: "asc" },
+  });
+
+  return lichGanNhat;
+};
+
 module.exports = {
     getAll,
     getAllDaDen,
@@ -442,6 +468,7 @@ module.exports = {
     getByDoctorAndDate,
     getUpcomingByDoctor,
     reassignDoctor,
-    demLichHomNay,
+    demLichTheoNgay,
     canBook,
+    kiemTraCoTheBaoBan,
 };

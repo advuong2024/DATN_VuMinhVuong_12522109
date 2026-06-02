@@ -30,3 +30,8 @@ export const reportBusy = async (buoi) => {
   const res = await axiosClient.post("/dat-lich/bao-ban", { buoi });
   return res.data;
 }
+
+export const getKiemTraBaoBan = async () => {
+  const res = await axiosClient.get("/dat-lich/co-the-bao-ban");
+  return res.data;
+}

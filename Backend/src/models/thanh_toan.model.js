@@ -440,8 +440,13 @@ const pay = async (data) => {
           },
         });
 
-        await tx.thanh_toan_chi_tiet.delete({
-          where: {id_thanh_toan}
+        await tx.thanh_toan_chi_tiet.deleteMany({
+          where: {
+            thanh_toan: {
+              id_phieu_kham,
+              loai_thanh_toan: "THUOC",
+            },
+          },
         });
   
         await tx.don_thuoc.updateMany({

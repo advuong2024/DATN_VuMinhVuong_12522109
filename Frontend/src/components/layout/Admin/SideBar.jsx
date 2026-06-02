@@ -42,7 +42,7 @@ const menuItems = [
 
   {
     key: "/admin/encounter",
-    label: "Phiên khám",
+    label: "Khám bệnh",
     icon: <BsClipboardCheck size={16} />,
     roles: ["ADMIN", "BAC_SI"],
   },

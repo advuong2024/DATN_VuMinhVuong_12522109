@@ -305,9 +305,11 @@ export default function AccountManagement() {
       <DataTable columns={columns} data={filteredData} loading={false} />
 
       <Modal
+        centered
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
+        destroyOnClose
         title={
             <div style={{ textAlign: "center", width: "100%" }}>
               {editingRecord ? "CẬP NHẬT TÀI KHOẢN" : "THÊM TÀI KHOẢN"}

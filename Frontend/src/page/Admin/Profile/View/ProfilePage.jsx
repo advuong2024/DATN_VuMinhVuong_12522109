@@ -68,12 +68,12 @@ export default function ProfilePage() {
     try {
       await createCertificate(newCert);
       message.success("Đã thêm chứng chỉ");
-      setNewCert({ ten_chung_chi: "", noi_cap: "", nam_cap: null });
       const certs = await getCertificates();
       setCertificates(certs);
     } catch (err) {
       message.error("Thêm chứng chỉ thất bại");
     }
+    setNewCert({ ten_chung_chi: "", noi_cap: "", nam_cap: null });
   };
 
   const handleDeleteCert = (cert) => {

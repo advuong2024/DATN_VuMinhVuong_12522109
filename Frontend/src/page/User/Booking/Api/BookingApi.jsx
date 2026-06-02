@@ -5,8 +5,9 @@ export const getCK = async () => {
     return res.data;
 }
 
-export const getDoctorCK = async (id) => {
-    const res = await axiosClient.get(`/nhan-vien/bac-si/${id}`);
+export const getDoctorCK = async (id, date) => {
+    const params = date ? { date } : {};
+    const res = await axiosClient.get(`/nhan-vien/bac-si/${id}`, { params });
     return res.data;
 }
 

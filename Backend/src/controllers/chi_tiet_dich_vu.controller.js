@@ -1,5 +1,6 @@
 const ChiTietDichVu = require("../models/Chi_tiet_dich_vu.model");
 const cloudinary = require("../utils/cloudinary");
+const fs = require("fs");
 
 function normalize(body = {}) {
   if (body.ghi_chu && typeof body.ghi_chu === "string") {
@@ -153,6 +154,7 @@ exports.updateResult = async (req, res) => {
         resource_type: resourceType,
       });
       file_ket_qua = result.secure_url;
+      fs.unlinkSync(req.file.path);
     }
 
     const data = {

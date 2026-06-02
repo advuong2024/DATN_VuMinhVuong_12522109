@@ -4,26 +4,29 @@ import {
   Input,
   Row,
   Col,
-  Modal, 
+  Modal,
   Tag,
   Radio,
+  DatePicker,
+  Tooltip,
 } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import dayjs from "dayjs";
 import DataTable from "@/components/common/DataTable";
-import { EyeOutlined, BellOutlined } from "@ant-design/icons";
+import { LeftOutlined, RightOutlined, BellOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { encounterUrl } from "@/routes/urls";
-import { getBookings, reportBusy } from "../Api/BookingApi"
+import { getBookings, getKiemTraBaoBan, reportBusy } from "../Api/BookingApi"
 import { updateEncounterStatus, createEncounter } from "../Api/EncounterApi"
 import { toast } from "react-toastify";
+
+const DATE_FORMAT = "DD/MM/YYYY";
 
 export default function BookingManagement() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-  const [viewRecord, setViewRecord] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [coTheBaoBan, setCoTheBaoBan] = useState(true);
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -32,27 +35,17 @@ export default function BookingManagement() {
   const [busyLoading, setBusyLoading] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
 
-  useEffect(() => {
-    fetchData({
-      search: debouncedSearch,
-    });
-  }, [debouncedSearch]);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchText]);
-
-  const fetchData = async (filters = {}) => {
+  const fetchData = useCallback(async (filters = {}) => {
     try {
       setLoading(true);
-  
+
+      const dateStr = selectedDate.format("YYYY-MM-DD");
       const res = await getBookings({
-        ...filters,});
-  
+        startDate: dateStr,
+        endDate: dateStr,
+        ...filters,
+      });
+
       const formatted = res.data.map((item) => ({
         key: item.id_dat_lich,
         bookingId: item.id_dat_lich,
@@ -69,15 +62,49 @@ export default function BookingManagement() {
         phieu_kham: item.phieu_kham,
       }));
 
-      console.log("DATA:", formatted)
-  
       setData(formatted);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    fetchData({ search: debouncedSearch });
+  }, [debouncedSearch, fetchData]);
+
+  useEffect(() => {
+    if (user?.vai_tro !== "BAC_SI") return;
+    getKiemTraBaoBan()
+      .then((res) => setCoTheBaoBan(res.coTheBaoBan))
+      .catch(() => setCoTheBaoBan(false));
+  }, [selectedDate]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  const goToPrevDay = () => {
+    setSelectedDate((prev) => prev.subtract(1, "day"));
   };
+
+  const maxDate = dayjs().add(3, "day");
+
+  const goToNextDay = () => {
+    setSelectedDate((prev) => prev.add(1, "day"));
+  };
+
+  const goToToday = () => {
+    setSelectedDate(dayjs());
+  };
+
+  const isToday = selectedDate.isSame(dayjs(), "day");
+  const isMaxForward = selectedDate.isSame(maxDate, "day");
 
   const columns = [
     { title: "Tên khách hàng", dataIndex: "name", align: "left", width: 185 },
@@ -91,6 +118,10 @@ export default function BookingManagement() {
       width: 150,
       render: (_, record) => {
         const pk = record.phieu_kham;
+
+        if (!pk) {
+          return <Tag color="default">Chưa khám</Tag>;
+        }
 
         if (pk.trang_thai === "NHAP") {
           return <Tag color="gold">Tạm dừng</Tag>
@@ -124,6 +155,8 @@ export default function BookingManagement() {
         const isPaused =
           pk?.trang_thai === "NHAP";
 
+        const hasEncounter = !!pk;
+
         return (
           <Button
             type={isPaused ? "primary" : "primary"}
@@ -133,9 +166,13 @@ export default function BookingManagement() {
             }
           >
             {
-              isPaused
-                ? "Tiếp tục"
-                : "Khám"
+              isDone
+                ? "Đã xong"
+                : isPaused
+                  ? "Tiếp tục"
+                  : hasEncounter
+                    ? "Khám"
+                    : "Khám"
             }
           </Button>
         );
@@ -145,7 +182,6 @@ export default function BookingManagement() {
 
   const handleReportBusy = async () => {
     setBusyBuoi("CA_NGAY");
-    setBusyList([]);
     setOpenBusy(true);
   };
 
@@ -199,54 +235,96 @@ export default function BookingManagement() {
 
   return (
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
-        <h3 style={{ marginBottom: 16 }}>Quản lý phiên khám</h3>
+      <Row align="middle" justify="space-between" style={{ marginBottom: 16 }}>
+        <Col>
+          <h3 style={{ margin: 0 }}>Quản lý khám bệnh</h3>
+        </Col>
+      </Row>
 
-        <Row gutter={16} justify="end" style={{ marginBottom: 16, }}>
-          <Col span={6}>
-            <Input
-              placeholder="Tìm theo tên / SĐT"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+      <Row gutter={16} align="middle" style={{ marginBottom: 16, marginTop: 20 }}>
+        <Col>
+          <Space.Compact>
+            <Button type="primary" icon={<LeftOutlined />} onClick={goToPrevDay} />
+            <DatePicker
+              value={selectedDate}
+              onChange={(date) => date && setSelectedDate(date)}
+              format={DATE_FORMAT}
+              allowClear={false}
+              disabledDate={(current) => current && current.isAfter(maxDate, "day")}
+              style={{ width: 140, textAlign: "center" }}
             />
-          </Col>
-          {user?.vai_tro === "BAC_SI" && (
-            <Col>
-              <Button
-                danger
-                icon={<BellOutlined />}
-                onClick={handleReportBusy}
-              >
-                Báo bận
-              </Button>
+            <Button
+              type="primary"
+              icon={<RightOutlined />}
+              onClick={goToNextDay}
+              disabled={isMaxForward}
+            />
+          </Space.Compact>
+        </Col>
+        <Col>
+          <Button type="primary" onClick={goToToday} disabled={isToday}>
+            Hôm nay
+          </Button>
+        </Col>
+        <Col flex="auto">
+          <Row justify="end" gutter={16}>
+            <Col span={8} style={{ maxWidth: 300 }}>
+              <Input
+                placeholder="Tìm theo tên / SĐT"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
             </Col>
-          )}
-        </Row>
+            {user?.vai_tro === "BAC_SI" && (
+              <Col>
+                <Tooltip
+                  title={
+                    !coTheBaoBan
+                      ? "Có lịch hẹn trong vòng 1 giờ tới, không thể báo bận"
+                      : undefined
+                  }
+                >
+                  <Button
+                    type="primary"
+                    danger
+                    icon={<BellOutlined />}
+                    onClick={handleReportBusy}
+                    disabled={!coTheBaoBan}
+                  >
+                    Báo bận
+                  </Button>
+                </Tooltip>
+              </Col>
+            )}
+          </Row>
+        </Col>
+      </Row>
 
-        <DataTable columns={columns} data={data} loading={false} />
+      <DataTable columns={columns} data={data} loading={loading} />
 
-        <Modal
-          title="📢 Báo bận"
-          open={openBusy}
-          onOk={confirmBusy}
-          onCancel={() => setOpenBusy(false)}
-          confirmLoading={busyLoading}
-          okText="Xác nhận"
-          cancelText="Hủy"
+      <Modal
+        title="📢 Báo bận"
+        open={openBusy}
+        onOk={confirmBusy}
+        onCancel={() => setOpenBusy(false)}
+        confirmLoading={busyLoading}
+        okText="Xác nhận"
+        cancelText="Hủy"
+      >
+        <p style={{ marginBottom: 12, fontWeight: 500 }}>Chọn thời gian bạn bận:</p>
+        <Radio.Group
+          value={busyBuoi}
+          onChange={(e) => setBusyBuoi(e.target.value)}
+          style={{ marginBottom: 16 }}
         >
-          <p style={{ marginBottom: 12, fontWeight: 500 }}>Chọn thời gian bạn bận:</p>
-          <Radio.Group
-            value={busyBuoi}
-            onChange={(e) => setBusyBuoi(e.target.value)}
-            style={{ marginBottom: 16 }}
-          >
-            <Radio value="CA_NGAY">Cả ngày</Radio>
-            <Radio value="SANG">Buổi sáng (trước 12:00)</Radio>
-            <Radio value="CHIEU">Buổi chiều (từ 12:00)</Radio>
-          </Radio.Group>
-          <p style={{ marginTop: 12, color: "#64748b", fontSize: 13 }}>
-            Thông báo sẽ được gửi đến lễ tân để xử lý.
-          </p>
-        </Modal>
+          <Radio value="CA_NGAY">Cả ngày</Radio>
+          <Radio value="SANG">Buổi sáng (trước 12:00)</Radio>
+          <Radio value="CHIEU">Buổi chiều (từ 12:00)</Radio>
+        </Radio.Group>
+        <p style={{ marginTop: 12, color: "#64748b", fontSize: 13 }}>
+          Thông báo sẽ được gửi đến lễ tân để xử lý.
+        </p>
+      </Modal>
     </div>
   );
 }

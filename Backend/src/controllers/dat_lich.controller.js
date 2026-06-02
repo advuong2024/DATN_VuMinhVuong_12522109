@@ -2,13 +2,13 @@ const LichHen = require("../models/dat_lich.model");
 const prisma = require("../prisma/client");
 const { taoThongBao, taoThongBaoNhieuNguoi } = require("../utils/thong_bao.helper");
 
-const kiemTraSlot = async (id_bac_si) => {
+const kiemTraSlot = async (id_bac_si, date) => {
   const bs = await prisma.nhan_vien.findUnique({
     where: { id_nhan_vien: id_bac_si },
     select: { so_luong_toi_da: true },
   });
   if (bs && bs.so_luong_toi_da !== null) {
-    const daDat = await LichHen.demLichHomNay(id_bac_si);
+    const daDat = await LichHen.demLichTheoNgay(id_bac_si, date);
     if (daDat >= bs.so_luong_toi_da) {
       const err = new Error("Bác sĩ đã đạt số lượng bệnh nhân tối đa trong ngày");
       err.status = 400;
@@ -154,7 +154,7 @@ exports.createBooking = async (req, res) => {
     }
 
     const doctorId = Number(booking.doctor?.value || booking.doctor);
-    await kiemTraSlot(doctorId);
+    await kiemTraSlot(doctorId, booking.date);
 
     const result = await LichHen.insertBooking(data);
     const leTans = await prisma.tai_khoan.findMany({
@@ -313,7 +313,7 @@ exports.reassignDoctor = async (req, res) => {
       return res.status(400).json({ error: "Bác sĩ mới không cùng chuyên khoa" });
     }
 
-    await kiemTraSlot(id_bac_si_moi);
+    await kiemTraSlot(id_bac_si_moi, existing.thoi_gian);
 
     const updated = await LichHen.reassignDoctor(id, id_bac_si_moi);
 
@@ -359,6 +359,27 @@ exports.canBook = async (req, res) => {
     const result = await LichHen.canBook(id, date);
 
     return res.json(result);
+  } catch (err) {
+    console.error("🔥 ERROR:", err);
+    return res.status(500).json({ message: "Lỗi" });
+  }
+};
+
+exports.kiemTraCoTheBaoBan = async (req, res) => {
+  try {
+    const doctorId = req.user.id_nhan_vien;
+    const lich = await LichHen.kiemTraCoTheBaoBan(doctorId);
+
+    return res.json({
+      coTheBaoBan: !lich,
+      lichGanNhat: lich
+        ? {
+            id_dat_lich: lich.id_dat_lich,
+            thoi_gian: lich.thoi_gian,
+            benh_nhan: lich.benh_nhan,
+          }
+        : null,
+    });
   } catch (err) {
     console.error("🔥 ERROR:", err);
     return res.status(500).json({ message: "Lỗi" });

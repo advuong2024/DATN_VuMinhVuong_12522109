@@ -26,6 +26,9 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
   };
 
   useEffect(() => {
+    setNewCertName("");
+    setNewCertIssuer("");
+    setNewCertYear("");
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,

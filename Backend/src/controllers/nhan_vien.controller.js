@@ -121,7 +121,7 @@ exports.getBacSiByChuyenKhoa = async (req, res) => {
       return res.status(400).json({ error: "id chuyên khoa không hợp lệ" });
     }
 
-    const data = await NhanVien.get_bacsi_Chuyenkhoa(id_chuyen_khoa);
+    const data = await NhanVien.get_bacsi_Chuyenkhoa(id_chuyen_khoa, req.query.date);
 
     res.json(data);
   } catch (err) {

@@ -7,7 +7,7 @@ export const getAccounts = async (params) => {
 
 export const getEmployeesNoAccount = async () => {
   const res = await axiosClient.get("/nhan-vien/chua-co-tai-khoan");
-  return res.data;
+  return res;
 };
 
 export const getPatientsNoAccount = async () => {

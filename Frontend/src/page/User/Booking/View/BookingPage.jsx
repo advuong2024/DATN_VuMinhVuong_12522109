@@ -144,7 +144,7 @@ export default function BookingPage() {
 
   const handleChangeCK = async (value) => {
     try {
-      const data = await getDoctorCK(value);
+      const data = await getDoctorCK(value, selectedDate);
 
       setDoctors(
         data.map((item) => {

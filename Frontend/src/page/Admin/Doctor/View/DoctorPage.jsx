@@ -204,6 +204,7 @@ export default function PatientManagement() {
         onCancel={() => setOpen(false)}
         footer={null}
         width={800}
+        destroyOnClose
         title={
           <div style={{ textAlign: "center" }}>
             {editingRecord ? "CẬP NHẬT" : "THÊM"} BÁC SĨ

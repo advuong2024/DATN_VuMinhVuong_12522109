@@ -24,7 +24,7 @@
    });
   };
 
-const get_bacsi_Chuyenkhoa = async (id_chuyen_khoa) => {
+const get_bacsi_Chuyenkhoa = async (id_chuyen_khoa, date) => {
   const dayjs = require("dayjs");
   const prisma = require("../prisma/client");
 
@@ -41,9 +41,9 @@ const get_bacsi_Chuyenkhoa = async (id_chuyen_khoa) => {
     }
   });
 
-  const now = dayjs();
-  const startOfDay = now.startOf("day").toDate();
-  const endOfDay = now.endOf("day").toDate();
+  const ngay = date ? dayjs(date) : dayjs();
+  const startOfDay = ngay.startOf("day").toDate();
+  const endOfDay = ngay.endOf("day").toDate();
 
   const result = await Promise.all(
     bacSiList.map(async (bs) => {

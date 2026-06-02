@@ -90,10 +90,13 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
             onChange={(value) => {
               const selected = servicesOptions.find(s => s.value === value);
               const newData = [...services];
+              const price = selected?.price || 0;
+              const quantity = newData[index]?.so_luong || 1;
               newData[index] = {
                 ...newData[index],
                 id_dich_vu: value,
-                gia: selected?.price || 0
+                gia: price,
+                thanh_tien: calcTotal(price, quantity)
               };
               setServices(newData);
             }}
@@ -178,10 +181,13 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
             onChange={(value) => {
               const selected = medicinesOptions.find(m => m.value === value);
               const newData = [...medicines];
+              const price = selected?.price || 0;
+              const quantity = newData[index]?.so_luong || 1;
               newData[index] = {
                 ...newData[index],
                 id_thuoc: value,
-                gia: selected?.price || 0
+                gia: price,
+                thanh_tien: calcTotal(price, quantity)
               };
               setMedicines(newData);
             }}

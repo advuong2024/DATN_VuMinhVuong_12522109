@@ -3,6 +3,7 @@ const router = express.Router();
 const controller = require("../controllers/dat_lich.controller");
 const verifyToken = require("../middlewares/auth.middleware");
 
+router.get("/co-the-bao-ban", verifyToken, controller.kiemTraCoTheBaoBan);
 router.post("/bao-ban", verifyToken, controller.reportBusy);
 router.patch("/:id/chuyen-bac-si", verifyToken, controller.reassignDoctor);
 router.get("/:id/can-book", controller.canBook)
