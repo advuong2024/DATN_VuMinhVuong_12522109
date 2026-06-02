@@ -294,6 +294,13 @@ const updateStatus = (id_dat_lich, trang_thai) => {
   });
 };
 
+const bulkUpdateStatus = (ids, trang_thai) => {
+  return prisma.dat_lich.updateMany({
+    where: { id_dat_lich: { in: ids } },
+    data: { trang_thai },
+  });
+};
+
 const remove = (id_dat_lich) => {
   return prisma.dat_lich.delete({
     where: { id_dat_lich },
@@ -464,6 +471,7 @@ module.exports = {
     insertBooking,
     update,
     updateStatus,
+    bulkUpdateStatus,
     remove,
     getByDoctorAndDate,
     getUpcomingByDoctor,

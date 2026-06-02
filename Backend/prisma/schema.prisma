@@ -296,6 +296,7 @@ enum TrangThaiLichHen {
   DA_DAT
   DA_HUY
   DA_DEN
+  BAO_BAN
 }
 
 enum TrangThaiPhieuKham {

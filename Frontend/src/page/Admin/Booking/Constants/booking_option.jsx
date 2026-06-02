@@ -2,6 +2,7 @@ export const STATUS_COLORS = {
   DA_DAT: "#faad14",
   DA_DEN: "#52c41a",
   DA_HUY: "#ff4d4f",
+  BAO_BAN: "#ff7a00",
 };
 
 export const STATUS_OPTIONS = [

@@ -97,6 +97,7 @@ export default function BookingManagement() {
   const renderStatusSelect = (status, record, handleChangeStatus) => {
     const isDone = status === "DA_DEN";
     const isCancelled = status === "DA_HUY";
+    const isBaoBan = status === "BAO_BAN";
 
     let options = STATUS_OPTIONS;
 
@@ -120,6 +121,17 @@ export default function BookingManagement() {
             value: opt.value,
             label: renderLabel(opt),
           }))}
+        />
+      );
+    }
+
+    if (isBaoBan) {
+      return (
+        <Select
+          value={status}
+          disabled
+          style={{ width: "100%" }}
+          options={[{ value: "BAO_BAN", label: <span style={{ color: "#ff7a00" }}>Báo bận</span> }]}
         />
       );
     }
@@ -160,7 +172,7 @@ export default function BookingManagement() {
       render: (_, record) => (
         <Space>
           <EyeOutlined style={{ fontSize: 18, cursor: "pointer", color: "#1677ff" }} onClick={() => handleShow(record)} />
-          {record.status === "DA_DAT" && (
+          {record.status === "BAO_BAN" && (
             <Button
               size="small"
               icon={<SwapOutlined />}

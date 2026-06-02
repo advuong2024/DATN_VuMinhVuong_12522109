@@ -251,6 +251,13 @@ exports.reportBusy = async (req, res) => {
 
     const appointments = await LichHen.getUpcomingByDoctor(doctorId, buoi);
 
+    if (appointments.length > 0) {
+      await LichHen.bulkUpdateStatus(
+        appointments.map(a => a.id_dat_lich),
+        "BAO_BAN"
+      );
+    }
+
     const tenBS = await prisma.nhan_vien.findUnique({
       where: { id_nhan_vien: doctorId },
       select: { ten_nhan_vien: true },
@@ -301,8 +308,8 @@ exports.reassignDoctor = async (req, res) => {
     if (!existing) {
       return res.status(404).json({ error: "Không tìm thấy lịch hẹn" });
     }
-    if (existing.trang_thai !== "DA_DAT") {
-      return res.status(400).json({ error: "Chỉ được chuyển bác sĩ khi lịch hẹn ở trạng thái Đã đặt" });
+    if (!["DA_DAT", "BAO_BAN"].includes(existing.trang_thai)) {
+      return res.status(400).json({ error: "Chỉ được chuyển bác sĩ khi lịch hẹn ở trạng thái Đã đặt hoặc Báo bận" });
     }
 
     const bsMoi = await prisma.nhan_vien.findUnique({
@@ -316,6 +323,10 @@ exports.reassignDoctor = async (req, res) => {
     await kiemTraSlot(id_bac_si_moi, existing.thoi_gian);
 
     const updated = await LichHen.reassignDoctor(id, id_bac_si_moi);
+
+    if (existing.trang_thai === "BAO_BAN") {
+      await LichHen.updateStatus(id, "DA_DAT");
+    }
 
     const bsCu = await prisma.nhan_vien.findUnique({
       where: { id_nhan_vien: existing.id_bac_si },
