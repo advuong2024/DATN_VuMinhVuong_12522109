@@ -8,6 +8,7 @@ export default function AccountForm({ initialValues, onSubmit }) {
   const [accountType, setAccountType] = useState("staff");
   const [employeeOptions, setEmployeeOptions] = useState([]);
   const [patientOptions, setPatientOptions] = useState([]);
+  const [patients, setPatients] = useState([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -29,6 +30,7 @@ export default function AccountForm({ initialValues, onSubmit }) {
       try {
         const res = await getPatientsNoAccount();
         const patients = Array.isArray(res.data) ? res.data : [];
+        setPatients(patients);
         setPatientOptions(
           patients.map(p => ({
             label: `${p.ten_benh_nhan} (${p.so_dien_thoai || "N/A"})`,
@@ -53,12 +55,18 @@ export default function AccountForm({ initialValues, onSubmit }) {
     }
   }, [initialValues, employeeOptions]);
 
+  useEffect(() => {
+    if (initialValues) {
+      setAccountType(initialValues.employeeId ? "staff" : "patient");
+    }
+  }, [initialValues]);
+
   const handleFinish = (values) => {
     const payload = {
       username: values.username,
       password: values.password,
       trang_thai: values.status ? "HOAT_DONG" : "KHOA",
-      vai_tro: values.role,
+      vai_tro: accountType === "patient" ? "NGUOI_DUNG" : values.role,
     };
 
     if (accountType === "staff") {
@@ -73,7 +81,18 @@ export default function AccountForm({ initialValues, onSubmit }) {
 
   const handleTypeChange = (e) => {
     setAccountType(e.target.value);
-    form.setFieldsValue({ employeeId: undefined, patientId: undefined });
+    const reset = { employeeId: undefined, patientId: undefined, username: undefined };
+    if (e.target.value === "patient") {
+      reset.role = "NGUOI_DUNG";
+    }
+    form.setFieldsValue(reset);
+  };
+
+  const handlePatientChange = (value) => {
+    const patient = patients.find(p => String(p.id_benh_nhan) === value);
+    if (patient?.so_dien_thoai) {
+      form.setFieldsValue({ username: patient.so_dien_thoai });
+    }
   };
 
   return (
@@ -115,6 +134,7 @@ export default function AccountForm({ initialValues, onSubmit }) {
             options={patientOptions}
             showSearch
             optionFilterProp="label"
+            onChange={handlePatientChange}
           />
         </Form.Item>
       )}
@@ -124,10 +144,10 @@ export default function AccountForm({ initialValues, onSubmit }) {
         name="username"
         rules={[
           { required: true, message: "Vui lòng nhập tên đăng nhập" },
-          { min: 4, message: "Ít nhất 4 ký tự" },
+          ...(accountType === "staff" ? [{ min: 4, message: "Ít nhất 4 ký tự" }] : []),
         ]}
       >
-        <Input placeholder="Nhập tên đăng nhập" />
+        <Input placeholder="Nhập tên đăng nhập" disabled={accountType === "patient"} />
       </Form.Item>
 
       <Form.Item
@@ -151,11 +171,8 @@ export default function AccountForm({ initialValues, onSubmit }) {
       >
         <Select
           placeholder="Chọn vai trò"
-          options={
-            accountType === "patient"
-              ? ROLE_OPTIONS.filter((r) => r.value === "NGUOI_DUNG")
-              : ROLE_OPTIONS
-          }
+          options={ROLE_OPTIONS}
+          disabled={accountType === "patient"}
         />
       </Form.Item>
 

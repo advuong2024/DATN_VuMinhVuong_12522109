@@ -21,8 +21,9 @@ export const createPayment = async (data) => {
   return res;
 };
 
-export const getServices = async () => {
-  const res = await axiosClient.get("/dich-vu");
+export const getServices = async (chuyenKhoa) => {
+  const params = chuyenKhoa ? { chuyen_khoa: chuyenKhoa } : {};
+  const res = await axiosClient.get("/dich-vu", { params });
   return res;
 };
 

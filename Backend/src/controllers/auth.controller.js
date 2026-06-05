@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const TaiKhoan = require("../models/tai_khoan.model");
+const BenhNhan = require("../models/benh_nhan.model");
 
 const {
   generateAccessToken,
@@ -29,8 +30,8 @@ exports.login = async (req, res) => {
     const accessToken = generateAccessToken({
       id_tai_khoan: account.id_tai_khoan,
       vai_tro: account.vai_tro,
-      id_nhan_vien:
-        account.nhan_vien?.id_nhan_vien,
+      id_nhan_vien: account.nhan_vien?.id_nhan_vien,
+      id_benh_nhan: account.benh_nhan?.id_benh_nhan,
     });
     const refreshToken = generateRefreshToken(account);
 
@@ -40,6 +41,7 @@ exports.login = async (req, res) => {
     );
 
     const safeUser = {
+      id_tai_khoan: account.id_tai_khoan,
       vai_tro: account.vai_tro,
       trang_thai: account.trang_thai,
 
@@ -57,6 +59,12 @@ exports.login = async (req, res) => {
             id_benh_nhan: account.benh_nhan.id_benh_nhan,
             ten_benh_nhan: account.benh_nhan.ten_benh_nhan,
             so_dien_thoai: account.benh_nhan.so_dien_thoai,
+            ngay_sinh: account.benh_nhan.ngay_sinh,
+            gioi_tinh: account.benh_nhan.gioi_tinh,
+            dia_chi: account.benh_nhan.dia_chi,
+            CCCD: account.benh_nhan.CCCD,
+            email: account.benh_nhan.email,
+            tien_su_benh: account.benh_nhan.tien_su_benh,
           }
         : null,
     };
@@ -65,6 +73,104 @@ exports.login = async (req, res) => {
       accessToken,
       refreshToken,
       user: safeUser,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+exports.register = async (req, res) => {
+  try {
+    const { phone, password, patientData } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ error: "Vui lòng nhập số điện thoại và mật khẩu" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Mật khẩu phải có ít nhất 6 ký tự" });
+    }
+
+    const existingAccount = await TaiKhoan.findByUsername(phone);
+    if (existingAccount) {
+      return res.status(400).json({ error: "Số điện thoại này đã được đăng ký tài khoản" });
+    }
+
+    let benhNhanId;
+    let existingPatient = null;
+
+    if (patientData && patientData.id_benh_nhan) {
+      existingPatient = await BenhNhan.getById(Number(patientData.id_benh_nhan));
+      if (!existingPatient) {
+        return res.status(400).json({ error: "Không tìm thấy thông tin bệnh nhân" });
+      }
+      benhNhanId = existingPatient.id_benh_nhan;
+    } else {
+      const foundByPhone = await BenhNhan.findByPhoneOrCCCD(phone, null);
+      if (foundByPhone) {
+        existingPatient = foundByPhone;
+        benhNhanId = foundByPhone.id_benh_nhan;
+      } else if (patientData) {
+        const newPatient = await BenhNhan.insert({
+          ten_benh_nhan: patientData.ten_benh_nhan,
+          so_dien_thoai: phone,
+          ngay_sinh: patientData.ngay_sinh ? new Date(patientData.ngay_sinh) : new Date(),
+          gioi_tinh: patientData.gioi_tinh || "KHAC",
+          CCCD: patientData.CCCD || "",
+          dia_chi: patientData.dia_chi || "",
+          email: patientData.email || "",
+          tien_su_benh: patientData.tien_su_benh || "",
+        });
+        benhNhanId = newPatient.id_benh_nhan;
+      } else {
+        return res.status(400).json({ error: "Không tìm thấy bệnh nhân với số điện thoại này" });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newAccount = await TaiKhoan.insert({
+      username: phone,
+      password: hashedPassword,
+      vai_tro: "NGUOI_DUNG",
+      trang_thai: "HOAT_DONG",
+      benh_nhan: {
+        connect: { id_benh_nhan: benhNhanId },
+      },
+    });
+
+    const accessToken = generateAccessToken({
+      id_tai_khoan: newAccount.id_tai_khoan,
+      username: phone,
+      vai_tro: "NGUOI_DUNG",
+      id_benh_nhan: benhNhanId,
+    });
+    const refreshToken = generateRefreshToken(newAccount);
+
+    await TaiKhoan.saveRefreshToken(newAccount.id_tai_khoan, refreshToken);
+
+    const patientInfo = existingPatient || await BenhNhan.getById(benhNhanId);
+
+    return res.status(201).json({
+      accessToken,
+      refreshToken,
+      user: {
+        id_tai_khoan: newAccount.id_tai_khoan,
+        vai_tro: "NGUOI_DUNG",
+        trang_thai: "HOAT_DONG",
+        benh_nhan: {
+          id_benh_nhan: patientInfo.id_benh_nhan,
+          ten_benh_nhan: patientInfo.ten_benh_nhan,
+          so_dien_thoai: phone,
+          ngay_sinh: patientInfo.ngay_sinh,
+          gioi_tinh: patientInfo.gioi_tinh,
+          dia_chi: patientInfo.dia_chi,
+          CCCD: patientInfo.CCCD,
+          email: patientInfo.email,
+          tien_su_benh: patientInfo.tien_su_benh,
+        },
+      },
     });
   } catch (err) {
     console.error(err);
@@ -95,6 +201,7 @@ exports.refresh = async (req, res) => {
       id_tai_khoan: account.id_tai_khoan,
       vai_tro: account.vai_tro,
       id_nhan_vien: account.nhan_vien?.id_nhan_vien,
+      id_benh_nhan: account.benh_nhan?.id_benh_nhan,
     });
     const newRefreshToken = generateRefreshToken(account);
 

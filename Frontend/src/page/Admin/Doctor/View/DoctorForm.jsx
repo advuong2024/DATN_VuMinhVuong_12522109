@@ -222,6 +222,14 @@ export default function PatientForm({ form, initialValues, onSuccess }) {
         </Col>
 
         <Col span={12}>
+          <Form.Item label="Phí khám (VNĐ)" name="phi_kham"
+            tooltip="Phí khám của bác sĩ, tự động áp dụng khi đón tiếp bệnh nhân."
+          >
+            <Input placeholder="Nhập phí khám (VD: 200000)" type="number" min={0} />
+          </Form.Item>
+        </Col>
+
+        <Col span={12}>
           <Form.Item label="Số BN tối đa/ngày" name="maxPatients"
             tooltip="Giới hạn số bệnh nhân bác sĩ có thể khám trong một ngày. Để trống = không giới hạn."
           >

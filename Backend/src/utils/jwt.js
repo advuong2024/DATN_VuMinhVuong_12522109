@@ -7,6 +7,7 @@ const generateAccessToken = (user) => {
       username: user.username,
       vai_tro: user.vai_tro,
       id_nhan_vien: user.id_nhan_vien,
+      id_benh_nhan: user.id_benh_nhan,
     },
     process.env.JWT_ACCESS_SECRET,
     {

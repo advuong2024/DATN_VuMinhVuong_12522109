@@ -8,6 +8,8 @@ import ServicesPage from "@/page/User/Service/View/ServicePage";
 import ServiceDetailPage from "@/page/User/Service/Detail/ServiceDetailPage";
 import UserDoctorPage from "@/page/User/Doctor/View/DoctorPage";
 import MyselfPage from "@/page/User/Myself/View/MyselfPage";
+import PatientLoginPage from "@/page/User/Auth/View/LoginPage";
+import PatientRegisterPage from "@/page/User/Auth/View/RegisterPage";
 
 import UserLayout from "@/components/layout/User/UseLayout";
 import MainLayout from "@/components/layout/Admin/MainLayout";
@@ -31,6 +33,8 @@ import {
   loginUrl,
   error403Url,
   error404Url,
+  patientLoginUrl,
+  patientRegisterUrl,
   BookUrl, MyUrl, DoctorUrl, SpecialtyUrl, specialtyDetailUrl, ServiceUrl, serviceDetailUrl,
   BookingUrl, doctorUrl, customerUrl, encounterUrl, serviceUrl, accountUrl, MedicineUrl, categoryUrl, billUrl
 } from "@/routes/urls";
@@ -89,6 +93,16 @@ const router = createBrowserRouter([
   {
     path: loginUrl,
     element: <LoginForm />,
+  },
+
+  {
+    path: patientLoginUrl,
+    element: <PatientLoginPage />,
+  },
+
+  {
+    path: patientRegisterUrl,
+    element: <PatientRegisterPage />,
   },
 
   {

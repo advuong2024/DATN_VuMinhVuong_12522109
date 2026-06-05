@@ -8,6 +8,7 @@ import {
   getMedicines,
   updateEncounter,
 } from "../../Api/EncounterApi";
+import { getNhanVienById } from "../../../../User/Booking/Api/BookingApi";
 import { toast } from "react-toastify";
 
 export default function EncounterPage() {
@@ -24,8 +25,11 @@ export default function EncounterPage() {
 
   const fetchData = async () => {
     try {
+      const doctor = await getNhanVienById(bookingData.doctorId);
+      const chuyenKhoa = doctor?.id_chuyen_khoa;
+
       const [serviceRes, medicineRes] = await Promise.all([
-        getServices(),
+        getServices(chuyenKhoa),
         getMedicines(),
       ]);
 
@@ -63,7 +67,7 @@ export default function EncounterPage() {
           .map((s) => ({
             id_chi_tiet: s.id_chi_tiet,
             id_dich_vu: Number(s.id_dich_vu),
-            so_luong: Number(s.so_luong || 1),
+            so_luong: 1,
             gia: Number(s.gia),
             trang_thai: s.loai_chi_tiet === "PHI_KHAM" ? "HOAN_THANH" : (s.trang_thai || "CHO_THUC_HIEN"),
             id_bac_si: bookingData.doctorId,

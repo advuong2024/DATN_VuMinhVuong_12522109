@@ -9,43 +9,40 @@ import {
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { updateStatus, createEncounter, createPayment, getServices } from "../Api/BookingApi"
+import { getNhanVienById } from "../../../User/Booking/Api/BookingApi"
 import { PATIENT_OPTIONS } from "@/components/common/Options";
 
 export default function ReceptionPaymentForm({ booking, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState([]);
+  const [doctorFee, setDoctorFee] = useState(0);
   const [form] = Form.useForm();
 
   const selectedServices = Form.useWatch("services", form);
 
   useEffect(() => {
-    fetchServices();
+    fetchData();
   }, []);
-    
+
   useEffect(() => {
-    if (!services || services.length === 0) return;
-
-    if (!selectedServices || selectedServices.length === 0) {
-      form.setFieldsValue({ tam_ung: 0 });
-      return;
-    }
-    
-    const total = selectedServices.reduce((sum, id) => {
-        const service = services.find((s) => String(s.id_dich_vu) === String(id));
-        const giaDichVu = service ? Number(service.gia) : 0; 
-        return sum + giaDichVu;
+    const totalService = (selectedServices || []).reduce((sum, id) => {
+      const sv = services.find((s) => String(s.id_dich_vu) === String(id));
+      return sum + (sv ? Number(sv.gia) : 0);
     }, 0);
-    
-    form.setFieldsValue({ tam_ung: total });
-  }, [selectedServices, services, form]);
+    form.setFieldsValue({ tam_ung: doctorFee + totalService });
+  }, [selectedServices, services, doctorFee, form]);
 
-  const fetchServices = async () => {
+  const fetchData = async () => {
     try {
-      const res = await getServices();
+      const doctor = await getNhanVienById(booking.id_bac_si);
+      setDoctorFee(Number(doctor.phi_kham) || 0);
+
+      const chuyenKhoa = doctor?.id_chuyen_khoa;
+      const res = await getServices(chuyenKhoa);
       setServices(res.data || []);
     } catch (err) {
       console.error(err);
-      toast.error("Không thể tải dịch vụ");
+      toast.error("Không thể tải dữ liệu");
     }
   };
 
@@ -53,20 +50,30 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
     try {
         setLoading(true);
 
+        const chiTietDichVu = (values.services || []).map((id) => {
+          const sv = services.find((s) => String(s.id_dich_vu) === String(id));
+          return {
+            id_dich_vu: id,
+            so_luong: 1,
+            gia: sv ? Number(sv.gia) : 0,
+            loai_chi_tiet: "PHI_KHAM",
+          };
+        });
+
         const res = await createEncounter({
             id_dat_lich: booking.key,
             trieu_chung: "",
             chan_doan: "",
             ghi_chu: "",
-            chi_tiets: values.services.map((id) => {
-              const service = services.find((s) => String(s.id_dich_vu) === String(id));
-              return {
-                id_dich_vu: id,
+            chi_tiets: [
+              {
+                id_dich_vu: 1,
                 so_luong: 1,
-                gia: service ? Number(service.gia) : 0,
-                loai_chi_tiet: "PHI_KHAM"
-              };
-            }),
+                gia: doctorFee,
+                loai_chi_tiet: "PHI_KHAM",
+              },
+              ...chiTietDichVu,
+            ],
             trang_thai: "CHO_KHAM",
         });
 
@@ -80,15 +87,23 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
           encounter.chi_tiets.map(ct => [String(ct.id_dich_vu), ct.id_chi_tiet])
         );
 
-        const items = values.services.map((id) => {
-          const service = services.find((s) => String(s.id_dich_vu) === String(id));
-          return {
+        const items = [
+          {
             loai_item: "PHI_KHAM",
-            id_item: map.get(String(id)),
-            gia: service ? Number(service.gia) : 0,
+            id_item: map.get("1"),
+            gia: doctorFee,
             so_luong: 1,
-          };
-        });
+          },
+          ...(values.services || []).map((id) => {
+            const sv = services.find((s) => String(s.id_dich_vu) === String(id));
+            return {
+              loai_item: "PHI_KHAM",
+              id_item: map.get(String(id)),
+              gia: sv ? Number(sv.gia) : 0,
+              so_luong: 1,
+            };
+          }),
+        ];
 
         await createPayment({
           id_phieu_kham: encounter.id_phieu_kham,
@@ -125,12 +140,20 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
         <Input value={booking?.doctor} disabled style={{ color: '#000' }} />
       </Form.Item>
 
-      <Divider>Dịch vụ ban đầu</Divider>
+      <Divider>Phí khám bệnh</Divider>
+
+      <div style={{ padding: "12px 16px", background: "#f6ffed", borderRadius: 8, border: "1px solid #b7eb8f", marginBottom: 16 }}>
+        <div><strong>Bác sĩ:</strong> {booking?.doctor}</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "#52c41a", marginTop: 4 }}>
+          Phí khám: {doctorFee ? `${doctorFee.toLocaleString()} VNĐ` : "Đang tải..."}
+        </div>
+      </div>
+
+      <Divider>Dịch vụ bổ sung</Divider>
 
       <Form.Item
         name="services"
         label="Chọn dịch vụ"
-        rules={[{ required: true, message: "Vui lòng chọn ít nhất 1 dịch vụ" }]}
       >
         <Select
           mode="multiple"
@@ -138,7 +161,7 @@ export default function ReceptionPaymentForm({ booking, onSuccess }) {
           allowClear
           options={services.map((s) => ({
             value: s.id_dich_vu,
-            label: `${s.ten_dich_vu} - ${s.gia.toLocaleString()} VNĐ`,
+            label: `${s.ten_dich_vu} - ${Number(s.gia).toLocaleString()} VNĐ`,
           }))}
         />
       </Form.Item>

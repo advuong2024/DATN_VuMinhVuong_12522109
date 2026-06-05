@@ -42,7 +42,7 @@ function normalize(body = {}) {
 
 exports.getAll = async (req, res) => {
   try {
-    const rows = await DichVu.getAll(req.query.hien_thi);
+    const rows = await DichVu.getAll(req.query.hien_thi, req.query.chuyen_khoa);
     res.json(rows);
   } catch (err) {
     console.error("🔥 ERROR:", err);

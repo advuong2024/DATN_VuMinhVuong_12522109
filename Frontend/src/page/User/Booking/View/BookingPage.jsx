@@ -11,17 +11,18 @@ import {
   Modal,
   Tooltip,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { useSearchParams } from "react-router-dom";
-import { getCK, getDoctorCK, getCustomer, 
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { getCK, getDoctorCK,
   postBook, postCustomer, updateCustomer, 
-  getBookedSlots, getFindPatient, getHistory,
+  getBookedSlots, getHistory,
   getCanBook, getNhanVienById,
 } from "../Api/BookingApi"
 import { toast } from "react-toastify";
 import HistoryFrom from "./BookingFrom";
+import { useAuth } from "@/page/Login/context/AuthContext";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -35,20 +36,43 @@ export default function BookingPage() {
   const [patientLoaded, setPatientLoaded] = useState(false);
   const [timeError, setTimeError] = useState("");
   const [form] = Form.useForm();
-  const [lookupForm] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
   const [originalData, setOriginalData] = useState(null);
   const [specialty, setSpecialty] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [bookedSlots, setBookedSlots] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [patientCode, setPatientCode] = useState(null);
   const [historyData, setHistoryData] = useState([]);
   const [openHistory, setOpenHistory] = useState(false);
   const [canBook, setCanBook] = useState(true);
   const [searchParams] = useSearchParams();
+  const { user, isLoggedIn, isPatient, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoggedIn && isPatient && user?.benh_nhan) {
+      const bn = user.benh_nhan;
+      form.setFieldsValue({
+        ten_benh_nhan: bn.ten_benh_nhan,
+        so_dien_thoai: bn.so_dien_thoai,
+        ngay_sinh: bn.ngay_sinh ? dayjs(bn.ngay_sinh).format("YYYY-MM-DD") : null,
+        gioi_tinh: bn.gioi_tinh,
+        CCCD: bn.CCCD,
+        email: bn.email || "",
+        dia_chi: bn.dia_chi || "",
+        tien_su_benh: bn.tien_su_benh || "",
+        id_benh_nhan: bn.id_benh_nhan,
+        patient_code: bn.id_benh_nhan,
+      });
+      setPatientLoaded(true);
+      setPatientType("old");
+      setOriginalData({
+        ...bn,
+        ngay_sinh: bn.ngay_sinh ? dayjs(bn.ngay_sinh).format("YYYY-MM-DD") : null,
+      });
+    }
+  }, [isLoggedIn, isPatient, user]);
 
   useEffect(() => {
     const init = async () => {
@@ -183,35 +207,6 @@ export default function BookingPage() {
       setBookedSlots(times);
     } catch (err) {
       console.error("Lỗi load slot:", err);
-    }
-  };
-
-  const handleFindPatient = async () => {
-    try {
-      const code = form.getFieldValue("patient_code");
-
-      if (!code) return;
-
-      const data = await getCustomer(code);
-      await checkCanBook(data.id_benh_nhan);
-
-      form.setFieldsValue({
-        ...data,
-        ngay_sinh: data.ngay_sinh
-          ? dayjs(data.ngay_sinh).format("YYYY-MM-DD")
-          : null,
-      });
-
-      setOriginalData({
-        ...data,
-        ngay_sinh: data.ngay_sinh
-          ? dayjs(data.ngay_sinh).format("YYYY-MM-DD")
-          : null,
-      });
-      setPatientLoaded(true);
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Lỗi tìm bệnh nhân:", err);
     }
   };
 
@@ -381,32 +376,17 @@ export default function BookingPage() {
     setSelectedTime(null);
   };
 
-  const handleSearch = async (values) => {
-    try {
-      setLoading(true);
-      setPatientCode(null);
-
-      const keyword = values.keyword;
-
-      const isPhone = /^0\d{9}$/.test(keyword);
-
-      const res = await getFindPatient({
-        phone: isPhone ? keyword : "",
-        cccd: isPhone ? "" : keyword,
-      });
-
-      setPatientCode(res.id_benh_nhan);
-    } catch (err) {
-      console.error(err);
-      toast.error("Không tìm thấy bệnh nhân");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const maskedCCCD = form
-    .getFieldValue("CCCD")
-    ?.replace(/^(\d{3})\d{6}(\d{3})$/, "$1******$2");
+  if (!isLoggedIn || !isPatient) {
+    return (
+      <Card style={{ maxWidth: 500, margin: "100px auto", textAlign: "center", padding: 40 }}>
+        <Title level={4}>Bạn cần đăng nhập để đặt lịch</Title>
+        <Button type="primary" size="large" style={{ marginTop: 20 }}
+          onClick={() => navigate('/dang-nhap?redirect=/booking')}>
+          Đăng nhập
+        </Button>
+      </Card>
+    );
+  }
 
   return (
     <div
@@ -426,6 +406,35 @@ export default function BookingPage() {
         <Title level={3} style={{ textAlign: "center", color: "#034ea5" }}>
           THÔNG TIN ĐẶT LỊCH HẸN
         </Title>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "12px 20px",
+            background: "#f6ffed",
+            borderRadius: 10,
+            border: "1px solid #b7eb8f",
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <UserOutlined style={{ color: "#52c41a", marginRight: 8 }} />
+            <strong>Xin chào, {user?.benh_nhan?.ten_benh_nhan}</strong>
+            <span style={{ color: "#8c8c8c", marginLeft: 12, fontSize: 13 }}>
+              (Mã BN: {user?.benh_nhan?.id_benh_nhan})
+            </span>
+          </div>
+          <Button
+            size="small"
+            icon={<LogoutOutlined />}
+            onClick={() => { logout(); window.location.reload(); }}
+            style={{ borderRadius: 6 }}
+          >
+            Đăng xuất
+          </Button>
+        </div>
 
         <Steps
           current={step}
@@ -675,170 +684,39 @@ export default function BookingPage() {
           <>
             <Title level={4}>Thông tin khách hàng</Title>
 
-            <Row gutter={16} align="bottom">
-              <Col span={6}>
-                <Form.Item label="Bạn là">
-                  <Select
-                    value={patientType}
-                    onChange={(value) => {
-                      setPatientType(value);
-                      setPatientLoaded(false);
-                      form.resetFields([
-                        "patient_code",
-                        "ten_benh_nhan",
-                        "so_dien_thoai",
-                        "ngay_sinh",
-                        "gioi_tinh",
-                        "CCCD",
-                        "email",
-                        "dia_chi",
-                        "tien_su_benh",
-                      ]);
-                    }}
-                    options={[
-                      { label: "Đã từng khám", value: "old" },
-                      { label: "Khách mới", value: "new" },
-                    ]}
-                  />
-                </Form.Item>
-              </Col>
-
-              {patientType === "old" && (
+            <div style={{ marginBottom: 20 }}>
+              <Button 
+                type="primary" 
+                style={{ marginRight: 12 }}
+                onClick={handleOpenHistory}
+              >
+                Lịch sử đặt lịch
+              </Button>
+              {!isEditing ? (
+                <Button type="primary" onClick={() => setIsEditing(true)}>
+                  Sửa thông tin
+                </Button>
+              ) : (
                 <>
-                  <Col span={10}>
-                    <Form.Item
-                      label="Mã bệnh nhân"
-                      name="patient_code"
-                      rules={[
-                        { required: true, message: "Nhập mã bệnh nhân" },
-                        {
-                          pattern: /^\d+$/,
-                          message: "Chỉ nhập số không chứa chữ cái và ký tự đặc biệt",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Nhập mã..." />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={4}>
-                    <Form.Item label=" ">
-                      <Button
-                        type="primary"
-                        block
-                        onClick={handleFindPatient}
-                      >
-                        Tìm
-                      </Button>
-                    </Form.Item>
-                  </Col>
-
-                  {!patientLoaded && (
-                    <Col span={4}>
-                      <Form.Item label=" ">
-                        <Button
-                          type="primary"
-                          block
-                          onClick={() => setOpen(true)}
-                        >
-                          Quên mã bệnh nhân
-                        </Button>
-                      </Form.Item>
-                    </Col>
-                  )}
+                  <Button
+                    type="primary"
+                    style={{ marginRight: 12 }}
+                    onClick={handleUpdatePatient}
+                  >
+                    Lưu
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      form.setFieldsValue(originalData);
+                      setIsEditing(false);
+                    }}
+                  >
+                    Hủy
+                  </Button>
                 </>
               )}
-            </Row>
-
-            <Modal
-              open={open}
-              title="Tra cứu mã bệnh nhân"
-              footer={null}
-              onCancel={() => {
-                setOpen(false);
-                lookupForm.resetFields();
-                setPatientCode(null);
-              }}
-            >
-              <Form
-                form={lookupForm}
-                layout="vertical"
-                onFinish={handleSearch}
-              >
-                <Form.Item
-                  label="CCCD hoặc số điện thoại"
-                  name="keyword"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng nhập CCCD hoặc số điện thoại",
-                    },
-                  ]}
-                >
-                  <Input placeholder="Nhập CCCCD hoặc số điện thoại" />
-                </Form.Item>
-
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  block
-                >
-                  Tra cứu
-                </Button>
-              </Form>
-
-              {patientCode && (
-                <div
-                  style={{
-                    marginTop: 20,
-                    padding: 12,
-                    border: "1px solid #d9d9d9",
-                    borderRadius: 8,
-                  }}
-                >
-                  <b>Mã bệnh nhân:</b> {patientCode}
-                </div>
-              )}
-            </Modal>
-
-            {patientType === "old" && patientLoaded && (
-              <div style={{ marginBottom: 20 }}>
-                {!isEditing ? (
-                  <>
-                    <Button type="primary" onClick={() => setIsEditing(true)}>
-                      Sửa thông tin
-                    </Button>
-                    <Button 
-                      type="primary" 
-                      style={{ marginLeft: 20 }}
-                      onClick={handleOpenHistory}
-                    >
-                      Lịch sử đặt lịch
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      type="primary"
-                      onClick={handleUpdatePatient}
-                    >
-                      Lưu
-                    </Button>
-                    <Button
-                      type="primary"
-                      style={{ marginLeft: 20 }}
-                      onClick={() => {
-                        form.setFieldsValue(originalData);
-                        setIsEditing(false);
-                      }}
-                    >
-                      Hủy
-                    </Button>
-                  </>
-                )}
-              </div>
-            )}
+            </div>
 
             <Modal
               open={openHistory}
@@ -849,163 +727,121 @@ export default function BookingPage() {
               <HistoryFrom data={historyData} />
             </Modal>
 
-            {(patientType === "new" || patientLoaded) && (
-              <>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label="Họ và tên"
-                      name="ten_benh_nhan"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập họ tên" },
-                        {
-                          pattern: /^[A-Za-zÀ-ỹ\s]+$/,
-                          message: "Họ tên không được chứa số hoặc ký tự đặc biệt",
-                        },
-                      ]}
-                    >
-                      <Input size="large" disabled={patientType === "old" && !isEditing} />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={12}>
-                    <Form.Item
-                      label="Số điện thoại"
-                      name="so_dien_thoai"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập số điện thoại" },
-                        {
-                          pattern: /^0\d{9}$/,
-                          message: "Số điện thoại phải gồm 10 số và bắt đầu bằng 0",
-                        },
-                      ]}
-                    >
-                      <Input
-                        size="large"
-                        maxLength={10}
-                        disabled={patientType === "old" && !isEditing}
-                        onKeyPress={(e) => {
-                          if (!/[0-9]/.test(e.key)) e.preventDefault();
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label="Ngày sinh"
-                      name="ngay_sinh"
-                      rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
-                    >
-                      <Input type="date" size="large" disabled={patientType === "old" && !isEditing} />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={12}>
-                    <Form.Item
-                      label="Giới tính"
-                      name="gioi_tinh"
-                      rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
-                    >
-                      <Select
-                        size="large"
-                        disabled={patientType === "old" && !isEditing}
-                        options={[
-                          { label: "Nam", value: "NAM" },
-                          { label: "Nữ", value: "NU" },
-                          { label: "Khác", value: "KHAC" },
-                        ]}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item label="CCCD"
-                      name="CCCD"
-                      rules={[
-                        { required: true, message: "Vui lòng nhập CCCD" },
-                        {
-                          pattern: /^\d{12}$/,
-                          message: "CCCD phải gồm đúng 12 số",
-                        },
-                      ]}
-                    >
-                      <Input
-                        size="large"
-                        maxLength={12}
-                        value={
-                          patientType === "old" && !isEditing
-                            ? form
-                                .getFieldValue("CCCD")
-                                ?.replace(
-                                  /^(\d{3})\d{6}(\d{3})$/,
-                                  "$1******$2"
-                                )
-                            : form.getFieldValue("CCCD")
-                        }
-                        onFocus={() => {
-                          if (patientType === "old") {
-                            setIsEditing(true);
-                          }
-                        }}
-                        disabled={patientType === "old" && !isEditing}
-                        onChange={(e) => {
-                          form.setFieldsValue({
-                            CCCD: e.target.value,
-                          });
-                        }}
-                        onKeyPress={(e) => {
-                          if (!/[0-9]/.test(e.key)) {
-                            e.preventDefault();
-                          }
-                        }}
-                      />
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={12}>
-                    <Form.Item
-                      label="Email"
-                      name="email"
-                      rules={[{ type: "email", message: "Email không hợp lệ" }]}
-                    >
-                      <Input size="large" disabled={patientType === "old" && !isEditing} />
-                    </Form.Item>
-                  </Col>
-                </Row>
-
+            <Row gutter={16}>
+              <Col span={12}>
                 <Form.Item
-                  label="Địa chỉ"
-                  name="dia_chi"
-                  rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
+                  label="Họ và tên"
+                  name="ten_benh_nhan"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập họ tên" },
+                    {
+                      pattern: /^[A-Za-zÀ-ỹ\s]+$/,
+                      message: "Họ tên không được chứa số hoặc ký tự đặc biệt",
+                    },
+                  ]}
                 >
-                  <Input size="large" disabled={patientType === "old" && !isEditing} />
+                  <Input size="large" disabled={!isEditing} />
                 </Form.Item>
+              </Col>
 
-                <Form.Item label="Tiền sử bệnh" name="tien_su_benh">
-                  <TextArea rows={3} disabled={patientType === "old" && !isEditing} />
+              <Col span={12}>
+                <Form.Item
+                  label="Số điện thoại"
+                  name="so_dien_thoai"
+                  rules={[
+                    { required: true, message: "Vui lòng nhập số điện thoại" },
+                    { pattern: /^0\d{9}$/, message: "Số điện thoại phải gồm 10 số và bắt đầu bằng 0" },
+                  ]}
+                >
+                  <Input
+                    size="large"
+                    maxLength={10}
+                    disabled
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) e.preventDefault();
+                    }}
+                  />
                 </Form.Item>
-              </>
-            )}
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="Ngày sinh"
+                  name="ngay_sinh"
+                  rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
+                >
+                  <Input type="date" size="large" disabled={!isEditing} />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label="Giới tính"
+                  name="gioi_tinh"
+                  rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
+                >
+                  <Select
+                    size="large"
+                    disabled={!isEditing}
+                    options={[
+                      { label: "Nam", value: "NAM" },
+                      { label: "Nữ", value: "NU" },
+                      { label: "Khác", value: "KHAC" },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label="CCCD" name="CCCD" rules={[
+                  { required: true, message: "Vui lòng nhập CCCD" },
+                  { pattern: /^\d{12}$/, message: "CCCD phải gồm đúng 12 số" },
+                ]}>
+                  <Input
+                    size="large"
+                    maxLength={12}
+                    disabled={!isEditing}
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) e.preventDefault();
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item
+                  label="Email"
+                  name="email"
+                  rules={[{ type: "email", message: "Email không hợp lệ" }]}
+                >
+                  <Input size="large" disabled={!isEditing} />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              label="Địa chỉ"
+              name="dia_chi"
+              rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
+            >
+              <Input size="large" disabled={!isEditing} />
+            </Form.Item>
+
+            <Form.Item label="Tiền sử bệnh" name="tien_su_benh">
+              <TextArea rows={3} disabled={!isEditing} />
+            </Form.Item>
 
             <div style={{ display: "flex", gap: 10 }}>
-              <Button type = "primary"  size="large" onClick={() => setStep(0)}>
+              <Button type="primary" size="large" onClick={() => setStep(0)}>
                 Quay lại
               </Button>
-
-              {(patientType === "new" || patientLoaded) && (
-                <Button
-                  type="primary"
-                  size="large"
-                  htmlType="submit"
-                >
-                  Xác nhận đặt lịch
-                </Button>
-              )}
+              <Button type="primary" size="large" htmlType="submit">
+                Xác nhận đặt lịch
+              </Button>
             </div>
           </>
         )}

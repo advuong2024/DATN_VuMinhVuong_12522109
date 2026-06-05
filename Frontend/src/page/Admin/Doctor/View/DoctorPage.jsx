@@ -58,6 +58,7 @@ export default function PatientManagement() {
         short_desc: item.mo_ta_ngan || null,
         experience: item.nam_kinh_nghiem || null,
         maxPatients: item.so_luong_toi_da || null,
+        phi_kham: item.phi_kham || null,
         certificates: item.chung_chis || [],
       }));
 
@@ -147,6 +148,13 @@ export default function PatientManagement() {
       render: (value) =>
         value ? <Tag color="blue">{value}</Tag> : <Tag>Không</Tag>,
     },
+    {
+        title: "Phí khám",
+        dataIndex: "phi_kham",
+        width: 120,
+        align: "center",
+        render: (v) => v ? `${Number(v).toLocaleString()} VNĐ` : "-",
+      },
     {
       title: "Kinh nghiệm",
       dataIndex: "experience",
@@ -246,6 +254,7 @@ export default function PatientManagement() {
               <Descriptions.Item label="Chức vụ">{viewRecord.position}</Descriptions.Item>
               <Descriptions.Item label="Chuyên khoa">{viewRecord.specialty || "-"}</Descriptions.Item>
               <Descriptions.Item label="Bằng cấp">{viewRecord.degree || "-"}</Descriptions.Item>
+              <Descriptions.Item label="Phí khám">{viewRecord.phi_kham ? `${Number(viewRecord.phi_kham).toLocaleString()} VNĐ` : "-"}</Descriptions.Item>
               <Descriptions.Item label="Kinh nghiệm">{viewRecord.experience ? `${viewRecord.experience} năm` : "-"}</Descriptions.Item>
               <Descriptions.Item label="Cơ sở">{viewRecord.location || "-"}</Descriptions.Item>
               <Descriptions.Item label="Địa chỉ" span={2}>{viewRecord.address || "-"}</Descriptions.Item>

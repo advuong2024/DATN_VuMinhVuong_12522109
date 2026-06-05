@@ -1,8 +1,9 @@
-import { Layout, Space, Button, Dropdown } from "antd";
-import { CalendarOutlined, DownOutlined } from "@ant-design/icons";
+import { Layout, Space, Button, Dropdown, Avatar } from "antd";
+import { CalendarOutlined, DownOutlined, UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getAllSpecialties } from "@/page/User/Specialty/Api/SpecialtyApi";
+import { useAuth } from "@/page/Login/context/AuthContext";
 
 const { Header } = Layout;
 
@@ -10,6 +11,7 @@ export default function AppHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const [specialties, setSpecialties] = useState([]);
+  const { user, isLoggedIn, isPatient, logout } = useAuth();
 
   useEffect(() => {
     const fetch = async () => {
@@ -130,6 +132,49 @@ export default function AppHeader() {
           </div>
         </Link>
         <Space size="middle">
+          {isLoggedIn && isPatient ? (
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "profile",
+                    label: "Thông tin cá nhân",
+                    onClick: () => navigate("/booking"),
+                  },
+                  {
+                    key: "logout",
+                    label: "Đăng xuất",
+                    icon: <LogoutOutlined />,
+                    onClick: () => { logout(); window.location.href = "/"; },
+                  },
+                ],
+              }}
+              trigger={["click"]}
+            >
+              <Button
+                size="large"
+                icon={<UserOutlined />}
+                style={{
+                  borderRadius: 10,
+                  fontWeight: 600,
+                }}
+              >
+                {user?.benh_nhan?.ten_benh_nhan || "Tài khoản"}
+              </Button>
+            </Dropdown>
+          ) : (
+            <Button
+              size="large"
+              icon={<UserOutlined />}
+              style={{
+                borderRadius: 10,
+                fontWeight: 600,
+              }}
+              onClick={() => navigate("/dang-nhap")}
+            >
+              Đăng nhập
+            </Button>
+          )}
           <Button
             type="primary"
             size="large"

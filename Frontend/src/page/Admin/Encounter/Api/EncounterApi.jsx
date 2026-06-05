@@ -4,8 +4,9 @@ export const getPatientById = (id) => {
   return axiosClient.get(`/benh-nhan/${id}`);
 };
 
-export const getServices = () => {
-  return axiosClient.get(`/dich-vu`);
+export const getServices = (chuyenKhoa) => {
+  const params = chuyenKhoa ? { chuyen_khoa: chuyenKhoa } : {};
+  return axiosClient.get(`/dich-vu`, { params });
 };
 
 export const getMedicines = () => {

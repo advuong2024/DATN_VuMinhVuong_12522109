@@ -1,9 +1,10 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const getAll = (hien_thi) => {
+const getAll = (hien_thi, id_chuyen_khoa) => {
     const where = { is_deleted: false };
     if (hien_thi === 'true') where.hien_thi = true;
+    if (id_chuyen_khoa) where.id_chuyen_khoa = Number(id_chuyen_khoa);
 
     return prisma.dich_vu.findMany({
         include: {

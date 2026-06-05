@@ -3,11 +3,12 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
 const getAll = (query) => {
-    const { trang_thai } = query;
+    const { trang_thai, vai_tro } = query;
     return prisma.tai_khoan.findMany({
         where: {
           is_deleted: false,
           ...(trang_thai && { trang_thai }),
+          ...(vai_tro && { vai_tro }),
         },
         include: {
           nhan_vien: true,
@@ -36,13 +37,19 @@ const getById = (id_tai_khoan) => {
     });
 };
 
-const insert = (data) => {
+const insert = async (data) => {
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
     return prisma.tai_khoan.create({
         data,
     });
 };
 
-const update = (id_tai_khoan, data) => {
+const update = async (id_tai_khoan, data) => {
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
     return prisma.tai_khoan.update({
         where: { id_tai_khoan },
         data,
@@ -97,6 +104,12 @@ const findByUsername = (username) => {
           id_benh_nhan: true,
           ten_benh_nhan: true,
           so_dien_thoai: true,
+          ngay_sinh: true,
+          gioi_tinh: true,
+          dia_chi: true,
+          CCCD: true,
+          email: true,
+          tien_su_benh: true,
         },
       },
     },
@@ -109,7 +122,17 @@ const findByIdWithNV = (id_tai_khoan) => {
     include: {
       nhan_vien: true,
       benh_nhan: {
-        select: { id_benh_nhan: true, ten_benh_nhan: true, so_dien_thoai: true },
+        select: {
+          id_benh_nhan: true,
+          ten_benh_nhan: true,
+          so_dien_thoai: true,
+          ngay_sinh: true,
+          gioi_tinh: true,
+          dia_chi: true,
+          CCCD: true,
+          email: true,
+          tien_su_benh: true,
+        },
       },
     },
   });
@@ -129,6 +152,18 @@ const clearRefreshToken = (id_tai_khoan) => {
     where: { id_tai_khoan },
     data: {
       refresh_token: null,
+    },
+  });
+};
+
+const findByBenhNhanId = (id_benh_nhan) => {
+  return prisma.tai_khoan.findFirst({
+    where: { id_benh_nhan, is_deleted: false },
+    select: {
+      id_tai_khoan: true,
+      username: true,
+      vai_tro: true,
+      trang_thai: true,
     },
   });
 };
@@ -157,4 +192,5 @@ module.exports = {
     clearRefreshToken,
     resetPassword,
     updateRole,
+    findByBenhNhanId,
 };

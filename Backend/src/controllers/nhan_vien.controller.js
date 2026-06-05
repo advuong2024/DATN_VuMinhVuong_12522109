@@ -24,6 +24,7 @@ function normalize(body = {}) {
     co_so: trim(body.location) || null,
     nam_kinh_nghiem: body.experience ? Number(body.experience) : null,
     so_luong_toi_da: body.maxPatients ? Number(body.maxPatients) : null,
+    phi_kham: body.phi_kham ? Number(body.phi_kham) : null,
 
     ...(specialtyId && {
       chuyen_khoa: {

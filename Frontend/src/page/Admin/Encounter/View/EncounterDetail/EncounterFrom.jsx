@@ -1,7 +1,7 @@
-import { Card, Form, Input, Button, Tabs, Table, InputNumber, Select, Space, Tag, Modal } from "antd";
+import { Card, Form, Input, Button, Tabs, Table, InputNumber, Select, Space, Tag, Modal, Tooltip } from "antd";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { CheckCircleOutlined, HourglassOutlined, EyeOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, HourglassOutlined, LockOutlined } from "@ant-design/icons";
 import PrintPreviewModal from "@/components/print/PrintPreviewModal";
 import PrintServiceRequest from "@/components/print/PrintServiceRequest";
 import PrintEncounter from "@/components/print/PrintEncounter";
@@ -22,7 +22,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
   const [openResult, setOpenResult] = useState(false);
   const [viewingResult, setViewingResult] = useState(null);
 
-  const calcTotal = (gia = 0, so_luong = 0) => gia * so_luong;
+  const hasSymptomsAndDiagnosis = symptoms?.trim() && diagnosis?.trim();
 
   useEffect(() => {
     if (!bookingData) return;
@@ -33,9 +33,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       pk?.chi_tiets?.map((ct) => ({
         id_chi_tiet: ct.id_chi_tiet,
         id_dich_vu: ct.id_dich_vu,
-        so_luong: ct.so_luong,
         gia: Number(ct.gia),
-        thanh_tien: ct.so_luong * Number(ct.gia),
         loai_chi_tiet: ct.loai_chi_tiet,
         trang_thai: ct.trang_thai,
         ket_qua: ct.ket_qua,
@@ -91,12 +89,10 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
               const selected = servicesOptions.find(s => s.value === value);
               const newData = [...services];
               const price = selected?.price || 0;
-              const quantity = newData[index]?.so_luong || 1;
               newData[index] = {
                 ...newData[index],
                 id_dich_vu: value,
                 gia: price,
-                thanh_tien: calcTotal(price, quantity)
               };
               setServices(newData);
             }}
@@ -105,52 +101,19 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
       }
     },
     {
-      title: "Số lượng",
-      dataIndex: "so_luong",
-      align: "center",
-      render: (_, record, index) => (
-        <InputNumber
-          min={1}
-          value={record.so_luong}
-          disabled={record.is_paid}
-          onChange={(value) => {
-            const newData = [...services];
-            newData[index].so_luong = value;
-            newData[index].thanh_tien = calcTotal(newData[index].gia, value);
-            setServices(newData);
-          }}
-        />
-      )
-    },
-    {
       title: "Đơn giá",
       align: "center",
       dataIndex: "gia",
       render: (val) => <InputNumber value={val} disabled />
     },
     {
-      title: "Thành tiền",
-      align: "center",
-      dataIndex: "thanh_tien",
-      render: (val) => <InputNumber value={val} disabled />
-    },
-    {
       title: "Kết quả",
       align: "center",
       width: 120,
-      render: (_, record) => {
-        if (record.trang_thai === "HOAN_THANH")
-          return (
-            <Space>
-              <Tag color="green" icon={<CheckCircleOutlined />}>Hoàn thành</Tag>
-              <EyeOutlined
-                style={{ fontSize: 16, color: "#1677ff", cursor: "pointer" }}
-                onClick={() => { setViewingResult(record); setOpenResult(true); }}
-              />
-            </Space>
-          );
-        return <Tag color="orange" icon={<HourglassOutlined />}>Chờ TH</Tag>;
-      },
+      render: (_, record) =>
+        record.trang_thai === "HOAN_THANH"
+          ? <Tag color="green" icon={<CheckCircleOutlined />}>Hoàn thành</Tag>
+          : <Tag color="orange" icon={<HourglassOutlined />}>Chờ TH</Tag>,
     },
     {
       title: "",
@@ -161,6 +124,45 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
         </Button>
       )
     }
+  ];
+
+  const resultColumns = [
+    {
+      title: "Dịch vụ",
+      dataIndex: "id_dich_vu",
+      align: "center",
+      width: 180,
+      render: (val) => servicesOptions.find(o => o.value === val)?.label || "-",
+    },
+    {
+      title: "Trạng thái",
+      align: "center",
+      width: 120,
+      render: (_, record) =>
+        record.trang_thai === "HOAN_THANH"
+          ? <Tag color="green" icon={<CheckCircleOutlined />}>Hoàn thành</Tag>
+          : <Tag color="orange" icon={<HourglassOutlined />}>Đang chờ</Tag>,
+    },
+    {
+      title: "Kết quả",
+      align: "center",
+      render: (_, record) => (
+        record.ket_qua
+          ? <div style={{ whiteSpace: "pre-wrap", textAlign: "left", maxHeight: 80, overflow: "auto" }}>{record.ket_qua}</div>
+          : <span style={{ color: "#999" }}>---</span>
+      ),
+    },
+    {
+      title: "File",
+      align: "center",
+      width: 100,
+      render: (_, record) =>
+        record.file_ket_qua ? (
+          record.file_ket_qua.match(/\.(jpg|jpeg|png|gif|webp)/i)
+            ? <img src={record.file_ket_qua} alt="KQ" style={{ maxWidth: 60, maxHeight: 60, borderRadius: 4, cursor: "pointer" }} onClick={() => window.open(record.file_ket_qua)} />
+            : <a href={record.file_ket_qua} target="_blank" rel="noopener noreferrer">Xem file</a>
+        ) : <span style={{ color: "#999" }}>---</span>,
+    },
   ];
 
   const medicineColumns = [
@@ -182,12 +184,11 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
               const selected = medicinesOptions.find(m => m.value === value);
               const newData = [...medicines];
               const price = selected?.price || 0;
-              const quantity = newData[index]?.so_luong || 1;
               newData[index] = {
                 ...newData[index],
                 id_thuoc: value,
                 gia: price,
-                thanh_tien: calcTotal(price, quantity)
+                thanh_tien: price,
               };
               setMedicines(newData);
             }}
@@ -206,7 +207,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           onChange={(value) => {
             const newData = [...medicines];
             newData[index].so_luong = value;
-            newData[index].thanh_tien = calcTotal(newData[index].gia, value);
+            newData[index].thanh_tien = newData[index].gia * value;
             setMedicines(newData);
           }}
         />
@@ -268,62 +269,16 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
     }
   };
 
+  const allServicesForResults = [...hiddenServices, ...services].filter(s => s.id_dich_vu);
+
   return (
     <Card title="Khám bệnh">
       <Form layout="vertical" form={form}>
-        <Form.Item
-          name="trieu_chung"
-          label="Triệu chứng"
-          rules={[
-            {
-              validator: (_, value) => {
-                if (!value || !value.trim()) {
-                  return Promise.reject(
-                    new Error(
-                      "Vui lòng nhập triệu chứng"
-                    )
-                  );
-                }
-
-                return Promise.resolve();
-              },
-            },
-          ]}
-        >
-          <TextArea />
-        </Form.Item>
-
-        <Form.Item
-          name="chan_doan"
-          label="Chẩn đoán"
-          rules={[
-            {
-              validator: (_, value) => {
-                if (!value || !value.trim()) {
-                  return Promise.reject(
-                    new Error(
-                      "Vui lòng nhập chẩn đoán"
-                    )
-                  );
-                }
-
-                return Promise.resolve();
-              },
-            },
-          ]}
-        >
-          <TextArea />
-        </Form.Item>
-
-        <Form.Item name="ghi_chu" label="Ghi chú">
-          <TextArea />
-        </Form.Item>
-
         <Tabs
           items={[
             {
-              key: "1",
-              label: "Dịch vụ",
+              key: "0",
+              label: <span>🏥 Dịch vụ</span>,
               children: (
                 <>
                   <Space style={{ marginBottom: 10 }}>
@@ -351,8 +306,76 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
               )
             },
             {
+              key: "1",
+              label: <span>📋 Kết quả dịch vụ</span>,
+              children: (
+                <>
+                  {allServicesForResults.length === 0 ? (
+                    <p style={{ color: "#999", textAlign: "center", padding: 20 }}>Chưa có dịch vụ nào được chỉ định.</p>
+                  ) : (
+                    <Table
+                      dataSource={allServicesForResults}
+                      columns={resultColumns}
+                      pagination={false}
+                      rowKey={(_, index) => index}
+                    />
+                  )}
+                </>
+              )
+            },
+            {
               key: "2",
-              label: "Thuốc",
+              label: <span>🩺 Khám bệnh</span>,
+              children: (
+                <>
+                  <Form.Item
+                    name="trieu_chung"
+                    label="Triệu chứng"
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          if (!value || !value.trim()) {
+                            return Promise.reject(new Error("Vui lòng nhập triệu chứng"));
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  >
+                    <TextArea />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="chan_doan"
+                    label="Chẩn đoán"
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          if (!value || !value.trim()) {
+                            return Promise.reject(new Error("Vui lòng nhập chẩn đoán"));
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  >
+                    <TextArea />
+                  </Form.Item>
+
+                  <Form.Item name="ghi_chu" label="Ghi chú">
+                    <TextArea />
+                  </Form.Item>
+                </>
+              )
+            },
+            {
+              key: "3",
+              label: (
+                <Tooltip title={!hasSymptomsAndDiagnosis ? "Vui lòng nhập triệu chứng và chẩn đoán trước khi kê đơn" : ""}>
+                  <span>💊 Thuốc {!hasSymptomsAndDiagnosis && <LockOutlined style={{ fontSize: 12, marginLeft: 4 }} />}</span>
+                </Tooltip>
+              ),
+              disabled: !hasSymptomsAndDiagnosis,
               children: (
                 <>
                   <Space style={{ marginBottom: 10 }}>
@@ -388,14 +411,14 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           </Button>
           <Button
             type="primary"
-            disabled={!symptoms?.trim() || !diagnosis?.trim()}
+            disabled={!hasSymptomsAndDiagnosis}
             onClick={handleCompleteExamination}
           >
             Hoàn thành
           </Button>
           <Button
             type="primary"
-            disabled={!symptoms?.trim() || !diagnosis?.trim()}
+            disabled={!hasSymptomsAndDiagnosis}
             onClick={() => setShowEncounter(true)}
           >
             In phiếu khám
@@ -417,10 +440,10 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           date={dayjs().format("DD/MM/YYYY")}
           services={services.filter(s => s.id_dich_vu).map(s => ({
             name: servicesOptions.find(o => o.value === s.id_dich_vu)?.label || "",
-            quantity: s.so_luong || 1,
+            quantity: 1,
             price: s.gia || 0,
           }))}
-          total={services.filter(s => s.id_dich_vu).reduce((sum, s) => sum + (s.gia || 0) * (s.so_luong || 1), 0)}
+          total={services.filter(s => s.id_dich_vu).reduce((sum, s) => sum + (s.gia || 0), 0)}
         />
       </PrintPreviewModal>
 
@@ -441,7 +464,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
           note={form.getFieldValue("ghi_chu")}
           services={[...hiddenServices, ...services].filter(s => s.id_dich_vu).map(s => ({
             name: servicesOptions.find(o => o.value === s.id_dich_vu)?.label || "",
-            quantity: s.so_luong || 1,
+            quantity: 1,
             price: s.gia || 0,
           }))}
           status={bookingData?.trang_thai || "CHO_KHAM"}
@@ -477,9 +500,7 @@ export default function EncounterForm({ bookingData, servicesOptions, medicinesO
         onCancel={() => { setOpenResult(false); setViewingResult(null); }}
         footer={null}
         width={600}
-        title={
-          <div style={{textAlign: "center"}}>Kết quả khám</div>
-        }
+        title={<div style={{ textAlign: "center" }}>Kết quả khám</div>}
       >
         {viewingResult && (
           <div>

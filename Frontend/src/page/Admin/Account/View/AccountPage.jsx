@@ -1,4 +1,5 @@
 import {
+  Tabs,
   Space,
   Button,
   Input,
@@ -44,6 +45,7 @@ export default function AccountManagement() {
   const [viewRecord, setViewRecord] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("staff");
 
   useEffect(() => {
     fetchAccounts();
@@ -88,6 +90,7 @@ export default function AccountManagement() {
         password: item.password,
         role: item.vai_tro,
         status: item.trang_thai,
+        phone: item.benh_nhan?.so_dien_thoai || "",
       }));
 
       setData(mapped);
@@ -212,6 +215,49 @@ export default function AccountManagement() {
     },
   ];
 
+  const patientColumns = [
+    {
+      title: "Họ và tên",
+      dataIndex: "name",
+      width: 230,
+    },
+    {
+      title: "SĐT",
+      dataIndex: "phone",
+      width: 150,
+      render: (val) => val || "-",
+    },
+    {
+      title: "Tên đăng nhập",
+      dataIndex: "username",
+      width: 180,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      width: 150,
+      align: "center",
+      render: (status) => (
+        <Tag color={status === "HOAT_DONG" ? "green" : "red"}>
+          {status === "HOAT_DONG" ? "Hoạt động" : "Khóa"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Thao tác",
+      align: "center",
+      width: 120,
+      render: (_, record) => (
+        <Tooltip title="Xem chi tiết">
+          <EyeOutlined
+            style={{ fontSize: 18, color: "#1677ff", cursor: "pointer" }}
+            onClick={() => handleView(record)}
+          />
+        </Tooltip>
+      ),
+    },
+  ];
+
   const handleView = (record) => {
     setViewRecord(record);
     setOpenView(true);
@@ -273,36 +319,53 @@ export default function AccountManagement() {
     <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
       <h3 style={{ marginBottom: 16 }}>Quản lý tài khoản</h3>
 
-      <Row gutter={16} justify="end" style={{ marginBottom: 16 }}>
-        <Col span={5}>
-          <Input
-            placeholder="Tìm theo tên / tài khoản"
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-        </Col>
+      <Tabs activeKey={activeTab} onChange={setActiveTab} items={[
+        {
+          key: "staff",
+          label: "Nhân viên",
+          children: (
+            <>
+              <Row gutter={16} justify="end" style={{ marginBottom: 16 }}>
+                <Col span={5}>
+                  <Input
+                    placeholder="Tìm theo tên / tài khoản"
+                    onChange={(e) => setSearchText(e.target.value)}
+                  />
+                </Col>
 
-        <Col span={3}>
-          <Select
-            placeholder="Chọn trạng thái"
-            style={{ width: "100%" }}
-            allowClear
-            options={STATUS_OPTIONS}
-            onChange={(value) => setStatusFilter(value)}
-          />
-        </Col>
+                <Col span={3}>
+                  <Select
+                    placeholder="Chọn trạng thái"
+                    style={{ width: "100%" }}
+                    allowClear
+                    options={STATUS_OPTIONS}
+                    onChange={(value) => setStatusFilter(value)}
+                  />
+                </Col>
 
-        <Col>
-          <Button
-            type="primary"
-            style={{ backgroundColor: "#af050e" }}
-            onClick={handleAdd}
-          >
-            THÊM
-          </Button>
-        </Col>
-      </Row>
+                <Col>
+                  <Button
+                    type="primary"
+                    style={{ backgroundColor: "#af050e" }}
+                    onClick={handleAdd}
+                  >
+                    THÊM
+                  </Button>
+                </Col>
+              </Row>
 
-      <DataTable columns={columns} data={filteredData} loading={false} />
+              <DataTable columns={columns} data={filteredData.filter(item => item.role !== "NGUOI_DUNG")} loading={false} />
+            </>
+          ),
+        },
+        {
+          key: "patient",
+          label: "Bệnh nhân",
+          children: (
+            <DataTable columns={patientColumns} data={filteredData.filter(item => item.role === "NGUOI_DUNG")} loading={false} />
+          ),
+        },
+      ]} />
 
       <Modal
         centered
